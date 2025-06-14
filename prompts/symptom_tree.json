@@ -1,19 +1,40 @@
 {
   "chest pain": {
     "response": "Chest pain can be serious. Please call emergency services or go to the emergency room immediately.",
-    "urgency": "medium"
+    "urgency": "medium",
+    "aliases": [
+      "tightness in chest",
+      "pressure in chest",
+      "pain in chest"
+    ]
   },
   "headache": {
     "response": "Headaches are common but can sometimes indicate other issues. Are you also experiencing vision changes, nausea, or confusion?",
-    "urgency": "medium"
+    "urgency": "medium",
+    "aliases": [
+      "migraine",
+      "pounding head",
+      "head throbbing"
+    ]
   },
   "fever": {
     "response": "Fever is your body's natural response to infection. Are you also feeling chills, fatigue, or experiencing a cough?",
-    "urgency": "medium"
+    "urgency": "medium",
+    "aliases": [
+      "high temperature",
+      "chills",
+      "feeling hot"
+    ]
   },
   "shortness of breath": {
     "response": "Shortness of breath can be a sign of something serious. If it started suddenly or is worsening, please seek emergency care.",
-    "urgency": "medium"
+    "urgency": "medium",
+    "aliases": [
+      "trouble breathing",
+      "hard to breathe",
+      "breathless",
+      "can't catch my breath"
+    ]
   },
   "rash": {
     "response": "Rashes can result from allergies, infections, or irritation. Did it appear suddenly, and is it spreading or painful?",
@@ -21,22 +42,48 @@
   },
   "stomach pain": {
     "response": "Stomach pain has many causes. Is the pain sharp, persistent, or associated with nausea, vomiting, or fever?",
-    "urgency": "medium"
+    "urgency": "medium",
+    "aliases": [
+      "abdominal pain",
+      "belly pain",
+      "cramping"
+    ]
   },
   "dizziness": {
     "response": "Dizziness can be caused by dehydration, inner ear issues, or something more serious. Are you also fainting or feeling lightheaded when standing?",
-    "urgency": "medium"
+    "urgency": "medium",
+    "aliases": [
+      "lightheaded",
+      "woozy",
+      "faint",
+      "off balance"
+    ]
   },
   "numbness in arm": {
     "response": "Sudden numbness in one arm can be a warning sign for stroke. Please seek immediate medical attention.",
-    "urgency": "medium"
+    "urgency": "medium",
+    "aliases": [
+      "tingling in arm",
+      "arm feels asleep",
+      "loss of feeling in arm"
+    ]
   },
   "sore throat": {
     "response": "A sore throat is often caused by a viral infection. Are you also experiencing fever or swollen lymph nodes?",
-    "urgency": "medium"
+    "urgency": "medium",
+    "aliases": [
+      "scratchy throat",
+      "throat hurts",
+      "pain when swallowing"
+    ]
   },
   "diarrhea": {
     "response": "Diarrhea can result from infection, diet, or medication. Stay hydrated. Have you had it for more than two days or noticed blood?",
-    "urgency": "medium"
+    "urgency": "medium",
+    "aliases": [
+      "loose stools",
+      "watery poop",
+      "frequent bowel movements"
+    ]
   }
 }

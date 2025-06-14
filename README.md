@@ -1,26 +1,32 @@
-# SymSafe: Clinical-Aware AI Symptom Screener
+# SymSafe AI
 
-**SymSafe** is a proof-of-concept project that demonstrates how AI-powered agents can safely assist with early symptom screening while staying aligned with clinical, ethical, and empathetic standards.
+---
 
-This is not a diagnostic tool — it's a blueprint for building LLM-based agents in healthcare that prioritize:
-- **Clinical escalation triggers**
-- **Tone and empathy alignment**
-- **PHI handling awareness**
-- **Safety guardrails**
+## 🔄 What's New in v1.1.0 (In Progress)
 
-## 💡 Why This Exists
+### ✅ Alias Matching + Match Trace Debugging
 
-Most "AI symptom checkers" are demo toys. This project simulates a system you'd actually want a **healthcare AI leader** to greenlight — with emphasis on *productization*, *compliance*, and *real-world UX concerns*.
+SymSafe now supports `aliases` in the symptom tree, enabling more natural language inputs to be correctly matched to structured triage categories. For example:
 
-## 🔍 Core Capabilities
+- "trouble breathing" → matched to "shortness of breath" (via alias)
+- "woozy" → matched to "dizziness" (via alias)
 
-- Accepts natural language symptom input from user
-- Uses GPT-4 or Claude to analyze for urgency triggers
-- Returns a response tailored by:
-  - Tone (calm, helpful, not alarming)
-  - Suggestive care (never diagnostic)
-  - Escalation if urgent keywords are detected
-- Evaluation framework flags hallucinations, dangerous advice, or overly generic responses
+Match logic now supports both:
+- **Direct matches** (exact key in the tree)
+- **Alias matches** (from a curated list of alternate expressions)
 
-## 🛠 Example Input
+🧠 **Match Trace Debugging:**  
+The CLI prints detailed trace output for every input:
+- Normalized user input
+- All candidate match phrases (including aliases)
+- Whether a match was found (and how)
 
+---
+
+## 📖 Why This Matters
+
+This version proves the system can handle real-world phrasing, even when users don’t say the “textbook” symptom names. It also introduces transparent debug tooling — showing exactly how the match was made — which is essential in real-world AI systems.
+
+By combining fuzzy matching, structured symptom modeling, and traceable scoring, this update moves SymSafe from “cool demo” to “product-grade prototype.” It’s the kind of detail-aware engineering that hiring managers and product leads expect from a senior AI engineer or architect.
+
+---

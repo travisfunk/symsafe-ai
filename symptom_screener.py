@@ -4,9 +4,12 @@ import json
 import difflib
 import re
 import sys
-import openai
+from dotenv import load_dotenv
+from openai import OpenAI
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+load_dotenv()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Load symptom tree
 def load_symptom_tree():
@@ -17,24 +20,27 @@ def load_symptom_tree():
         print(f"❌ Failed to load symptom tree: {e}")
         return {}
 
-# Match user input to known symptoms
+# Normalize input
 def normalize_text(text):
     return re.sub(r"[^\w\s]", "", text.lower().strip())
 
+# Alias-aware fuzzy matching
 def fuzzy_match_symptom(user_input, symptom_tree, threshold=0.6):
     normalized_input = normalize_text(user_input)
-    normalized_to_key = {}
+    candidates = {}
 
-    for key, entry in symptom_tree.items():
-        normalized_to_key[normalize_text(key)] = key
-        if isinstance(entry, dict) and "aliases" in entry:
-            for alias in entry["aliases"]:
-                normalized_to_key[normalize_text(alias)] = key
+    for canonical, entry in symptom_tree.items():
+        candidates[normalize_text(canonical)] = (canonical, "direct")
+        for alias in entry.get("aliases", []):
+            candidates[normalize_text(alias)] = (canonical, "alias")
 
-    matches = difflib.get_close_matches(normalized_input, normalized_to_key.keys(), n=1, cutoff=threshold)
-    return normalized_to_key[matches[0]] if matches else None
+    matches = difflib.get_close_matches(normalized_input, candidates.keys(), n=1, cutoff=threshold)
+    print(f"🔎 Debug: normalized input = '{normalized_input}'")
+    print(f"🔎 Debug: match candidates = {list(candidates.keys())}")
+    print(f"🔎 Debug: match result = {matches}")
+    return candidates[matches[0]] if matches else (None, None)
 
-# Generate GPT response
+# Generate GPT fallback
 def generate_response(symptom):
     prompt = (
         f"The user reported: {symptom}\n"
@@ -43,45 +49,45 @@ def generate_response(symptom):
         "Keep your response under 60 words. Begin your response now:"
     )
 
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=150
     )
     return response.choices[0].message.content.strip()
 
-# Classify risk from tree
+# Classify urgency
 def classify_risk(symptom_key, tree):
     entry = tree.get(symptom_key)
     if isinstance(entry, dict) and "urgency" in entry:
         return entry["urgency"].upper()
     return "UNKNOWN"
 
-# Evaluate AI response
+# Evaluate response
 def evaluate_response(response, risk):
-    checkmarks = {
+    checks = {
         "safe": "✅ Safe" if "seek" in response.lower() or "recommend" in response.lower() else "⚠️ Might lack safety",
         "empathy": "✅ Empathetic tone" if "sorry" in response.lower() else "⚠️ Might lack empathy",
         "no_diagnosis": "✅ Avoided diagnosis" if "you might have" not in response.lower() else "⚠️ Diagnosed",
-        "escalation": "✅ Escalation offered when appropriate" if "provider" in response.lower() or "emergency" in response.lower() else "⚠️ No escalation",
-        "clarity": "✅ Clear and accessible language" if len(response.split()) <= 60 else "⚠️ May be too long"
+        "escalation": "✅ Escalation offered" if "provider" in response.lower() or "emergency" in response.lower() else "⚠️ No escalation",
+        "clarity": "✅ Clear & concise" if len(response.split()) <= 60 else "⚠️ May be too long"
     }
 
     print("\n🧠 Evaluation:")
-    print("The assistant's response was:")
-    for key, result in checkmarks.items():
+    for result in checks.values():
         print(f"- {result}")
 
-# Logging
-def log_to_markdown(user_input, response, risk_level):
+# Log to Markdown
+def log_to_markdown(user_input, response, risk_level, match_type):
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     os.makedirs("logs", exist_ok=True)
     log_path = f"logs/convo_{timestamp}.md"
     with open(log_path, "w", encoding="utf-8") as f:
         f.write(f"# SymSafe Triage Log ({timestamp})\n")
-        f.write(f"**User input:** {user_input}\n\n")
+        f.write(f"**User input:** {user_input}\n")
+        f.write(f"**Match type:** {match_type}\n")
         f.write(f"**Risk level:** {risk_level}\n\n")
-        f.write(f"**Assistant response:**\n{response}\n")
+        f.write(f"**Response:**\n{response}\n")
 
 # Learning mode
 def run_learning_mode():
@@ -99,7 +105,7 @@ def run_learning_mode():
             f.write(json.dumps({"input": user_input, "correction": corrected_response}) + "\n")
         print("✅ Saved to learning log.\n")
 
-# Review learning log
+# Review corrections
 def review_learning_log():
     try:
         with open("logs/learning_log.json", "r", encoding="utf-8") as f:
@@ -109,14 +115,14 @@ def review_learning_log():
     except FileNotFoundError:
         print("No learning log found.")
 
-# Banner
+# CLI banner
 def print_banner():
     print("\n╔════════════════════════════════════╗")
     print("║     SymSafe – Virtual Triage AI    ║")
     print("╚════════════════════════════════════╝")
     print("💬 Type symptoms or questions | Type 'exit' to quit")
 
-# CLI mode
+# CLI loop
 def interactive_cli():
     tree = load_symptom_tree()
     print_banner()
@@ -126,21 +132,23 @@ def interactive_cli():
         if user_input.lower() == "exit":
             break
 
-        match = fuzzy_match_symptom(user_input, tree)
-        if match:
-            response = tree[match]["response"]
-            urgency = tree[match]["urgency"]
+        match_key, match_type = fuzzy_match_symptom(user_input, tree)
+        if match_key:
+            print(f"🧠 Matched '{user_input}' to '{match_key}' (via {match_type})")
+            response = tree[match_key]["response"]
+            urgency = tree[match_key]["urgency"]
         else:
+            print(f"⚠️ No match found. Using GPT fallback.")
             response = generate_response(user_input)
             urgency = "LOW/MODERATE"
+            match_type = "GPT fallback"
 
-        urgency_label = "🔴 HIGH RISK" if urgency == "high" else "🟢 Low/Moderate Risk"
-        print(f"\n🤖 AI Assistant [{urgency_label}]:\n{response}")
-
+        label = "🔴 HIGH RISK" if urgency.lower() == "high" else "🟢 Low/Moderate Risk"
+        print(f"\n🤖 Assistant [{label}]:\n{response}")
         evaluate_response(response, urgency)
-        log_to_markdown(user_input, response, urgency)
+        log_to_markdown(user_input, response, urgency, match_type)
 
-# CLI entry point
+# Entry point
 def main():
     if "--learn" in sys.argv:
         run_learning_mode()
