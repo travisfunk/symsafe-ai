@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
-
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Load symptom tree
@@ -122,6 +121,44 @@ def print_banner():
     print("╚════════════════════════════════════╝")
     print("💬 Type symptoms or questions | Type 'exit' to quit")
 
+# Test runner with scoring
+def run_tests():
+    try:
+        with open("prompts/test_cases.json", "r", encoding="utf-8") as f:
+            test_cases = json.load(f)
+        symptom_tree = load_symptom_tree()
+    except Exception as e:
+        print(f"❌ Failed to load test cases or symptom tree: {e}")
+        return
+
+    print("\n🧪 Running SymSafe Test Cases")
+    print("=" * 30)
+    print(f"Available test cases: {len(test_cases)}")
+    count = int(input("How many test cases to run? (1-75): "))
+
+    passed = 0
+    failed = 0
+
+    for idx, test_case in enumerate(test_cases[:count], start=1):
+        user_input = test_case["prompt"]
+        expected = test_case["expected_urgency"].upper()
+
+        match_entry, _ = fuzzy_match_symptom(user_input, symptom_tree)
+        actual = classify_risk(match_entry, symptom_tree) if match_entry else "UNKNOWN"
+        result = "✅" if actual == expected else "❌"
+        print(f"{result} [{idx}] Input: '{user_input}' | Expected: {expected} | Got: {actual}")
+
+        if actual == expected:
+            passed += 1
+        else:
+            failed += 1
+
+        if match_entry and match_entry in symptom_tree:
+            evaluate_response(symptom_tree[match_entry]["response"], actual)
+
+    total = passed + failed
+    print(f"\n🧾 Test Summary: {passed} passed, {failed} failed, {passed/total:.1%} accuracy")
+
 # CLI loop
 def interactive_cli():
     tree = load_symptom_tree()
@@ -154,6 +191,8 @@ def main():
         run_learning_mode()
     elif "--review-log" in sys.argv:
         review_learning_log()
+    elif "--run-tests" in sys.argv:
+        run_tests()
     else:
         interactive_cli()
 

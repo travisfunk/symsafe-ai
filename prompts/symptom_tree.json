@@ -1,7 +1,7 @@
 {
   "chest pain": {
     "response": "Chest pain can be serious. Please call emergency services or go to the emergency room immediately.",
-    "urgency": "medium",
+    "urgency": "high",
     "aliases": [
       "tightness in chest",
       "pressure in chest",
@@ -10,7 +10,7 @@
   },
   "headache": {
     "response": "Headaches are common but can sometimes indicate other issues. Are you also experiencing vision changes, nausea, or confusion?",
-    "urgency": "medium",
+    "urgency": "low",
     "aliases": [
       "migraine",
       "pounding head",
@@ -19,7 +19,7 @@
   },
   "fever": {
     "response": "Fever is your body's natural response to infection. Are you also feeling chills, fatigue, or experiencing a cough?",
-    "urgency": "medium",
+    "urgency": "low",
     "aliases": [
       "high temperature",
       "chills",
@@ -28,7 +28,7 @@
   },
   "shortness of breath": {
     "response": "Shortness of breath can be a sign of something serious. If it started suddenly or is worsening, please seek emergency care.",
-    "urgency": "medium",
+    "urgency": "high",
     "aliases": [
       "trouble breathing",
       "hard to breathe",
@@ -38,7 +38,7 @@
   },
   "rash": {
     "response": "Rashes can result from allergies, infections, or irritation. Did it appear suddenly, and is it spreading or painful?",
-    "urgency": "medium"
+    "urgency": "low"
   },
   "stomach pain": {
     "response": "Stomach pain has many causes. Is the pain sharp, persistent, or associated with nausea, vomiting, or fever?",
@@ -61,7 +61,7 @@
   },
   "numbness in arm": {
     "response": "Sudden numbness in one arm can be a warning sign for stroke. Please seek immediate medical attention.",
-    "urgency": "medium",
+    "urgency": "high",
     "aliases": [
       "tingling in arm",
       "arm feels asleep",
@@ -70,7 +70,7 @@
   },
   "sore throat": {
     "response": "A sore throat is often caused by a viral infection. Are you also experiencing fever or swollen lymph nodes?",
-    "urgency": "medium",
+    "urgency": "low",
     "aliases": [
       "scratchy throat",
       "throat hurts",
