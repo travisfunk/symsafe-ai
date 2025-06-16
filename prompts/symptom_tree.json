@@ -1,89 +1,90 @@
 {
   "chest pain": {
-    "response": "Chest pain can be serious. Please call emergency services or go to the emergency room immediately.",
-    "urgency": "high",
-    "aliases": [
-      "tightness in chest",
-      "pressure in chest",
-      "pain in chest"
-    ]
+    "response": "Chest pain can be serious. Are you experiencing any shortness of breath or pain radiating to your arm or jaw?",
+    "urgency": "HIGH",
+    "aliases": ["tightness in chest", "pressure in chest", "pain in chest"]
   },
   "headache": {
-    "response": "Headaches are common but can sometimes indicate other issues. Are you also experiencing vision changes, nausea, or confusion?",
-    "urgency": "low",
-    "aliases": [
-      "migraine",
-      "pounding head",
-      "head throbbing"
-    ]
+    "response": "Headaches are common and can result from many causes. Is this a usual headache for you, or does it feel different?",
+    "urgency": "LOW",
+    "aliases": ["migraine", "pounding head", "head throbbing"]
   },
   "fever": {
-    "response": "Fever is your body's natural response to infection. Are you also feeling chills, fatigue, or experiencing a cough?",
-    "urgency": "low",
-    "aliases": [
-      "high temperature",
-      "chills",
-      "feeling hot"
-    ]
+    "response": "A fever may be a sign of infection. Make sure to stay hydrated and rest. If the fever is high or persistent, consult a provider.",
+    "urgency": "LOW",
+    "aliases": ["high temperature", "chills", "feeling hot"]
   },
   "shortness of breath": {
-    "response": "Shortness of breath can be a sign of something serious. If it started suddenly or is worsening, please seek emergency care.",
-    "urgency": "high",
-    "aliases": [
-      "trouble breathing",
-      "hard to breathe",
-      "breathless",
-      "can't catch my breath"
-    ]
+    "response": "Difficulty breathing can be an emergency. If you are struggling to breathe, seek medical attention immediately.",
+    "urgency": "HIGH",
+    "aliases": ["trouble breathing", "hard to breathe", "breathless", "can't catch my breath"]
   },
   "rash": {
-    "response": "Rashes can result from allergies, infections, or irritation. Did it appear suddenly, and is it spreading or painful?",
-    "urgency": "low"
+    "response": "Skin rashes can have many causes. Can you describe the appearance, location, or if it itches or spreads?",
+    "urgency": "LOW",
+    "aliases": []
   },
   "stomach pain": {
-    "response": "Stomach pain has many causes. Is the pain sharp, persistent, or associated with nausea, vomiting, or fever?",
-    "urgency": "medium",
-    "aliases": [
-      "abdominal pain",
-      "belly pain",
-      "cramping"
-    ]
+    "response": "Abdominal pain can vary from mild to serious. Are there other symptoms like vomiting or fever?",
+    "urgency": "MEDIUM",
+    "aliases": ["abdominal pain", "belly pain", "cramping"]
   },
-  "dizziness": {
-    "response": "Dizziness can be caused by dehydration, inner ear issues, or something more serious. Are you also fainting or feeling lightheaded when standing?",
-    "urgency": "medium",
-    "aliases": [
-      "lightheaded",
-      "woozy",
-      "faint",
-      "off balance"
-    ]
-  },
+"dizziness": {
+  "response": "Dizziness can come from dehydration, low blood pressure, or other causes. Are you also fainting or seeing spots?",
+  "urgency": "MEDIUM",
+  "aliases": [
+    "lightheaded",
+    "woozy",
+    "faint",
+    "off balance",
+    "dizzy",
+    "dizzy and lightheaded",
+    "i feel dizzy and lightheaded"
+  ]
+},
   "numbness in arm": {
-    "response": "Sudden numbness in one arm can be a warning sign for stroke. Please seek immediate medical attention.",
-    "urgency": "high",
-    "aliases": [
-      "tingling in arm",
-      "arm feels asleep",
-      "loss of feeling in arm"
-    ]
+    "response": "Numbness in your arm could signal a nerve issue or even a heart-related problem. Please seek immediate evaluation.",
+    "urgency": "HIGH",
+    "aliases": ["tingling in arm", "arm feels asleep", "loss of feeling in arm"]
   },
   "sore throat": {
-    "response": "A sore throat is often caused by a viral infection. Are you also experiencing fever or swollen lymph nodes?",
-    "urgency": "low",
-    "aliases": [
-      "scratchy throat",
-      "throat hurts",
-      "pain when swallowing"
-    ]
+    "response": "A sore throat may indicate a cold or infection. Do you also have fever, cough, or trouble swallowing?",
+    "urgency": "LOW",
+    "aliases": ["scratchy throat", "throat hurts", "pain when swallowing"]
   },
   "diarrhea": {
-    "response": "Diarrhea can result from infection, diet, or medication. Stay hydrated. Have you had it for more than two days or noticed blood?",
-    "urgency": "medium",
-    "aliases": [
-      "loose stools",
-      "watery poop",
-      "frequent bowel movements"
-    ]
+    "response": "Diarrhea can lead to dehydration. Be sure to drink fluids. If it persists more than a couple of days, see a doctor.",
+    "urgency": "LOW",
+    "aliases": ["loose stools", "watery poop", "frequent bowel movements"]
+  },
+  "vomiting and can’t keep anything down": {
+    "response": "Persistent vomiting can be dangerous. If you're unable to keep fluids down or feeling weak, seek urgent care.",
+    "urgency": "HIGH",
+    "aliases": []
+  },
+  "blood in stool": {
+    "response": "Blood in your stool could indicate internal bleeding. Please contact a healthcare provider as soon as possible.",
+    "urgency": "HIGH",
+    "aliases": ["bloody stool", "red in stool", "there’s blood in my stool"]
+  },
+  "back pain": {
+    "response": "Back pain is often due to strain but can sometimes be serious. Is it sharp, constant, or radiating down the leg?",
+    "urgency": "LOW",
+    "aliases": ["my back hurts", "lower back pain", "aching back"]
+  },
+  "persistent cough": {
+    "response": "A persistent cough could be due to infection or irritation. Is it dry or wet, and how long has it lasted?",
+    "urgency": "LOW",
+    "aliases": ["ongoing cough", "coughing constantly", "frequent cough"]
+  },
+  "child has a fever": {
+    "response": "Fever in children is common but can sometimes need attention. How high is the temperature and how are they behaving?",
+    "urgency": "LOW",
+    "aliases": ["my kid has a fever", "baby has a fever", "child running a fever"]
+  },
+  "severe abdominal pain": {
+    "response": "Severe abdominal pain can be urgent. Is it sudden, sharp, or accompanied by vomiting or fever?",
+    "urgency": "MEDIUM",
+    "aliases": ["sharp stomach pain", "extreme belly pain", "crippling abdominal pain"]
   }
 }
