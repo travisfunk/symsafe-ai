@@ -1,6 +1,6 @@
 {
   "chest pain": {
-    "response": "I'm sorry you're experiencing chest pain. It can be serious. Are you also feeling shortness of breath or pain radiating to your arm or jaw?",
+    "response": "I'm sorry to hear about your chest pain. It's important to understand more about what you're feeling. Are you also experiencing shortness of breath or pain in your arm or jaw?",
     "urgency": "HIGH",
     "aliases": [
       "tightness in chest",
@@ -12,11 +12,10 @@
       "discomfort in chest",
       "chest pressure",
       "squeezing chest pain"
-    ],
-    "requires_escalation": true
+    ]
   },
   "headache": {
-    "response": "That sounds uncomfortable. Headaches are common and can result from many causes. Is this a usual headache for you, or does it feel different?",
+    "response": "I'm sorry to hear you're experiencing discomfort. Headaches can have many causes. Is this headache typical for you, or does it feel different than usual?",
     "urgency": "LOW",
     "aliases": [
       "migraine",
@@ -27,11 +26,10 @@
       "throbbing headache",
       "tension headache",
       "pain in my head"
-    ],
-    "requires_escalation": false
+    ]
   },
   "fever": {
-    "response": "Feeling feverish is never fun. A fever may be a sign of infection. Stay hydrated and rest. If it persists, consult a provider.",
+    "response": "I'm sorry to hear you're feeling feverish. A fever could indicate an infection. Remember to drink plenty of fluids and get rest. If the fever continues, please seek advice from a healthcare provider.",
     "urgency": "LOW",
     "aliases": [
       "high temperature",
@@ -42,11 +40,10 @@
       "elevated temperature",
       "hot to the touch",
       "my body is hot"
-    ],
-    "requires_escalation": false
+    ]
   },
   "shortness of breath": {
-    "response": "That can be very frightening. Difficulty breathing can be an emergency. Seek medical attention immediately if you're struggling.",
+    "response": "I'm sorry you're feeling this way. Difficulty breathing can be concerning. Please seek medical help right away if you're having trouble breathing.",
     "urgency": "HIGH",
     "aliases": [
       "trouble breathing",
@@ -58,11 +55,10 @@
       "labored breathing",
       "wheezing",
       "can't breathe well"
-    ],
-    "requires_escalation": true
+    ]
   },
   "rash": {
-    "response": "Skin issues can be distressing. Can you describe the appearance, location, or if it itches or spreads?",
+    "response": "I'm sorry to hear about your skin troubles. Can you share more details about how it looks, where it is, and if it's causing any discomfort or spreading?",
     "urgency": "LOW",
     "aliases": [
       "skin rash",
@@ -75,11 +71,10 @@
       "skin irritation",
       "hives",
       "red dots on skin"
-    ],
-    "requires_escalation": false
+    ]
   },
   "stomach pain": {
-    "response": "That sounds painful. Abdominal pain can vary in seriousness. Are there other symptoms like vomiting or fever?",
+    "response": "I'm sorry to hear you're experiencing pain. Abdominal discomfort can be concerning. Are there any other symptoms like vomiting or fever that you're also noticing?",
     "urgency": "MEDIUM",
     "aliases": [
       "abdominal pain",
@@ -91,11 +86,10 @@
       "tummy ache",
       "bad stomach ache",
       "stomach ache"
-    ],
-    "requires_escalation": false
+    ]
   },
   "dizziness": {
-    "response": "Feeling dizzy can be unsettling. It can come from dehydration, low blood pressure, or other causes. Are you also fainting or seeing spots?",
+    "response": "I'm sorry to hear you're feeling dizzy. It can be caused by various factors like dehydration or low blood pressure. Are you also experiencing fainting or spots in your vision?",
     "urgency": "MEDIUM",
     "aliases": [
       "lightheaded",
@@ -108,11 +102,10 @@
       "i'm lightheaded",
       "faint and dizzy",
       "room spinning"
-    ],
-    "requires_escalation": false
+    ]
   },
   "numbness in arm": {
-    "response": "That must feel strange. Numbness in your arm could signal a nerve or heart issue. Please seek immediate evaluation.",
+    "response": "I'm sorry to hear you're experiencing this. Numbness in your arm could signal a nerve or heart issue. Please seek immediate evaluation.",
     "urgency": "HIGH",
     "aliases": [
       "tingling in arm",
@@ -124,11 +117,10 @@
       "arm tingling",
       "tingly arm",
       "pins and needles in arm"
-    ],
-    "requires_escalation": true
+    ]
   },
   "sore throat": {
-    "response": "Sore throats can be very irritating. It may indicate a cold or infection. Do you also have fever, cough, or trouble swallowing?",
+    "response": "I'm sorry to hear about your sore throat. It could be a sign of a cold or infection. Do you have any other symptoms like fever, cough, or trouble swallowing?",
     "urgency": "LOW",
     "aliases": [
       "scratchy throat",
@@ -139,11 +131,10 @@
       "raw throat",
       "burning throat",
       "difficulty swallowing"
-    ],
-    "requires_escalation": false
+    ]
   },
   "diarrhea": {
-    "response": "I'm sorry you're dealing with that. Diarrhea can lead to dehydration. Drink fluids and see a doctor if it persists.",
+    "response": "I'm sorry to hear you're experiencing this. Diarrhea can sometimes lead to dehydration. It's important to stay hydrated and seek medical advice if it continues.",
     "urgency": "LOW",
     "aliases": [
       "loose stools",
@@ -153,11 +144,10 @@
       "diarrhea all day",
       "runny poop",
       "constant diarrhea"
-    ],
-    "requires_escalation": false
+    ]
   },
   "vomiting and can\u2019t keep anything down": {
-    "response": "That must be exhausting. Persistent vomiting can be dangerous. Seek urgent care if you can't keep fluids down.",
+    "response": "I'm sorry you're experiencing this. Persistent vomiting can be concerning. Please seek urgent care if you're unable to keep fluids down.",
     "urgency": "HIGH",
     "aliases": [
       "throwing up everything",
@@ -167,11 +157,10 @@
       "throwing up all day",
       "can't keep anything down",
       "nausea and vomiting"
-    ],
-    "requires_escalation": true
+    ]
   },
   "blood in stool": {
-    "response": "That can be alarming. Blood in your stool could indicate internal bleeding. Please contact a healthcare provider as soon as possible.",
+    "response": "I'm sorry you're experiencing this. Seeing blood in your stool should be checked by a healthcare provider promptly.",
     "urgency": "HIGH",
     "aliases": [
       "bloody stool",
@@ -181,11 +170,10 @@
       "blood in my poop",
       "blood in bowel movement",
       "pooping blood"
-    ],
-    "requires_escalation": true
+    ]
   },
   "back pain": {
-    "response": "Back pain can be hard to manage. Is it sharp, constant, or radiating down the leg?",
+    "response": "I'm sorry to hear about your back pain. Is it sharp, constant, or radiating down the leg?",
     "urgency": "LOW",
     "aliases": [
       "my back hurts",
@@ -196,11 +184,10 @@
       "stiff back",
       "back strain",
       "sharp back pain"
-    ],
-    "requires_escalation": false
+    ]
   },
   "persistent cough": {
-    "response": "Persistent coughing can be draining. Is it dry or wet, and how long has it lasted?",
+    "response": "I'm sorry to hear about your cough. Can you tell me if it's dry or wet, and how long it has been going on?",
     "urgency": "LOW",
     "aliases": [
       "ongoing cough",
@@ -211,11 +198,10 @@
       "wet cough",
       "cough that won't go away",
       "coughing all day"
-    ],
-    "requires_escalation": false
+    ]
   },
   "child has a fever": {
-    "response": "It\u2019s tough when a child isn\u2019t feeling well. How high is the fever and how are they acting?",
+    "response": "I'm sorry to hear your child isn't feeling well. Can you tell me the temperature of their fever and how they are behaving?",
     "urgency": "LOW",
     "aliases": [
       "my kid has a fever",
@@ -225,11 +211,10 @@
       "baby feels hot",
       "child has high temp",
       "baby has high fever"
-    ],
-    "requires_escalation": false
+    ]
   },
   "severe abdominal pain": {
-    "response": "That sounds serious. Severe abdominal pain can be urgent. Is it sharp, sudden, or accompanied by vomiting or fever?",
+    "response": "I'm sorry to hear you're experiencing this. Severe abdominal pain can be concerning. Is it sharp, sudden, or accompanied by vomiting or fever?",
     "urgency": "MEDIUM",
     "aliases": [
       "sharp stomach pain",
@@ -239,7 +224,6 @@
       "bad stomach cramps",
       "severe belly pain",
       "stabbing abdominal pain"
-    ],
-    "requires_escalation": false
+    ]
   }
 }

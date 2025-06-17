@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Review Unmatched Inputs – SymSafe AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding: 2rem; max-width: 900px; margin: auto; }
+    .entry-card { border: 1px solid #ccc; padding: 1rem; margin-bottom: 1.5rem; border-radius: 8px; background: #f9f9f9; }
+    textarea { width: 100%; resize: vertical; }
+    .form-label { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2 class="mb-4">🧠 Review Unknown Inputs</h2>
+  {% if entries %}
+    {% for entry in entries %}
+    <div class="entry-card">
+      <p><strong>Unmatched Input:</strong> {{ entry.input }}</p>
+
+      <div class="mb-2">
+        <label class="form-label">Map to Existing Symptom:</label>
+        <select class="form-select" name="symptom">
+          <option value="">-- Choose --</option>
+          {% for symptom in symptoms %}
+          <option value="{{ symptom }}">{{ symptom }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-2">
+        <label class="form-label">Or create new symptom name:</label>
+        <input type="text" class="form-control" name="new_symptom">
+      </div>
+
+      <button class="btn btn-success" onclick="saveEntry(this, '{{ entry.input }}')">💾 Save Mapping</button>
+      <span class="ms-2 text-success" data-status></span>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p>No unmatched inputs to review.</p>
+  {% endif %}
+
+  <script>
+    function saveEntry(button, inputText) {
+      const card = button.closest('.entry-card');
+      const selected = card.querySelector('select[name=\"symptom\"]').value.trim();
+      const newSymptom = card.querySelector('input[name=\"new_symptom\"]').value.trim();
+      const mapped = selected || newSymptom;
+      if (!mapped) {
+        alert(\"Please select or enter a symptom.\");
+        return;
+      }
+
+      fetch(\"/save-mapping\", {
+        method: \"POST\",
+        headers: { \"Content-Type\": \"application/json\" },
+        body: JSON.stringify({ input: inputText, map_to: mapped })
+      })
+      .then(res => res.json())
+      .then(data => {
+        card.querySelector('[data-status]').textContent = \"✔ Saved\";
+        setTimeout(() => card.remove(), 1000);
+      });
+    }
+  </script>
+</body>
+</html>
