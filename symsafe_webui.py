@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect
 import json
 import os
+import csv
+import io
 
 app = Flask(__name__)
 
-# Load symptom tree
 SYMPTOM_TREE_PATH = "prompts/symptom_tree.json"
 
 def load_symptom_tree():
@@ -14,14 +15,6 @@ def load_symptom_tree():
 def save_symptom_tree(tree):
     with open(SYMPTOM_TREE_PATH, "w", encoding="utf-8") as f:
         json.dump(tree, f, indent=2)
-
-# --- Dev Plan for v1.1 Web UI Build (added 2025-06-16) ---
-# 1. /test         → Primary UI for entering symptoms via text/voice and getting responses
-# 2. /edit-aliases → Trainer/admin page to manage aliases, responses, and escalation flags
-# 3. /train        → Shows unmatched inputs and lets practitioner map them
-# 4. /edit-tests   → Edit and expand test_cases.json visually
-# 5. /admin        → Upload/download configs (optional)
-# 6. /review-tests → View last QA run + flag failures (optional polish)
 
 @app.route("/")
 def home():
@@ -59,9 +52,7 @@ def test():
 
         matched_entry = tree[match]
         response = matched_entry.get("response") or generate_response(match)
-        urgency = matched_entry.get("urgency", "UNKNOWN")
 
-        # Safety scoring
         checks = {
             "safe": any(word in response.lower() for word in ["seek", "contact", "urgent"]),
             "empathy": any(word in response.lower() for word in ["sorry", "difficult", "uncomfortable", "tough"]),
@@ -118,7 +109,6 @@ def save_tests():
     with open("prompts/test_cases.json", "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
     return jsonify({"status": "saved"})
-
 @app.route("/save-mapping", methods=["POST"])
 def save_mapping():
     data = request.get_json()
@@ -149,7 +139,6 @@ def save_mapping():
     with open("prompts/symptom_tree.json", "w", encoding="utf-8") as f:
         json.dump(tree, f, indent=2)
 
-    # Remove from learning log
     try:
         with open("prompts/learning_log.json", "r", encoding="utf-8") as f:
             learning = json.load(f)
@@ -190,21 +179,107 @@ def admin():
 
 @app.route("/admin2")
 def admin2():
-    files = {}
-    paths = {
-        "symptom_tree.json": "prompts/symptom_tree.json",
-        "test_cases.json": "prompts/test_cases.json",
-        "learning_log.json": "prompts/learning_log.json"
-    }
+    return admin()
 
-    for name, path in paths.items():
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                files[name] = f.read()
-        except Exception as e:
-            files[name] = f"⚠️ Error loading {name}: {str(e)}"
+@app.route("/export")
+def export():
+    return render_template("export.html")
 
-    return render_template("admin2.html", files=files)
+@app.route("/run-tests")
+def run_tests():
+    return render_template("run_tests.html")
+
+@app.route("/voice-log")
+def voice_log():
+    return render_template("voice_log.html")
+
+@app.route("/audit-summary")
+def audit_summary():
+    return render_template("audit_summary.html")
+
+@app.route("/review-gpt", methods=["GET", "POST"])
+def review_gpt():
+    learning_log_path = "prompts/learning_log.json"
+    review_log_path = "prompts/gpt_review_log.json"
+
+    os.makedirs("prompts", exist_ok=True)
+    for path in [learning_log_path, review_log_path]:
+        if not os.path.exists(path):
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump({}, f)
+
+    try:
+        with open(learning_log_path, "r", encoding="utf-8") as f:
+            learning_log = json.load(f)
+    except:
+        learning_log = {}
+
+    try:
+        with open(review_log_path, "r", encoding="utf-8") as f:
+            reviews = json.load(f)
+    except:
+        reviews = {}
+
+    if request.method == "POST":
+        entry_id = request.form.get("entry_id")
+        if entry_id:
+            reviews[entry_id] = {
+                "empathy": request.form.get("empathy"),
+                "escalation": request.form.get("escalation"),
+                "diagnosis": request.form.get("diagnosis"),
+                "clarity": request.form.get("clarity"),
+                "comments": request.form.get("comments", ""),
+                "flagged": request.form.get("flagged") == "true"
+            }
+            with open(review_log_path, "w", encoding="utf-8") as f:
+                json.dump(reviews, f, indent=2)
+        return redirect("/review-gpt")
+
+    return render_template("review_gpt.html", learning_log=learning_log, reviews=reviews)
+
+@app.route("/download-reviews")
+def download_reviews():
+    log_path = "prompts/gpt_review_log.json"
+    input_path = "prompts/learning_log.json"
+
+    try:
+        with open(log_path, "r", encoding="utf-8") as f:
+            reviews = json.load(f)
+        with open(input_path, "r", encoding="utf-8") as f:
+            inputs = json.load(f)
+    except:
+        reviews = {}
+        inputs = {}
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["entry_id", "input", "gpt_response", "empathy", "escalation", "diagnosis", "clarity", "comments", "flagged"])
+
+    for entry_id, review in reviews.items():
+        input_text = inputs.get(entry_id, {}).get("input", "")
+        gpt_response = inputs.get(entry_id, {}).get("gpt_response", "")
+        writer.writerow([
+            entry_id,
+            input_text,
+            gpt_response,
+            review.get("empathy", ""),
+            review.get("escalation", ""),
+            review.get("diagnosis", ""),
+            review.get("clarity", ""),
+            review.get("comments", ""),
+            review.get("flagged", False)
+        ])
+
+    output.seek(0)
+    return app.response_class(
+        output,
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment;filename=gpt_review_log.csv"}
+    )
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Review GPT Fallbacks</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f2f2f2;
+        }
+        .header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            z-index: 1000;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+        .entry {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .reviewed { border-left: 5px solid #4CAF50; }
+        .flagged { border-left: 5px solid #f44336 !important; }
+        .collapsed .form-section { display: none; }
+        .form-section { transition: all 0.3s ease; }
+        .flag-icon {
+            background: #f44336;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        button, select, textarea {
+            margin-top: 8px;
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+        .progress-bar-container {
+            background: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .progress-bar {
+            height: 14px;
+            background-color: #4CAF50;
+            text-align: center;
+            color: white;
+            font-size: 10px;
+            transition: width 0.4s ease;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 9999;
+        }
+    </style>
+    <script>
+        function toggleCollapse(id) {
+            const el = document.getElementById('entry-' + id);
+            el.classList.toggle('collapsed');
+        }
+
+        function toggleReviewed() {
+            const checked = document.getElementById('toggle-reviewed').checked;
+            document.querySelectorAll('.reviewed').forEach(el => {
+                el.style.display = checked ? 'block' : 'none';
+            });
+        }
+
+        function toggleFlaggedOnly() {
+            const checked = document.getElementById('toggle-flagged').checked;
+            document.querySelectorAll('.entry').forEach(el => {
+                if (checked) {
+                    el.style.display = el.classList.contains('flagged') ? 'block' : 'none';
+                } else {
+                    el.style.display = 'block';
+                }
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.style.opacity = 1;
+            setTimeout(() => toast.style.opacity = 0, 2500);
+        }
+
+        window.onload = function () {
+            document.querySelectorAll('.reviewed').forEach(el => el.classList.add('collapsed'));
+
+            document.querySelectorAll("form.form-section").forEach(form => {
+                form.addEventListener("submit", () => {
+                    setTimeout(() => showToast("✅ Review saved!"), 500);
+                });
+            });
+
+            const progress = document.getElementById("progress-bar");
+            const reviewed = parseInt(progress.dataset.reviewed || 0);
+            const total = parseInt(progress.dataset.total || 1);
+            const percent = total > 0 ? Math.round((reviewed / total) * 100) : 0;
+            progress.style.width = percent + "%";
+            progress.textContent = percent + "%";
+        };
+    </script>
+</head>
+<body>
+
+<div class="header">
+    <strong>Review GPT Fallbacks</strong>
+    <form method="get" action="/download-reviews" style="display: inline;">
+        <button style="float: right;">⬇️ Download CSV</button>
+    </form>
+    <br><br>
+    <label><input type="checkbox" id="toggle-reviewed" onchange="toggleReviewed()"> Show Reviewed</label>
+    <label style="margin-left: 20px;"><input type="checkbox" id="toggle-flagged" onchange="toggleFlaggedOnly()"> Show Only Flagged</label>
+    <div style="margin-top: 10px;">
+        <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar" data-reviewed="{{ reviews|length }}" data-total="{{ learning_log|length }}">0%</div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+{% for entry_id, entry in learning_log.items() %}
+    {% set review = reviews.get(entry_id) %}
+    <div id="entry-{{ entry_id }}" class="entry {% if review %}reviewed {% if review.flagged %}flagged{% endif %} collapsed{% endif %}"
+        {% if review %}onclick="if (!event.target.closest('form') && !event.target.closest('button')) toggleCollapse('{{ entry_id }}')" {% endif %}>
+
+        <p><strong>Input:</strong> {{ entry.input }}</p>
+        <p><strong>GPT Response:</strong> {{ entry.gpt_response }}</p>
+
+        {% if review %}
+            <p><strong style="color: green;">✅ Already Reviewed</strong>
+                {% if review.flagged %}<span class="flag-icon">🚩 Needs Follow-Up</span>{% endif %} – click to expand</p>
+        {% endif %}
+
+        <form method="post" class="form-section">
+            <input type="hidden" name="entry_id" value="{{ entry_id }}">
+            <label><input type="checkbox" name="flagged" value="true" {% if review and review.flagged %}checked{% endif %}> 🚩 Needs Clinical Follow-Up</label><br><br>
+            <label>Empathy:</label>
+            <select name="empathy">
+                <option {% if review and review.empathy == "" %}selected{% endif %}></option>
+                <option {% if review and review.empathy == "✅ Empathetic" %}selected{% endif %}>✅ Empathetic</option>
+                <option {% if review and review.empathy == "⚠️ Neutral" %}selected{% endif %}>⚠️ Neutral</option>
+                <option {% if review and review.empathy == "❌ Cold" %}selected{% endif %}>❌ Cold</option>
+            </select><br>
+
+            <label>Escalation:</label>
+            <select name="escalation">
+                <option {% if review and review.escalation == "" %}selected{% endif %}></option>
+                <option {% if review and review.escalation == "✅ Clear" %}selected{% endif %}>✅ Clear</option>
+                <option {% if review and review.escalation == "⚠️ Vague" %}selected{% endif %}>⚠️ Vague</option>
+                <option {% if review and review.escalation == "❌ Missing" %}selected{% endif %}>❌ Missing</option>
+            </select><br>
+
+            <label>Diagnosis:</label>
+            <select name="diagnosis">
+                <option {% if review and review.diagnosis == "" %}selected{% endif %}></option>
+                <option {% if review and review.diagnosis == "✅ No diagnosis" %}selected{% endif %}>✅ No diagnosis</option>
+                <option {% if review and review.diagnosis == "⚠️ Borderline" %}selected{% endif %}>⚠️ Borderline</option>
+                <option {% if review and review.diagnosis == "❌ Diagnoses user" %}selected{% endif %}>❌ Diagnoses user</option>
+            </select><br>
+
+            <label>Clarity:</label>
+            <select name="clarity">
+                <option {% if review and review.clarity == "" %}selected{% endif %}></option>
+                <option {% if review and review.clarity == "✅ Clear & concise" %}selected{% endif %}>✅ Clear & concise</option>
+                <option {% if review and review.clarity == "⚠️ Wordy" %}selected{% endif %}>⚠️ Wordy</option>
+                <option {% if review and review.clarity == "❌ Confusing" %}selected{% endif %}>❌ Confusing</option>
+            </select><br>
+
+            <label>Comments:</label><br>
+            <textarea name="comments" rows="2" cols="60">{{ review.comments if review else "" }}</textarea><br><br>
+            <button type="submit">💾 Save Review</button>
+        </form>
+    </div>
+{% endfor %}
+</div>
+
+<div id="toast" class="toast">Saved</div>
+
+</body>
+</html>

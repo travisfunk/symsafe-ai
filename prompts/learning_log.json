@@ -1,1 +1,6 @@
-[]
+{
+  "001": {
+    "input": "My head hurts when I wake up",
+    "gpt_response": "You might want to rest and hydrate. If it continues, see a provider."
+  }
+}
