@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>🛠 GPT Prompt Settings – SymSafe AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding: 2rem; background: #f8f9f9; }
+    .container { max-width: 800px; }
+    textarea {
+      width: 100%;
+      height: 160px;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="mb-4">🛠 GPT Rewrite Prompt Settings</h1>
+
+    {% if saved %}
+      <div class="alert alert-success">✅ Prompt saved successfully.</div>
+    {% endif %}
+
+    <form method="POST">
+      <label for="tone_prompt" class="form-label">Current Prompt Used for Tone Rewriting:</label>
+      <textarea name="tone_prompt" id="tone_prompt">{{ tone_prompt }}</textarea>
+      <button type="submit" class="btn btn-primary mt-3">💾 Save Prompt</button>
+    </form>
+
+    <a href="/admin" class="btn btn-link mt-4">← Back to Admin Dashboard</a>
+  </div>
+</body>
+</html>

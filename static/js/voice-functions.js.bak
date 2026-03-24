@@ -1,0 +1,96 @@
+﻿// SymSafe AI Voice Functions
+let voiceEnabled = true;
+let preferredVoice = null;
+
+window.speechSynthesis.onvoiceschanged = function() {
+    const voices = window.speechSynthesis.getVoices();
+    preferredVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Female')) ||
+                    voices.find(v => v.lang.startsWith('en')) ||
+                    voices[0];
+};
+
+function speakResponse(text) {
+    if (!voiceEnabled) return;
+    
+    window.speechSynthesis.cancel();
+    showSpeakingIndicator(true);
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.voice = preferredVoice;
+    utterance.rate = 0.9;
+    utterance.pitch = 1.1;
+    utterance.volume = 0.9;
+    
+    utterance.onend = function() {
+        showSpeakingIndicator(false);
+        
+        // Auto-restart for continuous mode
+        if (typeof continuousMode !== 'undefined' && continuousMode && voiceEnabled) {
+            setTimeout(() => {
+                console.log('Continuous mode: restarting voice...');
+                if (typeof startVoice === 'function') {
+                    startVoice();
+                }
+            }, 1500);
+        }
+    };
+    
+    utterance.onerror = function() {
+        showSpeakingIndicator(false);
+        console.error('Speech synthesis error');
+    };
+    
+    window.speechSynthesis.speak(utterance);
+}
+
+function showSpeakingIndicator(speaking) {
+    const indicator = document.getElementById('speaking-indicator');
+    if (indicator) {
+        indicator.style.display = speaking ? 'inline-block' : 'none';
+    }
+}
+
+function toggleVoice() {
+    voiceEnabled = !voiceEnabled;
+    const btn = document.getElementById('voice-toggle');
+    if (btn) {
+        btn.textContent = voiceEnabled ? '🔊 Voice On' : '🔇 Voice Off';
+        btn.className = voiceEnabled ? 'btn btn-sm btn-success' : 'btn btn-sm btn-secondary';
+    }
+    
+    if (!voiceEnabled) {
+        window.speechSynthesis.cancel();
+        showSpeakingIndicator(false);
+    }
+}
+
+const style = document.createElement('style');
+style.textContent = `
+    .speaking-animation {
+        display: inline-block;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    
+    #speaking-indicator {
+        color: #007bff;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+    
+    .voice-controls-bar {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+`;
+document.head.appendChild(style);

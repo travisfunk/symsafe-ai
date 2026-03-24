@@ -1,8 +1,118 @@
-﻿<!DOCTYPE html>
-<html>
-<head><title>Run QA Tests</title></head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Run Tests</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      padding: 2rem;
+    }
+    .test-result-pass {
+      color: green;
+      font-weight: bold;
+    }
+    .test-result-fail {
+      color: red;
+      font-weight: bold;
+    }
+    .test-row {
+      margin-bottom: 1rem;
+    }
+    .test-card {
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      box-shadow: 1px 1px 5px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
 <body>
-  <h1>🧪 Run Test Cases</h1>
-  <p>This page will execute the test_cases.json and display pass/fail results.</p>
+<div class="container">
+  <h1 class="mb-4">Run Test Cases</h1>
+
+  {% if tests and tests|length > 0 %}
+    <form id="test-form">
+      <div class="mb-3">
+        <button type="button" class="btn btn-success me-2" onclick="runAllTests()">▶️ Run All Tests</button>
+        <button type="button" class="btn btn-primary" onclick="runSelectedTests()">✅ Run Selected Tests</button>
+      </div>
+
+      <div class="row">
+        {% for test in tests %}
+          <div class="col-md-6 test-row">
+            <div class="test-card">
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" name="testcase" value="{{ loop.index0 }}" id="test-{{ loop.index0 }}">
+                <label class="form-check-label" for="test-{{ loop.index0 }}">
+                  <strong>Input:</strong> {{ test.input }}
+                </label>
+              </div>
+
+              <p><strong>Expected:</strong> {{ test.expected_symptom or test.expected }}</p>
+
+              {% if test.actual is defined %}
+                <p><strong>Actual:</strong> {{ test.actual }}</p>
+                {% if test.actual == (test.expected_symptom or test.expected) %}
+                  <p class="test-result-pass">✅ PASS</p>
+                {% else %}
+                  <p class="test-result-fail">❌ FAIL</p>
+                {% endif %}
+              {% else %}
+                <p class="text-muted">No result yet</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </form>
+  {% else %}
+    <div class="alert alert-warning">⚠️ No test cases found.</div>
+  {% endif %}
+</div>
+
+<script>
+  function runSelectedTests() {
+    const checkboxes = document.querySelectorAll('input[name="testcase"]:checked');
+    const indices = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+    if (indices.length === 0) {
+      alert("Please select at least one test case.");
+      return;
+    }
+
+    fetch('/run-single-test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ indices: indices })
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert("Selected tests complete. Reloading...");
+      location.reload();
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Something went wrong while running selected tests.");
+    });
+  }
+
+  function runAllTests() {
+    fetch('/run-single-test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ run_all: true })
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert("All tests complete. Reloading...");
+      location.reload();
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Something went wrong while running all tests.");
+    });
+  }
+</script>
 </body>
 </html>

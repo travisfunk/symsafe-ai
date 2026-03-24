@@ -1,0 +1,706 @@
+﻿{
+    "psoriasis":  {
+                      "requires_escalation":  false,
+                      "aliases":  [
+                                      "scaly patches",
+                                      "skin scales",
+                                      "plaque psoriasis",
+                                      "psoriasis flare",
+                                      "red scaly skin"
+                                  ],
+                      "urgency":  "LOW",
+                      "response":  "Psoriasis management is important. Is this a new outbreak? Any joint pain?"
+                  },
+    "wheezing":  {
+                     "requires_escalation":  false,
+                     "aliases":  [
+                                     "whistling breathing",
+                                     "noisy breathing",
+                                     "asthma attack",
+                                     "tight chest",
+                                     "breathing sounds"
+                                 ],
+                     "urgency":  "MEDIUM",
+                     "response":  "Wheezing can indicate airway problems. Do you have asthma? Any recent illness or allergies?"
+                 },
+    "cut":  {
+                "requires_escalation":  false,
+                "aliases":  [
+                                "laceration",
+                                "wound",
+                                "gash",
+                                "bleeding cut",
+                                "deep cut",
+                                "need stitches",
+                                "sliced myself",
+                                "cut myself",
+                                "open wound"
+                            ],
+                "urgency":  "MEDIUM",
+                "response":  "Cuts may need medical attention. How deep is it? Is bleeding controlled? Where is it?"
+            },
+    "poison ivy":  {
+                       "requires_escalation":  false,
+                       "aliases":  [
+                                       "poison oak",
+                                       "poison sumac",
+                                       "itchy rash",
+                                       "contact dermatitis",
+                                       "allergic rash",
+                                       "plant rash"
+                                   ],
+                       "urgency":  "LOW",
+                       "response":  "Poison ivy is very itchy. How widespread is it? Any face or genital involvement?"
+                   },
+    "bronchitis":  {
+                       "requires_escalation":  false,
+                       "aliases":  [
+                                       "chest cold",
+                                       "bronchial infection",
+                                       "productive cough",
+                                       "coughing up phlegm",
+                                       "chest congestion",
+                                       "lung infection"
+                                   ],
+                       "urgency":  "MEDIUM",
+                       "response":  "Bronchitis often follows a cold. Is your cough producing colored mucus? Any wheezing or chest tightness?"
+                   },
+    "skin abscess":  {
+                         "requires_escalation":  false,
+                         "aliases":  [
+                                         "boil",
+                                         "skin infection",
+                                         "pus pocket",
+                                         "infected cyst",
+                                         "abscess",
+                                         "carbuncle"
+                                     ],
+                         "urgency":  "MEDIUM",
+                         "response":  "Abscesses often need drainage. How large is it? Is there fever or red streaks?"
+                     },
+    "rash":  {
+                 "requires_escalation":  false,
+                 "aliases":  [
+                                 "skin rash",
+                                 "red spots",
+                                 "hives",
+                                 "itchy skin",
+                                 "bumps on skin",
+                                 "skin irritation",
+                                 "breaking out",
+                                 "allergic reaction",
+                                 "skin allergy"
+                             ],
+                 "urgency":  "LOW",
+                 "response":  "Rashes have many causes. Where is it? Is it itchy, painful, or spreading?"
+             },
+    "wound infection":  {
+                            "requires_escalation":  false,
+                            "aliases":  [
+                                            "infected cut",
+                                            "infected wound",
+                                            "pus in wound",
+                                            "wound not healing",
+                                            "red wound",
+                                            "infection"
+                                        ],
+                            "urgency":  "MEDIUM",
+                            "response":  "Wound infections need treatment. Is there redness, warmth, pus, or red streaks?"
+                        },
+    "neck pain":  {
+                      "requires_escalation":  false,
+                      "aliases":  [
+                                      "stiff neck",
+                                      "neck hurts",
+                                      "can\u0027t turn neck",
+                                      "neck strain",
+                                      "pulled neck",
+                                      "neck spasm",
+                                      "sore neck"
+                                  ],
+                      "urgency":  "LOW",
+                      "response":  "Neck pain can affect daily activities. Can you move your neck? Any numbness or tingling?"
+                  },
+    "ear pain":  {
+                     "requires_escalation":  false,
+                     "aliases":  [
+                                     "earache",
+                                     "ear infection",
+                                     "ear hurts",
+                                     "pain in ear",
+                                     "my ear hurts",
+                                     "ear is killing me",
+                                     "sharp ear pain",
+                                     "ear pressure",
+                                     "blocked ear"
+                                 ],
+                     "urgency":  "LOW",
+                     "response":  "Ear pain can be very uncomfortable. Which ear? Any drainage, fever, or hearing changes?"
+                 },
+    "foreign object":  {
+                           "requires_escalation":  false,
+                           "aliases":  [
+                                           "splinter",
+                                           "something in my eye",
+                                           "glass in foot",
+                                           "object stuck",
+                                           "can\u0027t get it out",
+                                           "embedded object"
+                                       ],
+                           "urgency":  "MEDIUM",
+                           "response":  "Foreign objects may need removal. What\u0027s stuck and where? Any pain or bleeding?"
+                       },
+    "vomiting":  {
+                     "requires_escalation":  false,
+                     "aliases":  [
+                                     "throwing up",
+                                     "puking",
+                                     "can\u0027t keep anything down",
+                                     "vomit",
+                                     "being sick",
+                                     "threw up"
+                                 ],
+                     "urgency":  "MEDIUM",
+                     "response":  "Vomiting can lead to dehydration. How often? Can you keep any fluids down?"
+                 },
+    "shortness of breath":  {
+                                "requires_escalation":  true,
+                                "aliases":  [
+                                                "can\u0027t breathe",
+                                                "trouble breathing",
+                                                "difficulty breathing",
+                                                "hard to breathe",
+                                                "breathless",
+                                                "gasping",
+                                                "winded",
+                                                "out of breath"
+                                            ],
+                                "urgency":  "HIGH",
+                                "response":  "Breathing problems need immediate attention. Can you speak in full sentences? Any chest pain?"
+                            },
+    "insect bite":  {
+                        "requires_escalation":  false,
+                        "aliases":  [
+                                        "bug bite",
+                                        "spider bite",
+                                        "mosquito bite",
+                                        "bee sting",
+                                        "wasp sting",
+                                        "stung",
+                                        "bitten by bug"
+                                    ],
+                        "urgency":  "LOW",
+                        "response":  "Insect bites can cause reactions. Any spreading redness, fever, or difficulty breathing?"
+                    },
+    "back pain":  {
+                      "requires_escalation":  false,
+                      "aliases":  [
+                                      "backache",
+                                      "lower back pain",
+                                      "upper back pain",
+                                      "threw out my back",
+                                      "back hurts",
+                                      "pain in back",
+                                      "can\u0027t bend",
+                                      "back spasms",
+                                      "pulled my back",
+                                      "back strain"
+                                  ],
+                      "urgency":  "LOW",
+                      "response":  "Back pain is very common. Where in your back? Did anything specific trigger it?"
+                  },
+    "fever":  {
+                  "requires_escalation":  false,
+                  "aliases":  [
+                                  "high temperature",
+                                  "feel hot",
+                                  "burning up",
+                                  "chills",
+                                  "fever and chills",
+                                  "running a fever",
+                                  "i have a fever",
+                                  "my temperature is high",
+                                  "temperature",
+                                  "fevered"
+                              ],
+                  "urgency":  "MEDIUM",
+                  "response":  "I\u0027m sorry you\u0027re feeling feverish. How high is your temperature? How long have you had it?"
+              },
+    "std concern":  {
+                        "requires_escalation":  false,
+                        "aliases":  [
+                                        "std test",
+                                        "sti test",
+                                        "sexually transmitted",
+                                        "std symptoms",
+                                        "need std test",
+                                        "sexual health concern"
+                                    ],
+                        "urgency":  "MEDIUM",
+                        "response":  "STD testing is important for health. Any symptoms? When was the exposure?"
+                    },
+    "stomach pain":  {
+                         "requires_escalation":  false,
+                         "aliases":  [
+                                         "abdominal pain",
+                                         "belly ache",
+                                         "stomach ache",
+                                         "stomach hurts",
+                                         "pain in stomach",
+                                         "cramps",
+                                         "belly pain",
+                                         "my stomach hurts",
+                                         "tummy ache",
+                                         "gut pain"
+                                     ],
+                         "urgency":  "MEDIUM",
+                         "response":  "Stomach pain can have many causes. Where exactly? Any nausea, vomiting, or bowel changes?"
+                     },
+    "sore throat":  {
+                        "requires_escalation":  false,
+                        "aliases":  [
+                                        "throat pain",
+                                        "scratchy throat",
+                                        "throat hurts",
+                                        "painful throat",
+                                        "burning throat",
+                                        "strep throat",
+                                        "can\u0027t swallow",
+                                        "hurts to swallow",
+                                        "my throat hurts",
+                                        "throat infection",
+                                        "raw throat"
+                                    ],
+                        "urgency":  "LOW",
+                        "response":  "Sore throats can be quite uncomfortable. Are you having trouble swallowing? Any fever or white spots?"
+                    },
+    "cough":  {
+                  "requires_escalation":  false,
+                  "aliases":  [
+                                  "coughing",
+                                  "persistent cough",
+                                  "dry cough",
+                                  "wet cough",
+                                  "hacking cough",
+                                  "can\u0027t stop coughing",
+                                  "coughing fits",
+                                  "cough won\u0027t go away",
+                                  "i have a cough",
+                                  "bad cough",
+                                  "chronic cough",
+                                  "productive cough"
+                              ],
+                  "urgency":  "LOW",
+                  "response":  "I understand you have a cough. Is it dry or producing phlegm? How long have you had it?"
+              },
+    "animal bite":  {
+                        "requires_escalation":  false,
+                        "aliases":  [
+                                        "dog bite",
+                                        "cat bite",
+                                        "bitten by animal",
+                                        "bite wound",
+                                        "animal attack",
+                                        "pet bite"
+                                    ],
+                        "urgency":  "MEDIUM",
+                        "response":  "Animal bites need proper care. What kind of animal? Is the wound deep? When did it happen?"
+                    },
+    "sprain":  {
+                   "requires_escalation":  false,
+                   "aliases":  [
+                                   "pulled muscle",
+                                   "muscle strain",
+                                   "twisted",
+                                   "stretched ligament",
+                                   "sports injury",
+                                   "strain"
+                               ],
+                   "urgency":  "MEDIUM",
+                   "response":  "Sprains can be painful. Which area is affected? Can you move it? How did it happen?"
+               },
+    "dizziness":  {
+                      "requires_escalation":  false,
+                      "aliases":  [
+                                      "dizzy",
+                                      "vertigo",
+                                      "lightheaded",
+                                      "room spinning",
+                                      "off balance",
+                                      "feel faint",
+                                      "woozy",
+                                      "unsteady"
+                                  ],
+                      "urgency":  "MEDIUM",
+                      "response":  "Dizziness has many causes. Is the room spinning? Any falls, hearing changes, or headache?"
+                  },
+    "urinary tract infection":  {
+                                    "requires_escalation":  false,
+                                    "aliases":  [
+                                                    "uti",
+                                                    "bladder infection",
+                                                    "painful urination",
+                                                    "burning pee",
+                                                    "frequent urination",
+                                                    "urgency to pee",
+                                                    "kidney infection",
+                                                    "cystitis"
+                                                ],
+                                    "urgency":  "MEDIUM",
+                                    "response":  "UTIs are common but uncomfortable. Any fever, back pain, or blood in urine?"
+                                },
+    "nausea":  {
+                   "requires_escalation":  false,
+                   "aliases":  [
+                                   "feel sick",
+                                   "queasy",
+                                   "sick to stomach",
+                                   "nauseous",
+                                   "upset stomach",
+                                   "gonna throw up",
+                                   "feeling nauseous"
+                               ],
+                   "urgency":  "LOW",
+                   "response":  "Nausea can be miserable. Are you able to keep fluids down? Any fever or abdominal pain?"
+               },
+    "headache":  {
+                     "requires_escalation":  false,
+                     "aliases":  [
+                                     "head pain",
+                                     "migraine",
+                                     "head hurts",
+                                     "pounding head",
+                                     "splitting headache",
+                                     "i have a headache",
+                                     "my head is killing me",
+                                     "tension headache",
+                                     "severe headache",
+                                     "bad headache"
+                                 ],
+                     "urgency":  "LOW",
+                     "response":  "Headaches can be quite distressing. Where exactly does it hurt? Is this different from usual headaches?"
+                 },
+    "shoulder pain":  {
+                          "requires_escalation":  false,
+                          "aliases":  [
+                                          "shoulder hurts",
+                                          "can\u0027t lift arm",
+                                          "frozen shoulder",
+                                          "rotator cuff",
+                                          "shoulder injury",
+                                          "pulled shoulder"
+                                      ],
+                          "urgency":  "LOW",
+                          "response":  "Shoulder pain can be limiting. Can you raise your arm? Any specific injury?"
+                      },
+    "constipation":  {
+                         "requires_escalation":  false,
+                         "aliases":  [
+                                         "can\u0027t poop",
+                                         "backed up",
+                                         "no bowel movement",
+                                         "blocked up",
+                                         "constipated",
+                                         "hard stools"
+                                     ],
+                         "urgency":  "LOW",
+                         "response":  "Constipation can be uncomfortable. How long? Any severe pain or vomiting?"
+                     },
+    "chest pain":  {
+                       "requires_escalation":  true,
+                       "aliases":  [
+                                       "chest hurts",
+                                       "heart pain",
+                                       "chest pressure",
+                                       "chest tightness",
+                                       "pain in chest",
+                                       "my chest hurts",
+                                       "crushing chest pain",
+                                       "heart attack"
+                                   ],
+                       "urgency":  "HIGH",
+                       "response":  "Chest pain can be serious. Is it crushing, sharp, or burning? Any shortness of breath or arm pain?"
+                   },
+    "strep throat":  {
+                         "requires_escalation":  false,
+                         "aliases":  [
+                                         "think i have strep",
+                                         "strep",
+                                         "bacterial throat infection",
+                                         "severe sore throat",
+                                         "throat infection"
+                                     ],
+                         "urgency":  "MEDIUM",
+                         "response":  "Strep throat needs testing to confirm. Do you have fever, swollen glands, or white patches on your throat?"
+                     },
+    "shingles":  {
+                     "requires_escalation":  false,
+                     "aliases":  [
+                                     "herpes zoster",
+                                     "painful rash",
+                                     "blistering rash",
+                                     "nerve pain rash",
+                                     "band of blisters"
+                                 ],
+                     "urgency":  "MEDIUM",
+                     "response":  "Shingles can be very painful. Where is the rash? Any burning pain or blisters?"
+                 },
+    "acne":  {
+                 "requires_escalation":  false,
+                 "aliases":  [
+                                 "pimples",
+                                 "breakout",
+                                 "cystic acne",
+                                 "face acne",
+                                 "bad acne",
+                                 "acne flare"
+                             ],
+                 "urgency":  "LOW",
+                 "response":  "Severe acne can be treated. Is this sudden or worsening? Any painful cysts?"
+             },
+    "bruise":  {
+                   "requires_escalation":  false,
+                   "aliases":  [
+                                   "contusion",
+                                   "black and blue",
+                                   "hematoma",
+                                   "bruised",
+                                   "bruising",
+                                   "purple mark"
+                               ],
+                   "urgency":  "LOW",
+                   "response":  "Bruising is common after injury. How did it happen? Any severe pain or swelling?"
+               },
+    "knee pain":  {
+                      "requires_escalation":  false,
+                      "aliases":  [
+                                      "knee hurts",
+                                      "bad knee",
+                                      "knee injury",
+                                      "twisted knee",
+                                      "can\u0027t bend knee",
+                                      "knee swelling",
+                                      "sore knee"
+                                  ],
+                      "urgency":  "MEDIUM",
+                      "response":  "Knee pain can limit mobility. Did you injure it? Is there swelling or instability?"
+                  },
+    "eczema":  {
+                   "requires_escalation":  false,
+                   "aliases":  [
+                                   "dermatitis",
+                                   "skin inflammation",
+                                   "atopic dermatitis",
+                                   "dry itchy skin",
+                                   "eczema flare"
+                               ],
+                   "urgency":  "LOW",
+                   "response":  "Eczema flare-ups can be uncomfortable. Is this a known condition? Any signs of infection?"
+               },
+    "ringworm":  {
+                     "requires_escalation":  false,
+                     "aliases":  [
+                                     "fungal infection",
+                                     "circular rash",
+                                     "tinea",
+                                     "athlete\u0027s foot",
+                                     "jock itch",
+                                     "fungal rash"
+                                 ],
+                     "urgency":  "LOW",
+                     "response":  "Ringworm is a fungal infection. Where are the ring-shaped patches? Are they spreading?"
+                 },
+    "sinus infection":  {
+                            "requires_escalation":  false,
+                            "aliases":  [
+                                            "sinusitis",
+                                            "sinus pressure",
+                                            "sinus pain",
+                                            "blocked sinuses",
+                                            "sinus headache",
+                                            "face pressure",
+                                            "stuffed sinuses"
+                                        ],
+                            "urgency":  "LOW",
+                            "response":  "Sinus infections can be painful. Do you have facial pressure, colored nasal discharge, or headache?"
+                        },
+    "cellulitis":  {
+                       "requires_escalation":  false,
+                       "aliases":  [
+                                       "skin infection",
+                                       "spreading redness",
+                                       "hot red skin",
+                                       "infected area",
+                                       "red spreading rash"
+                                   ],
+                       "urgency":  "MEDIUM",
+                       "response":  "Cellulitis is a serious skin infection. Is the area red, warm, and spreading? Any fever?"
+                   },
+    "burn":  {
+                 "requires_escalation":  false,
+                 "aliases":  [
+                                 "burned myself",
+                                 "burn injury",
+                                 "scalded",
+                                 "sunburn",
+                                 "chemical burn",
+                                 "burned my hand",
+                                 "hot water burn",
+                                 "cooking burn"
+                             ],
+                 "urgency":  "MEDIUM",
+                 "response":  "Burns need proper care. How large is the area? What caused it? Are there blisters?"
+             },
+    "flu symptoms":  {
+                         "requires_escalation":  false,
+                         "aliases":  [
+                                         "i have the flu",
+                                         "flu-like symptoms",
+                                         "influenza",
+                                         "body aches and fever",
+                                         "think i have flu",
+                                         "flu",
+                                         "feeling flu-ish"
+                                     ],
+                         "urgency":  "MEDIUM",
+                         "response":  "Flu symptoms can make you feel terrible. Do you have body aches, fever, and fatigue? When did this start?"
+                     },
+    "fracture":  {
+                     "requires_escalation":  true,
+                     "aliases":  [
+                                     "broken bone",
+                                     "think it\u0027s broken",
+                                     "bone break",
+                                     "fractured",
+                                     "cracked bone",
+                                     "possible fracture"
+                                 ],
+                     "urgency":  "HIGH",
+                     "response":  "Possible fractures need X-rays. Where is the pain? Can you move the area? Any deformity?"
+                 },
+    "sprained ankle":  {
+                           "requires_escalation":  false,
+                           "aliases":  [
+                                           "twisted ankle",
+                                           "rolled ankle",
+                                           "ankle injury",
+                                           "hurt my ankle",
+                                           "ankle sprain",
+                                           "bad ankle",
+                                           "can\u0027t walk on ankle",
+                                           "ankle twist"
+                                       ],
+                           "urgency":  "MEDIUM",
+                           "response":  "Ankle injuries need assessment. Can you put weight on it? Is there significant swelling?"
+                       },
+    "anxiety":  {
+                    "requires_escalation":  false,
+                    "aliases":  [
+                                    "panic attack",
+                                    "anxiety attack",
+                                    "anxious",
+                                    "panic",
+                                    "can\u0027t calm down",
+                                    "freaking out",
+                                    "nervous"
+                                ],
+                    "urgency":  "MEDIUM",
+                    "response":  "Anxiety can feel overwhelming. Are you having chest pain, trouble breathing, or feel you might hurt yourself?"
+                },
+    "allergic reaction":  {
+                              "requires_escalation":  false,
+                              "aliases":  [
+                                              "allergy attack",
+                                              "allergies",
+                                              "reaction to medication",
+                                              "food allergy",
+                                              "allergic",
+                                              "allergy symptoms"
+                                          ],
+                              "urgency":  "MEDIUM",
+                              "response":  "Allergic reactions vary in severity. Any trouble breathing, swelling, or spreading rash?"
+                          },
+    "pink eye":  {
+                     "requires_escalation":  false,
+                     "aliases":  [
+                                     "conjunctivitis",
+                                     "red eye",
+                                     "eye infection",
+                                     "crusty eye",
+                                     "eye discharge",
+                                     "infected eye"
+                                 ],
+                     "urgency":  "LOW",
+                     "response":  "Pink eye is very contagious. Is there discharge? Both eyes? Any vision changes?"
+                 },
+    "diarrhea":  {
+                     "requires_escalation":  false,
+                     "aliases":  [
+                                     "loose stools",
+                                     "watery stools",
+                                     "the runs",
+                                     "bowel problems",
+                                     "stomach bug",
+                                     "frequent bowel movements"
+                                 ],
+                     "urgency":  "LOW",
+                     "response":  "Diarrhea can cause dehydration. How frequent? Any blood, fever, or severe cramps?"
+                 },
+    "allergies":  {
+                      "requires_escalation":  false,
+                      "aliases":  [
+                                      "hay fever",
+                                      "seasonal allergies",
+                                      "allergy symptoms",
+                                      "allergic rhinitis",
+                                      "pollen allergy",
+                                      "itchy eyes"
+                                  ],
+                      "urgency":  "LOW",
+                      "response":  "Allergies can be managed. What are your symptoms? Any trouble breathing or swelling?"
+                  },
+    "runny nose":  {
+                       "requires_escalation":  false,
+                       "aliases":  [
+                                       "nose running",
+                                       "nasal discharge",
+                                       "stuffy nose",
+                                       "congestion",
+                                       "blocked nose",
+                                       "can\u0027t breathe through nose",
+                                       "nose won\u0027t stop running",
+                                       "nasal congestion",
+                                       "sinus congestion"
+                                   ],
+                       "urgency":  "LOW",
+                       "response":  "A runny nose is often part of a cold or allergies. Is it clear or colored discharge? Any other symptoms?"
+                   },
+    "tooth pain":  {
+                       "requires_escalation":  false,
+                       "aliases":  [
+                                       "toothache",
+                                       "dental pain",
+                                       "tooth hurts",
+                                       "cavity pain",
+                                       "tooth infection",
+                                       "abscess",
+                                       "mouth pain",
+                                       "jaw pain"
+                                   ],
+                       "urgency":  "MEDIUM",
+                       "response":  "Tooth pain can be excruciating. Which tooth? Any swelling, fever, or trouble swallowing?"
+                   },
+    "joint pain":  {
+                       "requires_escalation":  false,
+                       "aliases":  [
+                                       "arthritis pain",
+                                       "joint ache",
+                                       "joints hurt",
+                                       "stiff joints",
+                                       "swollen joints",
+                                       "multiple joint pain"
+                                   ],
+                       "urgency":  "LOW",
+                       "response":  "Joint pain can have many causes. Which joints? Any swelling, redness, or fever?"
+                   }
+}

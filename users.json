@@ -1,0 +1,18 @@
+{
+  "admin": {
+    "password": "admin123",
+    "roles": ["admin", "trainer", "clinician"]
+  },
+  "trainer": {
+    "password": "train123",
+    "roles": ["trainer"]
+  },
+  "clinician": {
+    "password": "care123",
+    "roles": ["clinician"]
+  },
+  "demo": {
+    "password": "demo",
+    "roles": ["patient"]
+  }
+}

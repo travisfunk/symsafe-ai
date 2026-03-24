@@ -1,182 +1,146 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Edit Symptom Aliases</title>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f9f9f9; }
-    .header { position: sticky; top: 0; background: white; padding: 10px 20px; border-bottom: 1px solid #ccc; z-index: 1000; }
-    .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-    .controls input, .controls select, .controls button {
-        padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;
+    body { font-family: sans-serif; padding: 2rem; background: #f8f9f9; }
+    .symptom-block { margin-bottom: 2rem; background: #fff; padding: 1rem; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    textarea { width: 100%; height: 80px; font-size: 14px; font-family: sans-serif; padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+    .alias-list span {
+      display: inline-block; background: #ddd; margin: 4px; padding: 4px 8px; border-radius: 12px;
     }
-    .table-wrapper { max-width: 1200px; margin: 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.1); }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; vertical-align: top; }
-    th { background-color: #f7f7f7; }
-    .alias-chip {
-        display: inline-block; background: #ddd; padding: 3px 8px; margin: 2px; border-radius: 12px;
-        font-size: 12px;
-    }
-    .alias-chip button {
-        border: none; background: transparent; font-weight: bold; margin-left: 4px; cursor: pointer;
-    }
-    .gpt-suggestions {
-        margin-top: 10px;
-        background: #eef5f0;
-        border-left: 4px solid #4CAF50;
-        padding: 10px;
-        border-radius: 5px;
-    }
-    .gpt-suggestions h4 {
-        margin-top: 0;
-        font-size: 14px;
-        color: #2c662d;
-    }
-    .gpt-chip {
-        display: inline-block;
-        background: #d3e8dc;
-        margin: 4px;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-    }
-    .gpt-chip button {
-        background: none;
-        border: none;
-        cursor: pointer;
-        margin-left: 6px;
-        font-weight: bold;
-    }
+    .badge { display: inline-block; font-size: 12px; padding: 3px 8px; border-radius: 10px; margin: 4px; color: white; }
+    .badge.safe { background: green; }
+    .badge.unsafe { background: red; }
+    .badge.warn { background: orange; }
+    .history-box { background: #f1f1f1; padding: 6px; border-radius: 6px; font-size: 13px; margin-top: 10px; }
+    .history-box code { display: block; background: #fff; padding: 6px; margin: 4px 0; border-radius: 4px; }
+    button { margin-top: 6px; }
   </style>
 </head>
 <body>
+  <h1>Edit Aliases & Tone Settings</h1>
 
-<div class="header">
-  <div class="controls">
-    <input type="text" id="searchBox" placeholder="Search symptoms or aliases...">
-    <select id="urgencyFilter">
-      <option value="">All Urgencies</option>
-      <option value="LOW">LOW</option>
-      <option value="MEDIUM">MEDIUM</option>
-      <option value="HIGH">HIGH</option>
-    </select>
-    <button id="importBtn">📥 Import JSON</button>
-    <button id="exportBtn">📤 Export Snapshot</button>
-    <button id="newSymptomBtn">➕ Add Symptom</button>
-  </div>
-</div>
-
-<div class="table-wrapper">
-  <table>
-    <thead>
-      <tr>
-        <th>Symptom</th>
-        <th>Response</th>
-        <th>Aliases + GPT Suggestions</th>
-        <th>Urgency</th>
-        <th>Escalates</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="symptomRows">
-      <!-- Rows injected by JS -->
-    </tbody>
-  </table>
-</div>
+  {% for label, entry in tree.items() %}
+    <div class="symptom-block" id="block-{{ loop.index }}">
+      <h3>{{ label }}</h3>
+      <label>Response:</label>
+      <textarea id="response-{{ loop.index }}">{{ entry.response }}</textarea>
+      <button class="rewrite-btn" data-label="{{ label }}" data-target="response-{{ loop.index }}">✍️ Rewrite Tone</button>
+      <div class="flags" id="flags-{{ loop.index }}"></div>
+      <div class="history-box" id="history-{{ label | replace(' ', '_') }}">
+        <strong>Recent Rewrites:</strong>
+        <em>Loading...</em>
+      </div>
+      <p><strong>Aliases:</strong></p>
+      <div class="alias-list">
+        {% for alias in entry.aliases %}
+          <span>{{ alias }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
 
 <script>
-const symptomData = {
-  "headache": {
-    "response": "Try resting, hydrating, and monitoring. If persistent, contact a provider.",
-    "urgency": "LOW",
-    "aliases": ["head pain", "throbbing head"],
-    "requires_escalation": false
-  },
-  "chest pain": {
-    "response": "Seek emergency care if severe or persistent.",
-    "urgency": "HIGH",
-    "aliases": ["tight chest", "heart pain"],
-    "requires_escalation": true
+function flagAnalysis(text, containerId) {
+  const flags = [];
+  const txt = text.toLowerCase();
+  if (txt.includes("sorry") || txt.includes("uncomfortable")) {
+    flags.push('<span class="badge safe">✅ Empathy</span>');
+  } else {
+    flags.push('<span class="badge warn">⚠️ Lacks Empathy</span>');
   }
-};
-
-function createRow(symptom, data) {
-  const tr = document.createElement("tr");
-
-  const aliasChips = data.aliases.map(alias =>
-    `<span class="alias-chip">${alias}<button onclick="this.parentElement.remove()">×</button></span>`
-  ).join("");
-
-  const gptSuggestions = ["pounding head", "migraine episode", "pressure in temples"].map(alias =>
-    `<span class="gpt-chip">${alias}
-      <button onclick="approveAlias(this, '${alias}')">✅</button>
-      <button onclick="this.parentElement.remove()">❌</button>
-    </span>`
-  ).join("");
-
-  tr.innerHTML = `
-    <td><input class="editable" value="${symptom}" disabled></td>
-    <td><textarea class="editable">${data.response}</textarea></td>
-    <td>
-      <div class="alias-list">${aliasChips}</div>
-      <input type="text" placeholder="Add alias..." onkeydown="addAlias(event, this)">
-      <div class="gpt-suggestions">
-        <h4>💡 Suggested by ChatGPT (manual approval)</h4>
-        <div>${gptSuggestions}</div>
-        <button onclick="regenerate(this)">🔄 Regenerate Suggestions</button>
-      </div>
-    </td>
-    <td>
-      <select class="editable">
-        <option value="LOW" ${data.urgency === "LOW" ? "selected" : ""}>LOW</option>
-        <option value="MEDIUM" ${data.urgency === "MEDIUM" ? "selected" : ""}>MEDIUM</option>
-        <option value="HIGH" ${data.urgency === "HIGH" ? "selected" : ""}>HIGH</option>
-      </select>
-    </td>
-    <td><input type="checkbox" ${data.requires_escalation ? "checked" : ""}></td>
-    <td><button>💾 Save</button> <button>↩️ Undo</button></td>
-  `;
-
-  return tr;
-}
-
-function addAlias(event, input) {
-  if (event.key === "Enter" && input.value.trim()) {
-    const alias = input.value.trim();
-    const chip = document.createElement("span");
-    chip.className = "alias-chip";
-    chip.innerHTML = `${alias}<button onclick="this.parentElement.remove()">×</button>`;
-    input.previousElementSibling.appendChild(chip);
-    input.value = "";
+  if (txt.includes("seek") || txt.includes("provider") || txt.includes("urgent")) {
+    flags.push('<span class="badge safe">✅ Escalation</span>');
+  } else {
+    flags.push('<span class="badge warn">⚠️ No Escalation</span>');
   }
-}
-
-function approveAlias(btn, alias) {
-  const chip = document.createElement("span");
-  chip.className = "alias-chip";
-  chip.innerHTML = `${alias}<button onclick="this.parentElement.remove()">×</button>`;
-  const list = btn.closest("td").querySelector(".alias-list");
-  list.appendChild(chip);
-  btn.parentElement.remove();
-}
-
-function regenerate(btn) {
-  const container = btn.previousElementSibling;
-  container.innerHTML += `<span class="gpt-chip">new suggestion
-    <button onclick="approveAlias(this, 'new suggestion')">✅</button>
-    <button onclick="this.parentElement.remove()">❌</button></span>`;
-}
-
-function renderTable() {
-  const tbody = document.getElementById("symptomRows");
-  tbody.innerHTML = "";
-  for (const [symptom, data] of Object.entries(symptomData)) {
-    tbody.appendChild(createRow(symptom, data));
+  if (txt.includes("you might have") || txt.includes("could be")) {
+    flags.push('<span class="badge unsafe">❌ Diagnosis Risk</span>');
+  } else {
+    flags.push('<span class="badge safe">✅ No Diagnosis</span>');
   }
+  if (txt.includes("emergency") || txt.includes("911")) {
+    flags.push('<span class="badge safe">✅ Safety</span>');
+  }
+  document.getElementById(containerId).innerHTML = flags.join(" ");
 }
 
-renderTable();
+function renderHistoryFromFile(label, container) {
+  fetch("/rewrite-history")
+    .then(res => res.json())
+    .then(historyData => {
+      const clean = label.toLowerCase();
+      const list = historyData[clean] || [];
+      if (list.length === 0) {
+        container.innerHTML = "<strong>Recent Rewrites:</strong> <em>None found</em>";
+        return;
+      }
+      container.innerHTML = "<strong>Recent Rewrites:</strong>";
+      list.forEach(entry => {
+        container.innerHTML += `<code>${entry.timestamp}: ${entry.response}</code>`;
+      });
+    })
+    .catch(err => {
+      container.innerHTML = "<em>Error loading history</em>";
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".rewrite-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.target;
+      const label = btn.dataset.label;
+      const textarea = document.getElementById(id);
+      const flags = document.getElementById("flags-" + id.split("-")[1]);
+      const original = textarea.value.trim();
+
+      if (!original) return;
+
+      textarea.disabled = true;
+      btn.textContent = "⏳ Rewriting...";
+
+      fetch("/rewrite-response", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: original })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.rewritten) {
+            textarea.value = data.rewritten;
+            flagAnalysis(data.rewritten, flags.id);
+
+            // save to backend
+            fetch("/save-rewrite-history", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ label: label.toLowerCase(), response: data.rewritten })
+            });
+
+            const historyBox = document.getElementById("history-" + label.replace(/\s/g, "_"));
+            renderHistoryFromFile(label, historyBox);
+            btn.textContent = "✅ Rewritten & Saved";
+          } else {
+            btn.textContent = "⚠️ Error";
+          }
+        })
+        .catch(err => {
+          btn.textContent = "❌ Rewrite Failed";
+        })
+        .finally(() => {
+          textarea.disabled = false;
+        });
+    });
+  });
+
+  // load history for each block
+  {% for label in tree.keys() %}
+    const container = document.getElementById("history-{{ label | replace(' ', '_') }}");
+    renderHistoryFromFile("{{ label }}", container);
+  {% endfor %}
+});
 </script>
-
 </body>
 </html>

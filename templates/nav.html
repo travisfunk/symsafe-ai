@@ -1,0 +1,19 @@
+<div class="mt-4 mb-4">
+  <a href="/" class="btn btn-outline-primary btn-sm me-2">🏠 Home</a>
+  <a href="/admin2" class="btn btn-outline-secondary btn-sm me-2">🛠️ Dashboard</a>
+
+  {% if has_role('trainer') %}
+    <a href="/edit-aliases" class="btn btn-sm btn-outline-info me-2">Aliases</a>
+    <a href="/edit-tests" class="btn btn-sm btn-outline-info me-2">Tests</a>
+  {% endif %}
+
+  {% if has_role('clinician') %}
+    <a href="/review-gpt" class="btn btn-sm btn-outline-info me-2">GPT Review</a>
+  {% endif %}
+
+  {% if has_role('admin') %}
+    <a href="/admin" class="btn btn-sm btn-outline-danger me-2">System Info</a>
+  {% endif %}
+
+  <a href="/logout" class="btn btn-sm btn-outline-dark float-end">🚪 Logout</a>
+</div>

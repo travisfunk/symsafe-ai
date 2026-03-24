@@ -1,0 +1,337 @@
+﻿from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for, flash
+import json
+import os
+from io import BytesIO, StringIO
+from datetime import datetime
+import csv
+import platform
+import psutil
+from symptom_screener import load_symptom_tree, fuzzy_match_symptom
+from auth import authenticate_user, current_user, has_role, require_roles
+
+app = Flask(__name__, static_folder='static', static_url_path='/static')
+app.secret_key = "change-this-secret-key"
+
+SYMPTOM_TREE_PATH = "prompts/symptom_tree.json"
+TEST_CASES_PATH = "prompts/test_cases.json"
+LEARNING_LOG_PATH = "prompts/learning_log.json"
+GPT_REVIEW_LOG_PATH = "prompts/gpt_review_log.json"
+GPT_ACCEPTED_LOG_PATH = "gpt_accepted_log.json"
+REWRITE_HISTORY_PATH = "rewrite_history.json"
+TONE_PROMPT_PATH = "tone_prompt.txt"
+
+
+def safe_json_read(path):
+    try:
+        with open(path, "rb") as f:
+            raw = f.read()
+            if raw.startswith(b'\xef\xbb\xbf'):
+                raw = raw[3:]
+            return json.loads(raw.decode("utf-8"))
+    except Exception:
+        return {} if path.endswith(".json") else []
+
+
+def safe_json_write(path, data):
+    content = json.dumps(data, indent=2, ensure_ascii=False)
+    if content.startswith("\ufeff"):
+        content = content.replace("\ufeff", "")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+
+@app.context_processor
+def inject_user_helpers():
+    return {"current_user": current_user(), "has_role": has_role}
+
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        user = authenticate_user(username, password)
+        if user:
+            session["user"] = user
+            flash(f"Welcome, {username}!", "success")
+            return redirect(url_for("admin2"))
+        flash("Invalid credentials", "danger")
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("Youâ€™ve been logged out.")
+    return redirect(url_for("login"))
+
+
+@app.route("/edit-aliases")
+#@require_roles("trainer", "admin")
+def edit_aliases():
+    tree = safe_json_read(SYMPTOM_TREE_PATH)
+    return render_template("edit_aliases.html", tree=tree)
+
+
+@app.route("/rewrite-response", methods=["POST"])
+def rewrite_response():
+    data = request.get_json()
+    original = data.get("text", "")
+    if not original:
+        return jsonify({"error": "No input text provided."}), 400
+    rewritten = f"[Rewritten] {original}"
+    return jsonify({"rewritten": rewritten})
+
+
+@app.route("/save-rewrite-history", methods=["POST"])
+def save_rewrite_history():
+    data = request.get_json()
+    label = data.get("label")
+    response = data.get("response")
+    if not label or not response:
+        return jsonify({"error": "Missing label or response"}), 400
+    history = safe_json_read(REWRITE_HISTORY_PATH)
+    entry = {"timestamp": datetime.utcnow().isoformat(), "response": response}
+    history.setdefault(label, []).insert(0, entry)
+    history[label] = history[label][:5]
+    safe_json_write(REWRITE_HISTORY_PATH, history)
+    return jsonify({"status": "saved"})
+
+
+@app.route("/admin/settings", methods=["GET", "POST"])
+#@require_roles("admin")
+def admin_settings():
+    if request.method == "POST":
+        new_prompt = request.form.get("tone_prompt", "")
+        with open(TONE_PROMPT_PATH, "w", encoding="utf-8") as f:
+            f.write(new_prompt.strip())
+        return render_template("admin_settings.html", saved=True, tone_prompt=new_prompt)
+    if not os.path.exists(TONE_PROMPT_PATH):
+        with open(TONE_PROMPT_PATH, "w", encoding="utf-8") as f:
+            f.write("Rewrite this response to be empathetic, clinically safe, and non-diagnostic.")
+    with open(TONE_PROMPT_PATH, "r", encoding="utf-8") as f:
+        tone_prompt = f.read()
+    return render_template("admin_settings.html", tone_prompt=tone_prompt, saved=False)
+
+
+@app.route("/run-tests")
+#@require_roles("trainer", "admin")
+def run_tests():
+    tests = safe_json_read(TEST_CASES_PATH)
+    return render_template("run_tests.html", tests=tests)
+
+
+@app.route("/export")
+#@require_roles("trainer", "clinician", "admin")
+def export():
+    return render_template("export.html")
+
+
+@app.route("/download-tests")
+#@require_roles("trainer", "admin")
+def download_tests():
+    tests = safe_json_read(TEST_CASES_PATH)
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Input", "Expected", "Actual", "Pass?"])
+    for t in tests:
+        input_text = t.get("input", "")
+        expected = t.get("expected_symptom", "")
+        actual = t.get("actual", "")
+        if not input_text and not expected and not actual:
+            continue
+        passed = "PASS" if actual == expected else "FAIL"
+        writer.writerow([input_text, expected, actual, passed])
+    mem_bytes = BytesIO(output.getvalue().encode("utf-8"))
+    return send_file(mem_bytes, mimetype="text/csv", as_attachment=True, download_name="test_results.csv")
+
+
+@app.route("/download-reviews")
+#@require_roles("clinician", "admin")
+def download_reviews():
+    reviews = safe_json_read(GPT_REVIEW_LOG_PATH)
+    inputs = safe_json_read(LEARNING_LOG_PATH)
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Entry ID", "Input", "GPT Response", "Empathy", "Escalation", "Diagnosis", "Clarity", "Comments"])
+    for entry_id, review in reviews.items():
+        input_data = inputs.get(entry_id, {})
+        writer.writerow([
+            entry_id,
+            input_data.get("input", ""),
+            input_data.get("gpt_response", ""),
+            review.get("empathy", ""),
+            review.get("escalation", ""),
+            review.get("diagnosis", ""),
+            review.get("clarity", ""),
+            review.get("comments", "")
+        ])
+    mem_bytes = BytesIO(output.getvalue().encode("utf-8"))
+    return send_file(mem_bytes, mimetype="text/csv", as_attachment=True, download_name="gpt_review_log.csv")
+
+
+@app.route("/rewrite-history")
+def rewrite_history():
+    history = safe_json_read(REWRITE_HISTORY_PATH)
+    return jsonify(history)
+
+
+@app.route("/train")
+def train():
+    log = safe_json_read(LEARNING_LOG_PATH)
+    return render_template("train.html", learning_log=log)
+
+
+@app.route("/review-gpt")
+#@require_roles("clinician", "admin")
+def review_gpt():
+    reviews = safe_json_read(GPT_REVIEW_LOG_PATH)
+    learning_log = safe_json_read(LEARNING_LOG_PATH)
+    return render_template("review_gpt.html", reviews=reviews, learning_log=learning_log)
+
+
+@app.route("/edit-tests")
+#@require_roles("trainer", "admin")
+def edit_tests():
+    tests = safe_json_read(TEST_CASES_PATH)
+    return render_template("edit_tests.html", tests=tests)
+
+
+@app.route("/run-single-test", methods=["POST"])
+#@require_roles("trainer", "admin")
+def run_single_test():
+    data = request.get_json()
+    tests = safe_json_read(TEST_CASES_PATH)
+    symptom_tree = load_symptom_tree()
+    run_all = data.get("run_all", False)
+    indices = data.get("indices", []) if not run_all else list(range(len(tests)))
+    for i in indices:
+        input_text = tests[i]["input"]
+        matched_label, match_type = fuzzy_match_symptom(input_text, symptom_tree)
+        actual = matched_label or "unknown"
+        tests[i]["actual"] = actual
+    try:
+        safe_json_write(TEST_CASES_PATH, tests)
+        return jsonify({"status": "updated"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/audit-summary")
+#@require_roles("trainer", "admin")
+def audit_summary():
+    tests = safe_json_read(TEST_CASES_PATH)
+    return render_template("audit_summary.html", tests=tests)
+
+
+@app.route("/test", methods=["GET", "POST"])
+def test():
+    if request.method == "POST":
+        data = request.get_json()
+        input_text = data.get("input", "").strip()
+        symptom_tree = load_symptom_tree()
+        matched_label, _ = fuzzy_match_symptom(input_text, symptom_tree)
+        matched = matched_label or "unknown"
+        response = symptom_tree[matched]["response"] if matched in symptom_tree else "Thanks for your input."
+        evaluation = {
+            "empathy": True,
+            "escalation": False,
+            "diagnosis": False,
+            "clarity": True
+        }
+        return jsonify({
+            "matched_symptom": matched,
+            "response": response,
+            "evaluation": evaluation
+        })
+    return render_template("test.html")
+
+
+@app.route("/review-tests")
+#@require_roles("trainer", "admin")
+def review_tests():
+    try:
+        with open("review_tests.md", "r", encoding="utf-8") as f:
+            markdown = f.read()
+    except FileNotFoundError:
+        markdown = None
+    return render_template("review_tests.html", markdown=markdown)
+
+
+@app.route("/get-tests")
+def get_tests():
+    tests = safe_json_read(TEST_CASES_PATH)
+    return jsonify(tests)
+
+
+@app.route("/save-tests", methods=["POST"])
+#@require_roles("trainer", "admin")
+def save_tests():
+    data = request.get_json()
+    try:
+        safe_json_write(TEST_CASES_PATH, data)
+        return jsonify({"status": "saved"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/symptom", methods=["POST"])
+def api_symptom():
+    data = request.get_json()
+    text = data.get("text", "").strip()
+    symptom_tree = load_symptom_tree()
+    matched_label, match_type = fuzzy_match_symptom(text, symptom_tree)
+    if matched_label:
+        response = symptom_tree[matched_label].get("response", "Thank you for your input.")
+    else:
+        response = "Thank you. A clinician will review your input shortly."
+    return jsonify({"response": response, "match": matched_label or "unknown", "type": match_type or "none"})
+
+
+@app.route("/admin")
+#@require_roles("admin")
+def admin():
+    routes = [str(rule) for rule in app.url_map.iter_rules()]
+    return render_template("admin.html",
+        system=platform.uname(),
+        env=dict(os.environ),
+        routes=routes,
+        memory=psutil.virtual_memory()
+    )
+
+
+@app.route("/admin2")
+#@require_roles("trainer", "admin", "clinician")
+def admin2():
+    return render_template("admin2.html")
+
+
+@app.route("/voice-log")
+#@require_roles("admin")
+def voice_log():
+    return render_template("voice_log.html")
+
+
+@app.route("/upload-voice", methods=["POST"])
+#@require_roles("admin", "clinician")
+def upload_voice():
+    file = request.files.get("audio")
+    if not file:
+        return jsonify({"error": "No file received"}), 400
+    filename = f"uploads/{datetime.utcnow().isoformat().replace(':', '-')}.webm"
+    os.makedirs("uploads", exist_ok=True)
+    file.save(filename)
+    return jsonify({"status": "received", "filename": filename})
+
+
+if __name__ == "__main__":
+    print("âœ… SymSafe WebUI running with full authentication, fuzzy matching, and role-aware navigation")
+    for rule in app.url_map.iter_rules():
+        print(f" - {rule}")
+    app.run(debug=True)
+

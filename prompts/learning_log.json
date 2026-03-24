@@ -1,6 +1,42 @@
 {
-  "001": {
-    "input": "My head hurts when I wake up",
-    "gpt_response": "You might want to rest and hydrate. If it continues, see a provider."
+  "entry001": {
+    "input": "My stomach hurts",
+    "gpt_response": "It may be nausea. Monitor symptoms and hydrate."
+  },
+  "conv_test_20250705_013927": {
+    "type": "conversation_response",
+    "question": "Are you also experiencing jaw pain?",
+    "response": "right",
+    "symptoms_discussed": [
+      "chest pain"
+    ],
+    "timestamp": "2025-07-05T01:39:27.286928"
+  },
+  "conv_20250705_021614230169": {
+    "type": "conversation_response",
+    "question": "Are you also experiencing jaw pain?",
+    "response": "yuppers",
+    "symptoms_discussed": [
+      "chest pain"
+    ],
+    "timestamp": "2025-07-05T02:16:14.230169"
+  },
+  "conv_20250705_023428608516": {
+    "type": "conversation_response",
+    "question": "Are you also experiencing jaw pain?",
+    "response": "I'm sorry you're experiencing chest",
+    "symptoms_discussed": [
+      "chest pain"
+    ],
+    "timestamp": "2025-07-05T02:34:28.608516"
+  },
+  "conv_20250705_024539297632": {
+    "type": "conversation_response",
+    "question": "Are you also experiencing jaw pain?",
+    "response": "yuppers",
+    "symptoms_discussed": [
+      "chest pain"
+    ],
+    "timestamp": "2025-07-05T02:45:39.297632"
   }
 }

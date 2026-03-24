@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <title>Trainer Review – Unknown Inputs</title>
@@ -47,47 +47,148 @@
     .alias-chip .btn-reject { color: red; }
     .alias-group { margin-top: 8px; }
     .alias-label { font-weight: bold; margin-top: 10px; display: block; }
+    .text-primary { color: #007bff; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>🧠 Review Unknown Inputs</h1>
-    <div class="summary-banner">3 unmatched inputs remaining</div>
+    <div class="summary-banner">{{ learning_log|length }} unmatched inputs remaining</div>
 
-    <div class="entry">
-      <h3>“head is pounding like a drum”</h3>
-      <label class="input-label">Closest Existing Symptom (fuzzy match):</label>
-      <select>
-        <option>-- Choose existing symptom --</option>
-        <option selected>headache</option>
-        <option>migraine</option>
-        <option>anxiety</option>
-      </select>
-      <div class="confidence">Match confidence: 84%</div>
-
-      <label class="input-label">…or define this as a brand new symptom:</label>
-      <input type="text" placeholder="Enter new symptom name">
-
-      <div class="alias-toggle">
-        <label><input type="checkbox" checked> ✅ Add this input as an alias to "headache"</label>
-      </div>
-
-      <div class="gpt-box">
-        💡 AI Notes: This may relate to migraine or intense headache patterns. Consider if aliases like "pounding head" are appropriate.
-        <div class="alias-label">Suggested aliases (manual approval):</div>
-        <div class="alias-group">
-          <span class="alias-chip">pounding head <button class="btn-accept">✅</button><button class="btn-reject">❌</button></span>
-          <span class="alias-chip">migraine episode <button class="btn-accept">✅</button><button class="btn-reject">❌</button></span>
-          <span class="alias-chip">pressure in temples <button class="btn-accept">✅</button><button class="btn-reject">❌</button></span>
+    <!-- Conversation Response Section -->
+    {% for entry_id, entry in learning_log.items() %}
+      {% if entry.type == "conversation_response" %}
+        <div class="entry" id="entry-{{ entry_id }}">
+          <h3 class="text-primary">💬 Conversation Response</h3>
+          <p><strong>Question asked:</strong> "{{ entry.question }}"</p>
+          <p><strong>User said:</strong> "{{ entry.response }}"</p>
+          <p><strong>Context:</strong> Discussing {{ entry.symptoms_discussed | join(", ") }}</p>
+          
+          <label class="input-label">This response means:</label>
+          <select id="meaning-{{ entry_id }}" onchange="showAISuggestions('{{ entry_id }}', '{{ entry.response }}')">
+            <option value="">-- Choose --</option>
+            <option value="confirmed">✓ Confirmed (Yes)</option>
+            <option value="denied">✗ Denied (No)</option>
+            <option value="unclear">? Still Unclear</option>
+          </select>
+          
+          <div id="ai-suggestions-{{ entry_id }}" class="gpt-box" style="display:none;">
+            <h4>💡 AI suggests these similar responses:</h4>
+            <div id="suggestions-list-{{ entry_id }}" class="alias-group">
+              <!-- AI suggestions will appear here -->
+            </div>
+          </div>
+          
+          <div class="actions">
+            <button class="btn-save" onclick="saveConversationMapping('{{ entry_id }}', '{{ entry.response }}')">💾 Save Mapping</button>
+            <button class="btn-delete" onclick="deleteEntry('{{ entry_id }}')">❌ Ignore</button>
+          </div>
         </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn-save">💾 Save Mapping</button>
-        <button class="btn-delete">🗑️ Ignore This Input</button>
-      </div>
-    </div>
-
+      {% endif %}
+    {% endfor %}
   </div>
+
+<script>
+function showAISuggestions(entryId, userResponse) {
+    const meaning = document.getElementById('meaning-' + entryId).value;
+    if (!meaning || meaning === 'unclear') {
+        document.getElementById('ai-suggestions-' + entryId).style.display = 'none';
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('ai-suggestions-' + entryId).style.display = 'block';
+    document.getElementById('suggestions-list-' + entryId).innerHTML = 'Loading suggestions...';
+    
+    // Get AI suggestions
+    fetch('/get-conversation-suggestions', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            response: userResponse,
+            meaning: meaning
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const container = document.getElementById('suggestions-list-' + entryId);
+        container.innerHTML = '';
+        
+        data.suggestions.forEach(suggestion => {
+            const chip = document.createElement('span');
+            chip.className = 'alias-chip';
+            chip.innerHTML = suggestion + 
+                '<button class="btn-accept" onclick="approveSuggestion(\'' + suggestion + '\', \'' + meaning + '\', this)">✓</button>' +
+                '<button class="btn-reject" onclick="this.parentElement.remove()">✗</button>';
+            container.appendChild(chip);
+        });
+    })
+    .catch(err => {
+        document.getElementById('suggestions-list-' + entryId).innerHTML = 'Error loading suggestions';
+    });
+}
+
+function approveSuggestion(response, meaning, btn) {
+    fetch('/save-conversation-mapping', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            response: response,
+            meaning: meaning,
+            entry_id: 'ai_suggested'
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.parentElement.style.background = '#90EE90';
+        btn.textContent = '✓';
+        btn.disabled = true;
+    });
+}
+
+function saveConversationMapping(entryId, response) {
+    const meaning = document.getElementById('meaning-' + entryId).value;
+    if (!meaning) {
+        alert('Please select what this response means');
+        return;
+    }
+    
+    fetch('/save-conversation-mapping', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            entry_id: entryId,
+            response: response,
+            meaning: meaning
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            document.getElementById('entry-' + entryId).style.display = 'none';
+            alert('✓ Saved! The system will now understand "' + response + '" as ' + meaning);
+        }
+    })
+    .catch(err => {
+        alert('Error saving mapping: ' + err);
+    });
+}
+
+function deleteEntry(entryId) {
+    if (confirm('Ignore this entry?')) {
+        document.getElementById('entry-' + entryId).style.display = 'none';
+        // Could also make API call to remove from log
+        fetch('/save-conversation-mapping', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                entry_id: entryId,
+                response: '',
+                meaning: 'ignored'
+            })
+        });
+    }
+}
+</script>
 </body>
 </html>

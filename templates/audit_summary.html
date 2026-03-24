@@ -1,8 +1,46 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
-<head><title>Audit Summary</title></head>
-<body>
-  <h1>📊 Audit Summary</h1>
-  <p>Here you'll find summary stats: matched symptoms, GPT fallbacks, and review counts.</p>
+<head>
+  <title>Audit Summary</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <h1 class="mb-4">📊 Audit Summary</h1>
+
+    {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% else %}
+      <ul class="list-group">
+        <li class="list-group-item">Total Symptom Labels: <strong>{{ total }}</strong></li>
+        <li class="list-group-item">Missing Responses: <strong>{{ missing_response|length }}</strong></li>
+        <li class="list-group-item">Unused Labels (no aliases): <strong>{{ unused|length }}</strong></li>
+        <li class="list-group-item">Unmatched Learning Log Entries: <strong>{{ unmatched_count }}</strong></li>
+        <li class="list-group-item">Reviewed GPT Responses: <strong>{{ review_count }}</strong></li>
+        <li class="list-group-item">Flagged GPT Reviews: <strong>{{ flagged_count }}</strong></li>
+        <li class="list-group-item">Accepted GPT Suggestions: <strong>{{ accepted_count }}</strong></li>
+      </ul>
+
+      <a href="/export-accepted-csv" class="btn btn-outline-primary mt-4">
+        📤 Export Accepted Suggestions (CSV)
+      </a>
+
+      {% if accepted_entries %}
+      <div class="mt-4">
+        <h4>Accepted GPT Suggestions:</h4>
+        <ul class="list-group">
+          {% for entry in accepted_entries %}
+          <li class="list-group-item">
+            <strong>{{ entry.alias }}</strong> → <em>{{ entry.label }}</em><br>
+            Escalation: {{ entry.requires_escalation }}<br>
+            <small class="text-muted">{{ entry.timestamp }}</small><br>
+            <div class="mt-2"><code>{{ entry.response }}</code></div>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    {% endif %}
+  </div>
 </body>
 </html>

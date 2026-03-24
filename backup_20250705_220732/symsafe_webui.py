@@ -1,4 +1,4 @@
-import openai
+﻿import openai
 from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for, flash
 import json
 import os
@@ -21,7 +21,6 @@ GPT_ACCEPTED_LOG_PATH = "gpt_accepted_log.json"
 REWRITE_HISTORY_PATH = "rewrite_history.json"
 TONE_PROMPT_PATH = "tone_prompt.txt"
 VOICE_LOG_PATH = "logs/voice_log.json"
-LEARNED_RESPONSES_PATH = "prompts/learned_responses.json"
 
 
 def safe_json_read(path):
@@ -182,7 +181,7 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    flash("Youâ€™ve been logged out.")
+    flash("YouÃ¢â‚¬â„¢ve been logged out.")
     return redirect(url_for("login"))
 
 
@@ -522,7 +521,7 @@ def api_symptom():
     print(f"Input: '{text}', Session: {session_id}")
     
     symptom_tree = load_symptom_tree()
-    matched_label, match_type = fuzzy_match_symptom(text, symptom_tree, threshold=0.60)
+    matched_label, match_type = fuzzy_match_symptom(text, symptom_tree)
     
     # Check if this is part of an ongoing conversation
     if session_id in conversations:
@@ -647,7 +646,7 @@ def voice_log():
 
 
 if __name__ == "__main__":
-    print("âœ… SymSafe WebUI running with full authentication, fuzzy matching, and role-aware navigation")
+    print("Ã¢Å“â€¦ SymSafe WebUI running with full authentication, fuzzy matching, and role-aware navigation")
     for rule in app.url_map.iter_rules():
         print(f" - {rule}")
     app.run(debug=True)

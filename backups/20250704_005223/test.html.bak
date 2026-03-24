@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>SymSafe AI â€“ Triage Test</title>
+  <title>SymSafe AI – Triage Test</title>
   <style>
     body { font-family: sans-serif; padding: 2rem; max-width: 700px; margin: auto; }
     textarea { width: 100%; height: 80px; font-size: 1rem; margin-bottom: 1rem; }
@@ -12,20 +12,17 @@
   </style>
 </head>
 <body>
-  <h1>ðŸ©º SymSafe AI â€“ Triage Tester</h1>
+  <h1>🩺 SymSafe AI – Triage Tester</h1>
   
   <label class="label">Type or speak your symptom:</label>
   <textarea id="symptomInput" placeholder="e.g., I feel dizzy and nauseous"></textarea><br>
 
   <button onclick="submitInput()">Submit</button>
-  <button onclick="startVoice()">ðŸŽ™ï¸ Voice Input</button>
+  <button onclick="startVoice()">🎙️ Voice Input</button>
 
   <div class="output" id="results" style="display:none;">
     <p><strong>Matched Symptom:</strong> <span id="match"></span></p>
-    <p><strong>Response:</strong> <span id="response"></span>
-      <span id="speaking-indicator" style="display:none;">
-        🔊 <span class="speaking-animation">Speaking...</span>
-      </span></p>
+    <p><strong>Response:</strong> <span id="response"></span></p>
     <p><strong>Evaluation:</strong></p>
     <ul id="evalList"></ul>
   </div>
@@ -44,14 +41,11 @@
         document.getElementById("results").style.display = "block";
         document.getElementById("match").textContent = data.matched_symptom;
         document.getElementById("response").textContent = data.response;
-        
-        // VOICE OUTPUT ADDED HERE
-        speakResponse(data.response);
         const evalList = document.getElementById("evalList");
         evalList.innerHTML = "";
         for (const [key, value] of Object.entries(data.evaluation)) {
           const li = document.createElement("li");
-          li.textContent = `${key}: ${value ? 'âœ…' : 'âš ï¸'}`;
+          li.textContent = `${key}: ${value ? '✅' : '⚠️'}`;
           evalList.appendChild(li);
         }
       });
@@ -76,8 +70,5 @@
       recognition.start();
     }
   </script>
-  <!-- Include voice functions -->
-  <script src="/static/js/voice-functions.js"></script>
 </body>
 </html>
-

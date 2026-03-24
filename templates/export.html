@@ -1,8 +1,24 @@
 ﻿<!DOCTYPE html>
 <html>
-<head><title>Export Data</title></head>
+<head>
+  <title>Export Data</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding: 2rem; background: #f9f9f9; }
+    .export-box { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+  </style>
+</head>
 <body>
-  <h1>📦 Export SymSafe Data</h1>
-  <p>This page will allow trainers or admins to download logs and symptom data.</p>
+  <div class="container" style="max-width: 600px;">
+    <h1 class="mb-4">📦 Export SymSafe Data</h1>
+    <div class="export-box">
+      <p>Download test case results:</p>
+      <a href="/download-tests" class="btn btn-outline-primary mb-3">⬇️ Export Test Cases (CSV)</a>
+      <hr>
+      <p>Download reviewed GPT fallback entries:</p>
+      <a href="/download-reviews" class="btn btn-outline-secondary">⬇️ Export GPT Reviews (CSV)</a>
+    </div>
+    <a class="btn btn-link mt-4" href="/admin">← Back to Admin</a>
+  </div>
 </body>
 </html>

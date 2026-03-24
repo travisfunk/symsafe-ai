@@ -1,9 +1,10 @@
 {
-  "001": {
-    "empathy": "\u274c Cold",
-    "escalation": "\u274c Missing",
-    "diagnosis": "\u274c Diagnoses user",
+  "entry001": {
+    "empathy": "\u2705 Empathetic",
+    "escalation": "\u26a0\ufe0f Vague",
+    "diagnosis": "\u2705 No diagnosis",
     "clarity": "\u2705 Clear & concise",
-    "comments": "TESTASDsdDsd"
+    "comments": "Sufficient for demo.",
+    "flagged": false
   }
 }
