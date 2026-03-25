@@ -1,1 +1,21 @@
+# Environment
 .env
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Generated output
+logs/
+reports/
+data/
+
+# OS files
+.DS_Store
+
+# Dependencies
+node_modules/
+
+# Testing
+.pytest_cache/

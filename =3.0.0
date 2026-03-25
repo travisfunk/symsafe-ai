@@ -1,0 +1,9 @@
+Defaulting to user installation because normal site-packages is not writeable
+Requirement already satisfied: flask in C:\Users\travi\AppData\Roaming\Python\Python311\site-packages (3.1.0)
+Requirement already satisfied: Werkzeug>=3.1 in C:\Users\travi\AppData\Roaming\Python\Python311\site-packages (from flask) (3.1.3)
+Requirement already satisfied: Jinja2>=3.1.2 in C:\Users\travi\AppData\Roaming\Python\Python311\site-packages (from flask) (3.1.6)
+Requirement already satisfied: itsdangerous>=2.2 in C:\Users\travi\AppData\Roaming\Python\Python311\site-packages (from flask) (2.2.0)
+Requirement already satisfied: click>=8.1.3 in C:\Users\travi\AppData\Roaming\Python\Python311\site-packages (from flask) (8.1.8)
+Requirement already satisfied: blinker>=1.9 in C:\Users\travi\AppData\Roaming\Python\Python311\site-packages (from flask) (1.9.0)
+Requirement already satisfied: colorama in C:\Users\travi\AppData\Roaming\Python\Python311\site-packages (from click>=8.1.3->flask) (0.4.6)
+Requirement already satisfied: MarkupSafe>=2.0 in C:\Users\travi\AppData\Roaming\Python\Python311\site-packages (from Jinja2>=3.1.2->flask) (3.0.2)

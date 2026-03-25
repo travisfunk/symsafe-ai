@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SymSafe Clinician Review</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;color:#333;min-height:100vh}
+.header{background:#2c3e50;color:#fff;padding:16px 24px}
+.header h1{font-size:18px;font-weight:700}
+.header p{font-size:13px;opacity:.7;margin-top:2px}
+.container{max-width:900px;margin:0 auto;padding:20px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.stat-card{background:#fff;border-radius:10px;padding:16px;text-align:center;border:1px solid #e0e0e0}
+.stat-card .num{font-size:28px;font-weight:700;margin-bottom:2px}
+.stat-card .label{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.num-high{color:#c0392b}
+.num-pending{color:#e67e22}
+.num-reviewed{color:#27ae60}
+.section{margin-bottom:24px}
+.section-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:15px;font-weight:600;color:#555}
+.section-header .count{background:#e0e0e0;border-radius:10px;padding:2px 8px;font-size:12px;font-weight:600}
+.session-row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:12px 16px;margin-bottom:6px;cursor:pointer;text-decoration:none;color:#333;transition:border-color .15s}
+.session-row:hover{border-color:#2c3e50}
+.risk-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot-high{background:#c0392b}
+.dot-moderate{background:#e67e22}
+.dot-low{background:#27ae60}
+.session-info{flex:1;min-width:0}
+.session-symptoms{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.session-meta{font-size:12px;color:#888;margin-top:2px}
+.status-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px;flex-shrink:0;text-transform:uppercase;letter-spacing:.3px}
+.badge-pending{background:#fef5e7;color:#e67e22;border:1px solid #f5cba7}
+.badge-reviewed{background:#eafaf1;color:#27ae60;border:1px solid #a9dfbf}
+.badge-flagged{background:#fde8e8;color:#c0392b;border:1px solid #e6b0aa}
+.empty{text-align:center;color:#aaa;padding:20px;font-size:14px}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="header" style="display:flex;align-items:center;justify-content:space-between">
+  <div>
+    <h1>SymSafe clinician review</h1>
+    <p>Session queue</p>
+  </div>
+  <a href="/review/logout" style="color:rgba(255,255,255,.7);font-size:13px;text-decoration:none">Logout</a>
+</div>
+<div class="container">
+  <div class="stats">
+    <div class="stat-card"><div class="num">{{ stats.total_sessions }}</div><div class="label">Total sessions</div></div>
+    <div class="stat-card"><div class="num num-high">{{ stats.high_risk_count }}</div><div class="label">High risk</div></div>
+    <div class="stat-card"><div class="num num-pending">{{ stats.pending_count }}</div><div class="label">Pending review</div></div>
+    <div class="stat-card"><div class="num num-reviewed">{{ stats.reviewed_count }}</div><div class="label">Reviewed</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">High risk — review first <span class="count">{{ high_sessions|length }}</span></div>
+    {% for s in high_sessions %}
+    <a class="session-row" href="/review/session/{{ s.id }}">
+      <div class="risk-dot dot-high"></div>
+      <div class="session-info">
+        <div class="session-symptoms">{{ (s.session_symptoms or [])|join(', ') or 'No symptoms' }}</div>
+        <div class="session-meta">{{ s.message_count }} messages &middot; {{ s.highest_care_level|default('self_care')|replace('_',' ') }} &middot; {{ s.created_at|default('') }}</div>
+      </div>
+      <span class="status-badge {% if s.status == 'reviewed' %}badge-reviewed{% elif s.status == 'flagged' %}badge-flagged{% else %}badge-pending{% endif %}">{{ s.status|default('pending_review') }}</span>
+    </a>
+    {% endfor %}
+    {% if not high_sessions %}<div class="empty">No high risk sessions</div>{% endif %}
+  </div>
+
+  <div class="section">
+    <div class="section-header">Moderate risk <span class="count">{{ moderate_sessions|length }}</span></div>
+    {% for s in moderate_sessions %}
+    <a class="session-row" href="/review/session/{{ s.id }}">
+      <div class="risk-dot dot-moderate"></div>
+      <div class="session-info">
+        <div class="session-symptoms">{{ (s.session_symptoms or [])|join(', ') or 'No symptoms' }}</div>
+        <div class="session-meta">{{ s.message_count }} messages &middot; {{ s.highest_care_level|default('self_care')|replace('_',' ') }} &middot; {{ s.created_at|default('') }}</div>
+      </div>
+      <span class="status-badge {% if s.status == 'reviewed' %}badge-reviewed{% elif s.status == 'flagged' %}badge-flagged{% else %}badge-pending{% endif %}">{{ s.status|default('pending_review') }}</span>
+    </a>
+    {% endfor %}
+    {% if not moderate_sessions %}<div class="empty">No moderate risk sessions</div>{% endif %}
+  </div>
+
+  <div class="section">
+    <div class="section-header">Low risk <span class="count">{{ low_sessions|length }}</span></div>
+    {% for s in low_sessions %}
+    <a class="session-row" href="/review/session/{{ s.id }}">
+      <div class="risk-dot dot-low"></div>
+      <div class="session-info">
+        <div class="session-symptoms">{{ (s.session_symptoms or [])|join(', ') or 'No symptoms' }}</div>
+        <div class="session-meta">{{ s.message_count }} messages &middot; {{ s.highest_care_level|default('self_care')|replace('_',' ') }} &middot; {{ s.created_at|default('') }}</div>
+      </div>
+      <span class="status-badge {% if s.status == 'reviewed' %}badge-reviewed{% elif s.status == 'flagged' %}badge-flagged{% else %}badge-pending{% endif %}">{{ s.status|default('pending_review') }}</span>
+    </a>
+    {% endfor %}
+    {% if not low_sessions %}<div class="empty">No low risk sessions</div>{% endif %}
+  </div>
+</div>
+</body>
+</html>

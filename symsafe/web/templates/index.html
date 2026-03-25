@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SymSafe</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f7f8fa;color:#333;min-height:100vh;display:flex;flex-direction:column}
+.header{background:#1a6b52;color:#fff;padding:14px 20px;text-align:center}
+.header h1{font-size:20px;font-weight:700;letter-spacing:.5px}
+.header p{font-size:13px;opacity:.85;margin-top:2px}
+.container{max-width:600px;width:100%;margin:0 auto;padding:16px;flex:1;display:flex;flex-direction:column}
+.footer{text-align:center;padding:12px;font-size:12px;color:#888;border-top:1px solid #e0e0e0;background:#fff}
+/* Welcome */
+.welcome{text-align:center;padding:40px 0}
+.welcome h2{font-size:22px;color:#1a6b52;margin-bottom:16px}
+.welcome .desc{font-size:15px;color:#555;line-height:1.6;margin-bottom:12px}
+.welcome .disclaimer{font-size:13px;color:#888;margin-bottom:28px;font-style:italic}
+.btn{display:inline-block;padding:12px 24px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;border:none;transition:background .2s}
+.btn-primary{background:#1a6b52;color:#fff}
+.btn-primary:hover{background:#15573f}
+.btn-secondary{background:#fff;color:#1a6b52;border:2px solid #1a6b52;margin-left:8px}
+.btn-secondary:hover{background:#f0f7f4}
+.welcome .btns{display:flex;flex-direction:column;gap:10px;align-items:center}
+.welcome .btns .btn{width:260px;text-align:center}
+/* Intake */
+.intake{display:none}
+.intake .skip-link{text-align:right;margin-bottom:12px}
+.intake .skip-link a{color:#1a6b52;font-size:13px;text-decoration:none}
+.intake .intro{font-size:14px;color:#666;margin-bottom:20px;line-height:1.5}
+.q-group{margin-bottom:20px}
+.q-group label{display:block;font-size:14px;font-weight:600;margin-bottom:8px;color:#333}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 16px;border-radius:20px;border:1.5px solid #ccc;font-size:13px;cursor:pointer;background:#fff;transition:all .15s;user-select:none}
+.chip.selected{background:#1a6b52;color:#fff;border-color:#1a6b52}
+.chip:hover{border-color:#1a6b52}
+.text-input{width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #ccc;font-size:14px;font-family:inherit}
+.text-input:focus{outline:none;border-color:#1a6b52}
+.slider-wrap{display:flex;align-items:center;gap:12px}
+.slider-wrap input[type=range]{flex:1;accent-color:#1a6b52}
+.slider-wrap .labels{display:flex;justify-content:space-between;font-size:11px;color:#888}
+.slider-val{font-size:18px;font-weight:700;color:#1a6b52;min-width:28px;text-align:center}
+/* Chat */
+.chat-view{display:none;flex-direction:column;flex:1}
+.messages{flex:1;overflow-y:auto;padding:8px 0;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:85%;padding:12px 16px;border-radius:12px;font-size:14px;line-height:1.5;word-wrap:break-word}
+.msg-user{background:#1a6b52;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.msg-ai{background:#fff;border:1px solid #e0e0e0;align-self:flex-start;border-bottom-left-radius:4px}
+.banner{padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:4px;max-width:85%;align-self:flex-start}
+.banner-high{background:#fde8e8;color:#c0392b;border:1px solid #e6b0aa}
+.banner-moderate{background:#fef5e7;color:#e67e22;border:1px solid #f5cba7}
+.care-box{background:#f0f7f4;border:1px solid #c8e6d8;border-radius:8px;padding:10px 14px;font-size:13px;max-width:85%;align-self:flex-start;margin-top:4px}
+.care-box strong{display:block;margin-bottom:4px}
+.care-box a{color:#1a6b52;font-weight:600}
+.followups{font-size:13px;color:#555;max-width:85%;align-self:flex-start;padding:6px 14px;margin-top:2px}
+.followups ul{padding-left:18px;margin-top:4px}
+.typing{align-self:flex-start;padding:12px 16px;font-size:14px;color:#888;font-style:italic}
+.chat-input{display:flex;gap:8px;padding:12px 0;border-top:1px solid #e0e0e0;margin-top:auto}
+.chat-input input{flex:1;padding:12px 16px;border-radius:24px;border:1.5px solid #ccc;font-size:14px;font-family:inherit}
+.chat-input input:focus{outline:none;border-color:#1a6b52}
+.chat-input button{padding:12px 20px;border-radius:24px;background:#1a6b52;color:#fff;border:none;font-size:14px;font-weight:600;cursor:pointer}
+.chat-input button:hover{background:#15573f}
+.end-btn{font-size:12px;color:rgba(255,255,255,.8);cursor:pointer;background:none;border:none;text-decoration:underline;position:absolute;right:16px;top:50%;transform:translateY(-50%)}
+.header{position:relative}
+/* Summary */
+.summary{display:none;text-align:center;padding:24px 0}
+.summary h2{font-size:20px;color:#1a6b52;margin-bottom:20px}
+.summary-card{background:#fff;border-radius:12px;padding:24px;text-align:left;border:1px solid #e0e0e0;margin-bottom:20px}
+.summary-card .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+.summary-card .row:last-child{border-bottom:none}
+.risk-badge{display:inline-block;padding:4px 12px;border-radius:12px;font-size:13px;font-weight:600;color:#fff}
+.risk-high{background:#c0392b}
+.risk-moderate{background:#e67e22}
+.risk-low{background:#27ae60}
+.action-box{padding:14px;border-radius:10px;font-size:14px;margin-bottom:20px;text-align:left}
+.action-high{background:#fde8e8;border:1px solid #e6b0aa;color:#c0392b}
+.action-moderate{background:#fef5e7;border:1px solid #f5cba7;color:#e67e22}
+.action-low{background:#eafaf1;border:1px solid #a9dfbf;color:#27ae60}
+.symptom-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.symptom-tag{background:#f0f7f4;border:1px solid #c8e6d8;border-radius:12px;padding:3px 10px;font-size:12px;color:#1a6b52}
+.summary .btns{display:flex;flex-direction:column;gap:8px;align-items:center}
+.summary .btns .btn{width:240px;text-align:center}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>SymSafe</h1>
+  <p>AI triage assistant</p>
+  <button class="end-btn" id="endBtn" style="display:none" onclick="endSession()">End session</button>
+</div>
+
+<div class="container">
+  <!-- STATE 1: Welcome -->
+  <div class="welcome" id="welcomeView">
+    <h2>Welcome to SymSafe</h2>
+    <p class="desc">I can help you understand your symptoms and figure out what kind of care might be right for you.</p>
+    <p class="disclaimer">I'm not a doctor. I can help you organize your thoughts before you talk to one.</p>
+    <div class="btns">
+      <button class="btn btn-primary" onclick="showIntake()">Guided assessment (recommended)</button>
+      <button class="btn btn-secondary" onclick="skipToChat()">Skip to conversation</button>
+    </div>
+  </div>
+
+  <!-- STATE 2: Intake -->
+  <div class="intake" id="intakeView">
+    <div class="skip-link"><a href="#" onclick="skipToChat();return false">Skip to conversation</a></div>
+    <p class="intro">Answer what you can. Everything is optional — the more you share, the better I can help.</p>
+
+    <div class="q-group">
+      <label>What's your main concern?</label>
+      <div class="chips" data-field="concern" data-multi="false">
+        <div class="chip">Pain</div><div class="chip">Breathing</div><div class="chip">Digestive</div>
+        <div class="chip">Skin</div><div class="chip">Mental health</div><div class="chip">Injury</div><div class="chip">Other</div>
+      </div>
+    </div>
+
+    <div class="q-group">
+      <label>Where is the problem?</label>
+      <div class="chips" data-field="location" data-multi="false">
+        <div class="chip">Head</div><div class="chip">Chest</div><div class="chip">Stomach</div><div class="chip">Back</div>
+        <div class="chip">Arms/Hands</div><div class="chip">Legs/Feet</div><div class="chip">Skin</div><div class="chip">All over</div>
+      </div>
+    </div>
+
+    <div class="q-group">
+      <label>When did this start?</label>
+      <div class="chips" data-field="onset" data-multi="false">
+        <div class="chip">Just now</div><div class="chip">Today</div><div class="chip">Yesterday</div>
+        <div class="chip">Few days</div><div class="chip">A week+</div>
+      </div>
+    </div>
+
+    <div class="q-group">
+      <label>How severe is it?</label>
+      <div class="slider-wrap">
+        <span style="font-size:12px;color:#888">Mild</span>
+        <input type="range" id="severity" min="1" max="10" value="5">
+        <span style="font-size:12px;color:#888">Worst</span>
+        <span class="slider-val" id="severityVal">5</span>
+      </div>
+    </div>
+
+    <div class="q-group">
+      <label>Getting better or worse?</label>
+      <div class="chips" data-field="trajectory" data-multi="false">
+        <div class="chip">Better</div><div class="chip">Worse</div><div class="chip">Same</div><div class="chip">Comes and goes</div>
+      </div>
+    </div>
+
+    <div class="q-group">
+      <label>Current medications</label>
+      <input type="text" class="text-input" id="medications" placeholder="List medications or 'none'">
+    </div>
+
+    <div class="q-group">
+      <label>Chronic conditions</label>
+      <div class="chips" data-field="conditions" data-multi="true">
+        <div class="chip">Diabetes</div><div class="chip">Heart disease</div><div class="chip">Asthma</div>
+        <div class="chip">High BP</div><div class="chip">None</div>
+      </div>
+    </div>
+
+    <div class="q-group">
+      <label>Zip code (optional)</label>
+      <input type="text" class="text-input" id="zipCode" placeholder="For finding nearby care (optional)" maxlength="10">
+    </div>
+
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="submitIntake()">Start conversation</button>
+  </div>
+
+  <!-- STATE 3: Chat -->
+  <div class="chat-view" id="chatView">
+    <div class="messages" id="messages"></div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Describe your symptoms..." maxlength="1000" onkeydown="if(event.key==='Enter')sendMessage()">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <!-- STATE 4: Summary -->
+  <div class="summary" id="summaryView">
+    <h2>Session Summary</h2>
+    <div class="summary-card" id="summaryCard"></div>
+    <div class="action-box" id="actionBox"></div>
+    <div class="btns" id="summaryBtns"></div>
+  </div>
+</div>
+
+<div class="footer">Not for emergencies. If you need immediate help, call 911.</div>
+
+<script>
+let sessionId = null;
+const intakeData = {};
+
+// Chip selection
+document.querySelectorAll('.chips').forEach(group => {
+  const multi = group.dataset.multi === 'true';
+  group.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (multi) {
+        chip.classList.toggle('selected');
+      } else {
+        group.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+        chip.classList.toggle('selected');
+      }
+    });
+  });
+});
+
+document.getElementById('severity').addEventListener('input', e => {
+  document.getElementById('severityVal').textContent = e.target.value;
+});
+
+function showIntake() {
+  document.getElementById('welcomeView').style.display = 'none';
+  document.getElementById('intakeView').style.display = 'block';
+}
+
+function skipToChat() {
+  sessionId = new Date().toISOString().replace(/[-:T]/g,'').slice(0,15).replace(/(\d{8})(\d{6}).*/, '$1_$2');
+  document.getElementById('welcomeView').style.display = 'none';
+  document.getElementById('intakeView').style.display = 'none';
+  document.getElementById('chatView').style.display = 'flex';
+  document.getElementById('endBtn').style.display = 'block';
+  fetch('/api/intake', {
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({session_id: sessionId, answers: {}, zip_code: null})
+  });
+}
+
+function submitIntake() {
+  sessionId = new Date().toISOString().replace(/[-:T]/g,'').slice(0,15).replace(/(\d{8})(\d{6}).*/, '$1_$2');
+  const answers = {};
+  document.querySelectorAll('.chips').forEach(group => {
+    const field = group.dataset.field;
+    const sel = group.querySelectorAll('.chip.selected');
+    if (sel.length === 1) answers[field] = sel[0].textContent;
+    else if (sel.length > 1) answers[field] = Array.from(sel).map(c=>c.textContent).join(', ');
+  });
+  answers.severity = document.getElementById('severity').value;
+  const meds = document.getElementById('medications').value.trim();
+  if (meds) answers.medications = meds;
+  const zip = document.getElementById('zipCode').value.trim();
+
+  fetch('/api/intake', {
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({session_id: sessionId, answers: answers, zip_code: zip || null})
+  }).then(() => {
+    document.getElementById('intakeView').style.display = 'none';
+    document.getElementById('chatView').style.display = 'flex';
+    document.getElementById('endBtn').style.display = 'block';
+  });
+}
+
+function addMessage(html, cls) {
+  const m = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = cls;
+  d.innerHTML = html;
+  m.appendChild(d);
+  m.scrollTop = m.scrollHeight;
+}
+
+function showTyping() {
+  const m = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'typing';
+  d.id = 'typingIndicator';
+  d.textContent = 'SymSafe is thinking...';
+  m.appendChild(d);
+  m.scrollTop = m.scrollHeight;
+}
+
+function hideTyping() {
+  const t = document.getElementById('typingIndicator');
+  if (t) t.remove();
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  addMessage(esc(text), 'msg msg-user');
+  showTyping();
+
+  try {
+    const res = await fetch('/api/chat', {
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({message: text, session_id: sessionId})
+    });
+    hideTyping();
+    const data = await res.json();
+
+    if (data.error) {
+      addMessage(esc(data.error), 'msg msg-ai');
+      return;
+    }
+
+    if (data.re_escalation) {
+      addMessage(esc(data.re_escalation), 'banner banner-high');
+    }
+
+    if (data.banner === 'high') {
+      addMessage('Based on what you\'ve described, please seek immediate medical attention or call 911.', 'banner banner-high');
+    } else if (data.banner === 'moderate') {
+      addMessage('Consider scheduling an appointment with your healthcare provider about this.', 'banner banner-moderate');
+    }
+
+    addMessage(esc(data.response), 'msg msg-ai');
+
+    if (data.care_guidance) {
+      let careHtml = '<strong>Where to go:</strong> ' + esc(data.care_guidance.where);
+      careHtml += '<br><strong>Right now:</strong> ' + esc(data.care_guidance.right_now);
+      if (data.maps_link) {
+        const careLabel = data.care_level === 'emergency' ? 'emergency room' : data.care_level.replace('_',' ');
+        careHtml += '<br><a href="' + esc(data.maps_link) + '" target="_blank" rel="noopener">Find ' + esc(careLabel) + ' near you</a>';
+      }
+      addMessage(careHtml, 'care-box');
+    }
+
+    if (data.follow_up_questions && data.follow_up_questions.length) {
+      let fhtml = '<strong>I\'d like to understand more:</strong><ul>';
+      data.follow_up_questions.forEach(q => fhtml += '<li>' + esc(q) + '</li>');
+      fhtml += '</ul>';
+      addMessage(fhtml, 'followups');
+    }
+  } catch(e) {
+    hideTyping();
+    addMessage('Something went wrong. Please try again.', 'msg msg-ai');
+  }
+}
+
+async function endSession() {
+  try {
+    const res = await fetch('/api/end-session', {
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({session_id: sessionId})
+    });
+    const data = await res.json();
+    showSummary(data);
+  } catch(e) {
+    showSummary({summary:{session_symptoms:[],highest_risk:'LOW',message_count:0,highest_care_level:'self_care'},report_url:null});
+  }
+}
+
+function showSummary(data) {
+  document.getElementById('chatView').style.display = 'none';
+  document.getElementById('endBtn').style.display = 'none';
+  document.getElementById('summaryView').style.display = 'block';
+
+  const s = data.summary;
+  const risk = s.highest_risk || 'LOW';
+  const riskClass = risk === 'HIGH' ? 'risk-high' : risk === 'MODERATE' ? 'risk-moderate' : 'risk-low';
+
+  let cardHtml = '<div class="row"><span>Risk level</span><span class="risk-badge '+riskClass+'">'+esc(risk)+'</span></div>';
+  cardHtml += '<div class="row"><span>Messages exchanged</span><span>'+s.message_count+'</span></div>';
+  cardHtml += '<div class="row"><span>Care level</span><span>'+esc((s.highest_care_level||'self_care').replace('_',' '))+'</span></div>';
+  if (s.session_symptoms && s.session_symptoms.length) {
+    cardHtml += '<div class="row" style="flex-direction:column"><span style="margin-bottom:6px">Symptoms discussed</span><div class="symptom-tags">';
+    s.session_symptoms.forEach(sym => cardHtml += '<span class="symptom-tag">'+esc(sym)+'</span>');
+    cardHtml += '</div></div>';
+  }
+  document.getElementById('summaryCard').innerHTML = cardHtml;
+
+  const actionClass = risk === 'HIGH' ? 'action-high' : risk === 'MODERATE' ? 'action-moderate' : 'action-low';
+  const actionText = risk === 'HIGH' ? 'Seek immediate medical evaluation' : risk === 'MODERATE' ? 'Schedule an appointment with your healthcare provider' : 'No urgent action needed — see a provider if symptoms develop';
+  document.getElementById('actionBox').className = 'action-box ' + actionClass;
+  document.getElementById('actionBox').innerHTML = '<strong>Recommended action:</strong> ' + actionText;
+
+  let btnsHtml = '';
+  if (data.report_url) {
+    btnsHtml += '<a class="btn btn-primary" href="'+esc(data.report_url)+'" target="_blank">View report in browser</a>';
+    btnsHtml += '<a class="btn btn-secondary" href="'+esc(data.report_url)+'" download>Download report</a>';
+  }
+  btnsHtml += '<button class="btn btn-secondary" onclick="location.reload()">Start new session</button>';
+  document.getElementById('summaryBtns').innerHTML = btnsHtml;
+}
+</script>
+</body>
+</html>
