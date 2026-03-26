@@ -137,6 +137,50 @@ def _get_banner(merged_risk_level):
     return "none"
 
 
+def determine_patient_banner(local_risk_level, gpt_risk_level, all_flags, care_level):
+    """Determine the patient-facing banner and care level.
+
+    Decouples the patient display from the internal risk classification.
+    The internal classification stays aggressive for clinician review, but
+    the patient sees proportionate, calm guidance.
+
+    Args:
+        local_risk_level: Risk level string from the local keyword classifier.
+        gpt_risk_level: Risk level string from GPT's assessment.
+        all_flags: Combined list of risk flag strings from both classifiers.
+        care_level: The internal merged care level string.
+
+    Returns:
+        A tuple of (patient_banner, patient_care_level) where patient_banner
+        is one of "emergency", "attention", "moderate", "none" and
+        patient_care_level is the care level to display to the patient.
+    """
+    local_tier = "LOW"
+    if "HIGH" in local_risk_level.upper():
+        local_tier = "HIGH"
+    elif "MODERATE" in local_risk_level.upper():
+        local_tier = "MODERATE"
+
+    gpt_tier = gpt_risk_level.upper() if gpt_risk_level else "LOW"
+
+    combo_fired = any("combination:" in f for f in all_flags)
+
+    if local_tier == "HIGH" and (gpt_tier == "HIGH" or combo_fired):
+        patient_banner = "emergency"
+    elif local_tier == "HIGH" and gpt_tier in ("MODERATE", "LOW"):
+        patient_banner = "attention"
+    elif "MODERATE" in _merge_risk(local_risk_level, gpt_risk_level).upper():
+        patient_banner = "moderate"
+    else:
+        patient_banner = "none"
+
+    patient_care_level = care_level
+    if patient_banner == "attention" and care_level == "emergency":
+        patient_care_level = "urgent_care"
+
+    return patient_banner, patient_care_level
+
+
 def _get_or_create_session(session_id, base_prompt, symptom_tree):
     """Get existing session state or create a new one."""
     if session_id not in _sessions:
@@ -470,20 +514,24 @@ def create_app(test_config=None):
                     session_id=session_id,
                 )
 
+            patient_banner, patient_care_level = determine_patient_banner(
+                local_risk_level, gpt_risk_level, all_flags, care_level)
+
             care_guidance = None
             maps_link = None
-            if care_level and care_level != "self_care":
-                care_guidance = get_care_guidance(care_level)
-                maps_link = build_maps_link(care_level, state.get("zip_code"))
+            if patient_care_level and patient_care_level != "self_care":
+                care_guidance = get_care_guidance(patient_care_level)
+                maps_link = build_maps_link(patient_care_level, state.get("zip_code"))
 
             response_data = {
                 "response": reply,
                 "risk_level": merged_risk_level,
-                "care_level": care_level,
+                "care_level": patient_care_level,
                 "care_guidance": care_guidance,
                 "follow_up_questions": follow_up_questions,
                 "maps_link": maps_link,
-                "banner": _get_banner(merged_risk_level),
+                "banner": patient_banner,
+                "internal_risk": merged_risk_level,
             }
             if re_escalation:
                 response_data["re_escalation"] = re_escalation

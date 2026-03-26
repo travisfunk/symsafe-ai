@@ -54,9 +54,11 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f7f8fa;c
 .msg{max-width:85%;padding:12px 16px;border-radius:12px;font-size:14px;line-height:1.5;word-wrap:break-word}
 .msg-user{background:#1a6b52;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
 .msg-ai{background:#fff;border:1px solid #e0e0e0;align-self:flex-start;border-bottom-left-radius:4px}
-.banner{padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:4px;max-width:85%;align-self:flex-start}
-.banner-high{background:#fde8e8;color:#c0392b;border:1px solid #e6b0aa}
-.banner-moderate{background:#fef5e7;color:#e67e22;border:1px solid #f5cba7}
+.banner{padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:4px;max-width:85%;align-self:flex-start;border-left:4px solid transparent}
+.banner-emergency{background:#fde8e8;color:#c0392b;border-left-color:#c0392b;border-top:1px solid #e6b0aa;border-right:1px solid #e6b0aa;border-bottom:1px solid #e6b0aa}
+.banner-attention{background:#fef5e7;color:#b8860b;border-left-color:#e67e22;border-top:1px solid #f5cba7;border-right:1px solid #f5cba7;border-bottom:1px solid #f5cba7}
+.banner-moderate{background:#e8f6f3;color:#1a6b52;border-left-color:#1a6b52;border-top:1px solid #c8e6d8;border-right:1px solid #c8e6d8;border-bottom:1px solid #c8e6d8}
+.banner-high{background:#fde8e8;color:#c0392b;border-left-color:#c0392b;border-top:1px solid #e6b0aa;border-right:1px solid #e6b0aa;border-bottom:1px solid #e6b0aa}
 .care-box{background:#f0f7f4;border:1px solid #c8e6d8;border-radius:8px;padding:10px 14px;font-size:13px;max-width:85%;align-self:flex-start;margin-top:4px}
 .care-box strong{display:block;margin-bottom:4px}
 .care-box a{color:#1a6b52;font-weight:600}
@@ -391,13 +393,15 @@ async function sendMessage() {
     }
 
     if (data.re_escalation) {
-      addMessage(esc(data.re_escalation), 'banner banner-high');
+      addMessage(esc(data.re_escalation), 'banner banner-attention');
     }
 
-    if (data.banner === 'high') {
-      addMessage('Based on what you\'ve described, please seek immediate medical attention or call 911.', 'banner banner-high');
+    if (data.banner === 'emergency') {
+      addMessage('This sounds like it could be serious. If you feel this is an emergency, call 911. Otherwise, please see a doctor as soon as possible today.', 'banner banner-emergency');
+    } else if (data.banner === 'attention') {
+      addMessage('I noticed something in what you described that can sometimes be serious. It\'s worth mentioning to a doctor soon \u2014 but based on everything you\'ve shared, there\'s no need to panic.', 'banner banner-attention');
     } else if (data.banner === 'moderate') {
-      addMessage('Consider scheduling an appointment with your healthcare provider about this.', 'banner banner-moderate');
+      addMessage('It sounds like this is worth getting checked out. Consider scheduling a visit with your doctor.', 'banner banner-moderate');
     }
 
     addMessage(esc(data.response), 'msg msg-ai');
