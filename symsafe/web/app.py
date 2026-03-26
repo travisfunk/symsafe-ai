@@ -27,8 +27,8 @@ from symsafe.care_router import get_care_guidance, merge_care_level, CARE_LEVEL_
 from symsafe.intake import format_intake_context
 from symsafe.report import generate_report, save_report
 from symsafe.store import (
-    init_db, save_session, save_exchange, get_all_sessions, get_session,
-    get_exchanges, update_session_status, update_exchange_review,
+    init_db, save_session, update_session, save_exchange, get_all_sessions,
+    get_session, get_exchanges, update_session_status, update_exchange_review,
     get_session_stats, get_synonym_proposals_for_session,
 )
 from symsafe.feedback import (
@@ -159,6 +159,15 @@ def _get_or_create_session(session_id, base_prompt, symptom_tree):
             "log_filename": log_filename,
             "symptom_tree": symptom_tree,
         }
+        save_session(
+            session_id=session_id,
+            intake_answers=None,
+            highest_risk="LOW",
+            highest_care_level="self_care",
+            message_count=0,
+            session_symptoms=[],
+            zip_code=None,
+        )
     return _sessions[session_id]
 
 
@@ -514,9 +523,8 @@ def create_app(test_config=None):
                 state["session_highest_care_level"],
             )
 
-            save_session(
+            update_session(
                 session_id=session_id,
-                intake_answers=state["intake_answers"],
                 highest_risk=state["session_highest_risk"],
                 highest_care_level=state["session_highest_care_level"],
                 message_count=state["session_message_count"],

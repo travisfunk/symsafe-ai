@@ -203,6 +203,40 @@ def save_exchange(session_id, exchange_index, user_input, assistant_response,
         conn.close()
 
 
+def update_session(session_id, highest_risk, highest_care_level,
+                    message_count, session_symptoms, zip_code=None, db_path=None):
+    """Update an existing session record's fields.
+
+    Args:
+        session_id: The session ID to update.
+        highest_risk: Highest risk tier reached.
+        highest_care_level: Highest care level reached.
+        message_count: Total number of patient messages.
+        session_symptoms: List of symptom strings.
+        zip_code: Optional patient zip code.
+        db_path: Path to the database file. Defaults to the configured DB_PATH.
+    """
+    conn = _get_connection(db_path)
+    try:
+        conn.execute(
+            """UPDATE sessions
+               SET highest_risk = ?, highest_care_level = ?,
+                   message_count = ?, session_symptoms = ?, zip_code = ?
+               WHERE id = ?""",
+            (
+                highest_risk,
+                highest_care_level,
+                message_count,
+                json.dumps(session_symptoms),
+                zip_code,
+                session_id,
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def get_session(session_id, db_path=None):
     """Retrieve a single session record by ID.
 
