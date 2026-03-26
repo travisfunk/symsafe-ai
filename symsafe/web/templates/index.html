@@ -37,10 +37,16 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f7f8fa;c
 .chip:hover{border-color:#1a6b52}
 .text-input{width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #ccc;font-size:14px;font-family:inherit}
 .text-input:focus{outline:none;border-color:#1a6b52}
-.slider-wrap{display:flex;align-items:center;gap:12px}
-.slider-wrap input[type=range]{flex:1;accent-color:#1a6b52}
-.slider-wrap .labels{display:flex;justify-content:space-between;font-size:11px;color:#888}
-.slider-val{font-size:18px;font-weight:700;color:#1a6b52;min-width:28px;text-align:center}
+.pain-scale{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pain-faces{display:flex;justify-content:space-between;gap:8px;width:100%}
+.pain-face{background:none;border:3px solid transparent;border-radius:50%;cursor:pointer;padding:4px;transition:border-color .15s,transform .15s;display:flex;align-items:center;justify-content:center}
+.pain-face:hover{transform:scale(1.12)}
+.pain-face.active{border-color:#1a6b52;transform:scale(1.15)}
+.pain-labels{display:flex;justify-content:space-between;width:100%;font-size:11px;color:#888;text-align:center}
+.pain-labels span{flex:1}
+.pain-slider-row{width:100%;padding:0 4px}
+.pain-slider-row input[type=range]{width:100%;accent-color:#1a6b52}
+.pain-display{font-size:20px;font-weight:700;color:#1a6b52;text-align:center;margin-top:2px}
 /* Chat */
 .chat-view{display:none;flex-direction:column;flex:1}
 .messages{flex:1;overflow-y:auto;padding:8px 0;display:flex;flex-direction:column;gap:8px}
@@ -120,8 +126,8 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f7f8fa;c
       <label>Where is the problem?</label>
       <div class="chips" data-field="location" data-multi="false">
         <div class="chip">Head</div><div class="chip">Chest</div><div class="chip">Stomach</div><div class="chip">Back</div>
-        <div class="chip">Arms/Hands</div><div class="chip">Legs/Feet</div><div class="chip">Skin</div><div class="chip">All over</div>
-        <div class="chip">Neck</div><div class="chip">Throat</div><div class="chip">Eye/Ear</div><div class="chip" data-other="true">Other</div>
+        <div class="chip">Arms/Hands</div><div class="chip">Legs/Feet</div><div class="chip">Neck</div><div class="chip">Throat</div>
+        <div class="chip">Eye/Ear</div><div class="chip">Skin</div><div class="chip">All over</div><div class="chip" data-other="true">Other</div>
       </div>
       <input type="text" class="text-input other-input" style="display:none;margin-top:8px" placeholder="Please describe the location...">
     </div>
@@ -137,19 +143,40 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f7f8fa;c
 
     <div class="q-group">
       <label>How severe is it?</label>
-      <div class="slider-wrap">
-        <span style="font-size:12px;color:#888">Mild</span>
-        <input type="range" id="severity" min="1" max="10" value="5">
-        <span style="font-size:12px;color:#888">Worst</span>
-        <span class="slider-val" id="severityVal">5</span>
+      <div class="pain-scale">
+        <div class="pain-faces">
+          <button type="button" class="pain-face" data-min="1" data-max="2" data-snap="2" aria-label="No pain">
+            <svg viewBox="0 0 48 48" width="48" height="48"><circle cx="24" cy="24" r="22" fill="#4CAF50" stroke="#388E3C" stroke-width="2"/><circle cx="16" cy="19" r="2.5" fill="#1B5E20"/><circle cx="32" cy="19" r="2.5" fill="#1B5E20"/><path d="M15 30 Q24 37 33 30" fill="none" stroke="#1B5E20" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </button>
+          <button type="button" class="pain-face" data-min="3" data-max="4" data-snap="4" aria-label="Mild pain">
+            <svg viewBox="0 0 48 48" width="48" height="48"><circle cx="24" cy="24" r="22" fill="#8BC34A" stroke="#689F38" stroke-width="2"/><circle cx="16" cy="19" r="2.5" fill="#33691E"/><circle cx="32" cy="19" r="2.5" fill="#33691E"/><path d="M16 31 Q24 28 32 31" fill="none" stroke="#33691E" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </button>
+          <button type="button" class="pain-face" data-min="5" data-max="6" data-snap="5" aria-label="Moderate pain">
+            <svg viewBox="0 0 48 48" width="48" height="48"><circle cx="24" cy="24" r="22" fill="#FFC107" stroke="#FFA000" stroke-width="2"/><circle cx="16" cy="19" r="2.5" fill="#E65100"/><circle cx="32" cy="19" r="2.5" fill="#E65100"/><path d="M16 31 L32 31" fill="none" stroke="#E65100" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </button>
+          <button type="button" class="pain-face" data-min="7" data-max="8" data-snap="8" aria-label="Severe pain">
+            <svg viewBox="0 0 48 48" width="48" height="48"><circle cx="24" cy="24" r="22" fill="#FF9800" stroke="#EF6C00" stroke-width="2"/><circle cx="16" cy="19" r="2.5" fill="#BF360C"/><circle cx="32" cy="19" r="2.5" fill="#BF360C"/><path d="M15 33 Q24 27 33 33" fill="none" stroke="#BF360C" stroke-width="2.5" stroke-linecap="round"/><path d="M13 15 L19 17" stroke="#BF360C" stroke-width="1.5" stroke-linecap="round"/><path d="M35 15 L29 17" stroke="#BF360C" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <button type="button" class="pain-face" data-min="9" data-max="10" data-snap="10" aria-label="Worst pain">
+            <svg viewBox="0 0 48 48" width="48" height="48"><circle cx="24" cy="24" r="22" fill="#F44336" stroke="#C62828" stroke-width="2"/><circle cx="16" cy="19" r="2.5" fill="#fff"/><circle cx="32" cy="19" r="2.5" fill="#fff"/><path d="M15 34 Q24 27 33 34" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M20 12 L16 16" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M28 12 L32 16" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><path d="M22 26 Q24 24 26 26 L24 38 Z" fill="#4FC3F7" opacity=".7"/></svg>
+          </button>
+        </div>
+        <div class="pain-labels">
+          <span>No pain</span><span>Mild</span><span>Moderate</span><span>Severe</span><span>Worst</span>
+        </div>
+        <div class="pain-slider-row">
+          <input type="range" id="severity" min="1" max="10" value="5">
+        </div>
+        <div class="pain-display">Pain level: <span id="severityVal">5</span></div>
       </div>
     </div>
 
     <div class="q-group">
       <label>Getting better or worse?</label>
       <div class="chips" data-field="trajectory" data-multi="false">
-        <div class="chip">Better</div><div class="chip">Worse</div><div class="chip">Same</div><div class="chip">Comes and goes</div>
+        <div class="chip">Better</div><div class="chip">Worse</div><div class="chip">Same</div><div class="chip">Comes and goes</div><div class="chip" data-other="true">Other</div>
       </div>
+      <input type="text" class="text-input other-input" style="display:none;margin-top:8px" placeholder="Please describe the pattern...">
     </div>
 
     <div class="q-group">
@@ -225,9 +252,33 @@ document.querySelectorAll('.chips').forEach(group => {
   });
 });
 
-document.getElementById('severity').addEventListener('input', e => {
-  document.getElementById('severityVal').textContent = e.target.value;
+// Pain scale faces + slider sync
+const severitySlider = document.getElementById('severity');
+const severityVal = document.getElementById('severityVal');
+const painFaces = document.querySelectorAll('.pain-face');
+
+function updatePainFace(val) {
+  painFaces.forEach(f => {
+    const min = parseInt(f.dataset.min), max = parseInt(f.dataset.max);
+    f.classList.toggle('active', val >= min && val <= max);
+  });
+}
+
+painFaces.forEach(face => {
+  face.addEventListener('click', () => {
+    const snap = face.dataset.snap;
+    severitySlider.value = snap;
+    severityVal.textContent = snap;
+    updatePainFace(parseInt(snap));
+  });
 });
+
+severitySlider.addEventListener('input', e => {
+  severityVal.textContent = e.target.value;
+  updatePainFace(parseInt(e.target.value));
+});
+
+updatePainFace(5);
 
 function showIntake() {
   document.getElementById('welcomeView').style.display = 'none';
