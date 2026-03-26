@@ -131,7 +131,7 @@ def save_session(session_id, intake_answers, highest_risk, highest_care_level,
     conn = _get_connection(db_path)
     try:
         conn.execute(
-            """INSERT INTO sessions
+            """INSERT OR IGNORE INTO sessions
                (id, created_at, intake_answers, highest_risk, highest_care_level,
                 message_count, session_symptoms, zip_code)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
