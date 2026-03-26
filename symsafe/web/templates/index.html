@@ -111,8 +111,9 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f7f8fa;c
       <label>What's your main concern?</label>
       <div class="chips" data-field="concern" data-multi="false">
         <div class="chip">Pain</div><div class="chip">Breathing</div><div class="chip">Digestive</div>
-        <div class="chip">Skin</div><div class="chip">Mental health</div><div class="chip">Injury</div><div class="chip">Other</div>
+        <div class="chip">Skin</div><div class="chip">Mental health</div><div class="chip">Injury</div><div class="chip" data-other="true">Other</div>
       </div>
+      <input type="text" class="text-input other-input" style="display:none;margin-top:8px" placeholder="Please describe your concern...">
     </div>
 
     <div class="q-group">
@@ -120,15 +121,18 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f7f8fa;c
       <div class="chips" data-field="location" data-multi="false">
         <div class="chip">Head</div><div class="chip">Chest</div><div class="chip">Stomach</div><div class="chip">Back</div>
         <div class="chip">Arms/Hands</div><div class="chip">Legs/Feet</div><div class="chip">Skin</div><div class="chip">All over</div>
+        <div class="chip">Neck</div><div class="chip">Throat</div><div class="chip">Eye/Ear</div><div class="chip" data-other="true">Other</div>
       </div>
+      <input type="text" class="text-input other-input" style="display:none;margin-top:8px" placeholder="Please describe the location...">
     </div>
 
     <div class="q-group">
       <label>When did this start?</label>
       <div class="chips" data-field="onset" data-multi="false">
         <div class="chip">Just now</div><div class="chip">Today</div><div class="chip">Yesterday</div>
-        <div class="chip">Few days</div><div class="chip">A week+</div>
+        <div class="chip">Few days</div><div class="chip">A week+</div><div class="chip" data-other="true">Other</div>
       </div>
+      <input type="text" class="text-input other-input" style="display:none;margin-top:8px" placeholder="Please describe when it started...">
     </div>
 
     <div class="q-group">
@@ -157,8 +161,9 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f7f8fa;c
       <label>Chronic conditions</label>
       <div class="chips" data-field="conditions" data-multi="true">
         <div class="chip">Diabetes</div><div class="chip">Heart disease</div><div class="chip">Asthma</div>
-        <div class="chip">High BP</div><div class="chip">None</div>
+        <div class="chip">High BP</div><div class="chip">None</div><div class="chip" data-other="true">Other</div>
       </div>
+      <input type="text" class="text-input other-input" style="display:none;margin-top:8px" placeholder="Please describe your condition...">
     </div>
 
     <div class="q-group">
@@ -196,6 +201,7 @@ const intakeData = {};
 // Chip selection
 document.querySelectorAll('.chips').forEach(group => {
   const multi = group.dataset.multi === 'true';
+  const otherInput = group.parentElement.querySelector('.other-input');
   group.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
       if (multi) {
@@ -203,6 +209,17 @@ document.querySelectorAll('.chips').forEach(group => {
       } else {
         group.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
         chip.classList.toggle('selected');
+      }
+      // Show/hide other input
+      if (otherInput) {
+        const otherChip = group.querySelector('[data-other="true"]');
+        if (otherChip && otherChip.classList.contains('selected')) {
+          otherInput.style.display = 'block';
+          otherInput.focus();
+        } else {
+          otherInput.style.display = 'none';
+          otherInput.value = '';
+        }
       }
     });
   });
@@ -235,8 +252,13 @@ function submitIntake() {
   document.querySelectorAll('.chips').forEach(group => {
     const field = group.dataset.field;
     const sel = group.querySelectorAll('.chip.selected');
-    if (sel.length === 1) answers[field] = sel[0].textContent;
-    else if (sel.length > 1) answers[field] = Array.from(sel).map(c=>c.textContent).join(', ');
+    const otherInput = group.parentElement.querySelector('.other-input');
+    const resolveChipText = (chip) => {
+      if (chip.dataset.other && otherInput && otherInput.value.trim()) return otherInput.value.trim();
+      return chip.textContent;
+    };
+    if (sel.length === 1) answers[field] = resolveChipText(sel[0]);
+    else if (sel.length > 1) answers[field] = Array.from(sel).map(c=>resolveChipText(c)).join(', ');
   });
   answers.severity = document.getElementById('severity').value;
   const meds = document.getElementById('medications').value.trim();
