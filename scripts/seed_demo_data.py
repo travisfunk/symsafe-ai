@@ -315,6 +315,11 @@ def main():
         print("Demo data already exists. Use --clear to wipe and re-seed.")
         return
 
+    seed_all()
+
+
+def seed_all():
+    """Insert all demo data. Can be called programmatically (e.g. on app startup)."""
     s1 = _seed_session_1()
     s2 = _seed_session_2()
     s3 = _seed_session_3()

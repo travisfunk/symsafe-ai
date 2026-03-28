@@ -244,6 +244,14 @@ def create_app(test_config=None):
 
     # Load resources once at startup
     init_db()
+    stats = get_session_stats()
+    if stats.get("total_sessions", 0) == 0:
+        try:
+            from scripts.seed_demo_data import seed_all
+            seed_all()
+            logger.info("Seeded demo data into empty database.")
+        except Exception as e:
+            logger.warning(f"Could not seed demo data: {e}")
     load_combination_rules_from_db(DB_PATH)
     classifier_path = BASE_DIR / "symsafe" / "risk_classifier.py"
     generate_proposals(DB_PATH, classifier_path)
