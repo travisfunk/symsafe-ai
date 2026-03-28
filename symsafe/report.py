@@ -58,7 +58,8 @@ def generate_report(
     highest_care_level,
     message_count,
     conversation_log,
-    follow_up_questions,
+    provider_questions=None,
+    follow_up_questions=None,
 ):
     """Generate a standalone HTML Patient Preparation Document.
 
@@ -74,12 +75,16 @@ def generate_report(
         message_count: Total number of patient messages in the session.
         conversation_log: List of dicts with keys: user, assistant, risk,
                           care_level, risk_flags.
-        follow_up_questions: List of follow-up question strings collected
-                             during the session.
+        provider_questions: List of questions the patient should ask their
+                            doctor at their appointment.
+        follow_up_questions: Deprecated. Use provider_questions instead.
 
     Returns:
         A complete HTML document as a string.
     """
+    # Support both parameter names for backwards compatibility
+    if provider_questions is None and follow_up_questions is not None:
+        provider_questions = follow_up_questions
     risk_color, risk_bg = RISK_COLORS.get(highest_risk, RISK_COLORS["LOW"])
     care_guidance = get_care_guidance(highest_care_level)
     formatted_date = _format_timestamp(timestamp)
@@ -148,15 +153,23 @@ def generate_report(
       {convo_items}
     </section>""" if conversation_log else ""
 
-    # Build follow-up questions section
+    # Build provider questions section with answer lines for printing
     followup_html = ""
-    if follow_up_questions:
-        items = "".join(f"<li>{_escape(q)}</li>\n" for q in follow_up_questions)
+    if provider_questions:
+        question_blocks = ""
+        for q in provider_questions:
+            question_blocks += f"""
+      <div style="margin-bottom:20px">
+        <p style="font-weight:600;margin-bottom:4px">{_escape(q)}</p>
+        <p style="font-size:12px;color:#888;margin-bottom:2px">Doctor's answer:</p>
+        <div style="border-bottom:1px solid #999;min-height:24px;margin-bottom:8px"></div>
+        <div style="border-bottom:1px solid #999;min-height:24px"></div>
+      </div>"""
         followup_html = f"""
     <section>
       <h2>Questions to Ask Your Provider</h2>
-      <p>Based on your conversation, consider asking:</p>
-      <ul>{items}</ul>
+      <p>Bring this report to your appointment. Use the lines below to write down your doctor's answers.</p>
+      {question_blocks}
     </section>"""
 
     # Build immediate action section

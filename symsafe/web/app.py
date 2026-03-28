@@ -196,6 +196,7 @@ def _get_or_create_session(session_id, base_prompt, symptom_tree):
             "exchange_index": 0,
             "conversation_log": [],
             "session_follow_ups": [],
+            "session_provider_questions": [],
             "messages_since_escalation": 0,
             "last_escalation_care_level": None,
             "intake_answers": None,
@@ -428,6 +429,7 @@ def create_app(test_config=None):
             gpt_risk_level = result.get("risk_level", "LOW")
             gpt_risk_flags = result.get("risk_flags", [])
             follow_up_questions = result.get("follow_up_questions", [])
+            provider_questions = result.get("provider_questions", [])
             gpt_care_level = result.get("care_level", "self_care")
 
             merged_risk_level = _merge_risk(local_risk_level, gpt_risk_level)
@@ -473,6 +475,8 @@ def create_app(test_config=None):
             })
             if follow_up_questions:
                 state["session_follow_ups"].extend(follow_up_questions)
+            if provider_questions:
+                state["session_provider_questions"].extend(provider_questions)
 
             is_clinical = "HIGH" in merged_risk_level.upper() or "MODERATE" in merged_risk_level.upper() or len(tree_matches) > 0
             if is_clinical:
@@ -584,6 +588,13 @@ def create_app(test_config=None):
 
             report_url = None
             if state["session_message_count"] > 0:
+                provider_qs = list(dict.fromkeys(state["session_provider_questions"]))
+                if not provider_qs:
+                    provider_qs = [
+                        "What do you think is causing these symptoms?",
+                        "Are there any tests I should have done?",
+                        "What should I watch for that would mean I need to come back?",
+                    ]
                 report_html = generate_report(
                     timestamp=session_id,
                     intake_answers=state["intake_answers"],
@@ -592,7 +603,7 @@ def create_app(test_config=None):
                     highest_care_level=state["session_highest_care_level"],
                     message_count=state["session_message_count"],
                     conversation_log=state["conversation_log"],
-                    follow_up_questions=list(dict.fromkeys(state["session_follow_ups"])),
+                    provider_questions=provider_qs,
                 )
                 reports_dir = BASE_DIR / "reports"
                 save_report(report_html, reports_dir, session_id)

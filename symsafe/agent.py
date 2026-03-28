@@ -15,7 +15,11 @@ JSON_INSTRUCTION = (
     'IMPORTANT: You must respond ONLY with valid JSON in this exact format, no other text: '
     '{"response": "your conversational reply", "risk_level": "HIGH or MODERATE or LOW", '
     '"risk_flags": ["list of concerning symptoms identified"], '
-    '"follow_up_questions": ["1-2 relevant follow-up questions if appropriate, empty list if none needed"], '
+    '"follow_up_questions": ["1-2 questions YOU want to ask the PATIENT to better understand their symptoms — empty list if none needed"], '
+    '"provider_questions": ["1-3 questions the PATIENT should ask their DOCTOR at their appointment, '
+    'specific to the symptoms discussed — e.g. Could this be related to [symptom]?, Do I need any tests?, '
+    'What medications would you recommend?, When should I come back if it doesn\'t improve?, '
+    'Should I be concerned about [specific symptom]? — empty list if self_care"], '
     '"care_level": "emergency | urgent_care | primary_care | telehealth | self_care"} '
     'care_level definitions: '
     '"emergency" — Call 911 or go to ER immediately (life-threatening symptoms). '
@@ -43,6 +47,7 @@ def _parse_response(raw_text):
             "risk_level": "LOW",
             "risk_flags": [],
             "follow_up_questions": [],
+            "provider_questions": [],
             "care_level": "self_care"
         }
 

@@ -197,6 +197,7 @@ def main():
     # Conversation log for HTML report generation
     conversation_log = []
     session_follow_ups = []
+    session_provider_questions = []
 
     # Tracks messages since last emergency/urgent_care recommendation.
     # After 3 messages without the patient seeking care, re-escalate.
@@ -249,6 +250,13 @@ def main():
         )
         generate_proposals(DB_PATH, classifier_path)
         if session_message_count > 0:
+            provider_qs = list(dict.fromkeys(session_provider_questions))
+            if not provider_qs:
+                provider_qs = [
+                    "What do you think is causing these symptoms?",
+                    "Are there any tests I should have done?",
+                    "What should I watch for that would mean I need to come back?",
+                ]
             report_html = generate_report(
                 timestamp=timestamp,
                 intake_answers=intake_answers,
@@ -257,7 +265,7 @@ def main():
                 highest_care_level=session_highest_care_level,
                 message_count=session_message_count,
                 conversation_log=conversation_log,
-                follow_up_questions=list(dict.fromkeys(session_follow_ups)),
+                provider_questions=provider_qs,
             )
             reports_dir = BASE_DIR / "reports"
             report_path = save_report(report_html, reports_dir, timestamp)
@@ -319,6 +327,7 @@ def main():
             gpt_risk_level = result.get("risk_level", "LOW")
             gpt_risk_flags = result.get("risk_flags", [])
             follow_up_questions = result.get("follow_up_questions", [])
+            provider_questions = result.get("provider_questions", [])
             gpt_care_level = result.get("care_level", "self_care")
 
             # Dual-layer risk merging: take the higher of local and GPT assessments
@@ -374,6 +383,8 @@ def main():
             })
             if follow_up_questions:
                 session_follow_ups.extend(follow_up_questions)
+            if provider_questions:
+                session_provider_questions.extend(provider_questions)
 
             print_assistant_response(reply, merged_risk_level, follow_up_questions, care_level)
 
