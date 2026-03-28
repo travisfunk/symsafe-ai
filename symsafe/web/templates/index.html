@@ -412,11 +412,11 @@ async function sendMessage() {
     addMessage(esc(data.response), 'msg msg-ai');
 
     if (data.care_guidance) {
-      let careHtml = '<strong>Where to go:</strong> ' + esc(data.care_guidance.where);
-      careHtml += '<br><strong>Right now:</strong> ' + esc(data.care_guidance.right_now);
+      let careHtml = '<div style="margin-bottom:12px"><div style="font-weight:700;font-size:14px;margin-bottom:4px;color:#1a6b52">Where to go</div><div style="font-size:14px">' + esc(data.care_guidance.where) + '</div></div>';
+      careHtml += '<div style="margin-bottom:8px"><div style="font-weight:700;font-size:14px;margin-bottom:4px;color:#1a6b52">Right now</div><div style="font-size:14px">' + esc(data.care_guidance.right_now) + '</div></div>';
       if (data.maps_link) {
         const careLabel = data.care_level === 'emergency' ? 'emergency room' : data.care_level.replace('_',' ');
-        careHtml += '<br><a href="' + esc(data.maps_link) + '" target="_blank" rel="noopener">Find ' + esc(careLabel) + ' near you</a>';
+        careHtml += '<div style="margin-top:8px"><a href="' + esc(data.maps_link) + '" target="_blank" rel="noopener">Find ' + esc(careLabel) + ' near you</a></div>';
       }
       addMessage(careHtml, 'care-box');
     }
