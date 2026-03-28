@@ -14,7 +14,8 @@ def app():
          patch("symsafe.web.app.load_combination_rules_from_db"), \
          patch("symsafe.web.app.generate_proposals"), \
          patch("symsafe.web.app.get_client") as mock_client_factory, \
-         patch("symsafe.web.app.load_base_prompt", return_value="Test prompt."):
+         patch("symsafe.web.app.load_base_prompt", return_value="Test prompt."), \
+         patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}, clear=False):
         mock_client = MagicMock()
         mock_client_factory.return_value = mock_client
         application = create_app(test_config={"TESTING": True})
@@ -36,7 +37,7 @@ def auth_app():
          patch("symsafe.web.app.generate_proposals"), \
          patch("symsafe.web.app.get_client") as mock_client_factory, \
          patch("symsafe.web.app.load_base_prompt", return_value="Test prompt."), \
-         patch.dict("os.environ", {"REVIEW_PASSWORD": "test-pass"}, clear=False):
+         patch.dict("os.environ", {"REVIEW_PASSWORD": "test-pass", "ANTHROPIC_API_KEY": "test-key"}, clear=False):
         mock_client = MagicMock()
         mock_client_factory.return_value = mock_client
         application = create_app()
@@ -57,7 +58,7 @@ def no_key_app():
          patch("symsafe.web.app.generate_proposals"), \
          patch("symsafe.web.app.get_client") as mock_client_factory, \
          patch("symsafe.web.app.load_base_prompt", return_value="Test prompt."), \
-         patch.dict("os.environ", {"OPENAI_API_KEY": ""}, clear=False):
+         patch.dict("os.environ", {"ANTHROPIC_API_KEY": ""}, clear=False):
         mock_client_factory.return_value = None
         application = create_app(test_config={"TESTING": True})
         yield application
@@ -88,9 +89,9 @@ class TestInputSanitization:
             "response": "I see.", "risk_level": "LOW",
             "risk_flags": [], "follow_up_questions": [], "care_level": "self_care"
         })
-        mock_client.chat.completions.create.return_value.choices = [
-            MagicMock(message=MagicMock(content=response_json))
-        ]
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text=response_json)]
+        mock_client.messages.create.return_value = mock_response
         with patch("symsafe.web.app.save_exchange"), \
              patch("symsafe.web.app.log_interaction"):
             rv = client.post("/api/chat",
@@ -164,9 +165,9 @@ class TestRateLimiting:
             "response": "OK", "risk_level": "LOW",
             "risk_flags": [], "follow_up_questions": [], "care_level": "self_care"
         })
-        mock_client.chat.completions.create.return_value.choices = [
-            MagicMock(message=MagicMock(content=response_json))
-        ]
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text=response_json)]
+        mock_client.messages.create.return_value = mock_response
 
         session_id = "rate_limit_test"
         with patch("symsafe.web.app.save_exchange"), \
@@ -197,7 +198,7 @@ class TestApiKeyProtection:
         rv = client.get("/")
         body = rv.data.decode("utf-8")
         # Check that no actual API key pattern appears (not function names like skipToChat)
-        api_key = os.environ.get("OPENAI_API_KEY", "")
+        api_key = os.environ.get("ANTHROPIC_API_KEY", "")
         if api_key and len(api_key) > 10:
             assert api_key not in body
 

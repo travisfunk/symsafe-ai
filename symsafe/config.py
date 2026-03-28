@@ -3,13 +3,13 @@ config.py — Application configuration, path resolution, and API client initial
 
 Handles environment variable loading from .env, resolves the project root
 directory for consistent file access across modules, and provides factory
-functions for the OpenAI client and base prompt.
+functions for the Anthropic client and base prompt.
 """
 
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from openai import OpenAI
+from anthropic import Anthropic
 
 # Project root directory (parent of the symsafe/ package).
 # All file paths (prompts/, logs/, reports/) are resolved relative to this.
@@ -22,16 +22,16 @@ DB_PATH = BASE_DIR / "data" / "symsafe.db"
 
 
 def get_client():
-    """Create and return an OpenAI API client using the configured API key.
+    """Create and return an Anthropic API client using the configured API key.
 
     Returns:
-        OpenAI: An initialized OpenAI client instance.
+        Anthropic: An initialized Anthropic client instance.
     """
-    return OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    return Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 
 def load_base_prompt():
-    """Load the GPT system prompt from prompts/base_prompt.txt.
+    """Load the system prompt from prompts/base_prompt.txt.
 
     Returns:
         str: The full text of the base system prompt.

@@ -17,7 +17,8 @@ def app():
              patch("symsafe.web.app.load_combination_rules_from_db"), \
              patch("symsafe.web.app.generate_proposals"), \
              patch("symsafe.web.app.get_client") as mock_client_factory, \
-             patch("symsafe.web.app.load_base_prompt", return_value="You are a triage assistant."):
+             patch("symsafe.web.app.load_base_prompt", return_value="You are a triage assistant."), \
+             patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}, clear=False):
             mock_client = MagicMock()
             mock_client_factory.return_value = mock_client
             application = create_app(test_config={"TESTING": True})

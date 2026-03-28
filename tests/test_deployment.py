@@ -34,7 +34,7 @@ class TestDeploymentConfig:
 
     def test_env_example_has_all_vars(self):
         content = (PROJECT_ROOT / ".env.example").read_text(encoding="utf-8")
-        assert "OPENAI_API_KEY" in content
+        assert "ANTHROPIC_API_KEY" in content
         assert "FLASK_SECRET_KEY" in content
         assert "REVIEW_PASSWORD" in content
 

@@ -255,10 +255,10 @@ def create_app(test_config=None):
     symptom_tree = load_symptom_tree()
 
     # API key validation
-    api_key = os.environ.get("OPENAI_API_KEY", "")
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     has_api_key = bool(api_key and api_key != "your_api_key_here")
     if not has_api_key:
-        logger.warning("OPENAI_API_KEY not set or invalid. Chat functionality will be unavailable.")
+        logger.warning("ANTHROPIC_API_KEY not set or invalid. Chat functionality will be unavailable.")
 
     client = get_client() if has_api_key else None
 

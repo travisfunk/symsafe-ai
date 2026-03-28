@@ -53,7 +53,7 @@ class TestProjectDocs:
 
     def test_env_example_has_placeholder(self):
         content = (PROJECT_ROOT / ".env.example").read_text(encoding="utf-8")
-        assert "OPENAI_API_KEY" in content, ".env.example should contain OPENAI_API_KEY"
+        assert "ANTHROPIC_API_KEY" in content, ".env.example should contain ANTHROPIC_API_KEY"
 
     def test_eval_template_not_empty(self):
         content = (PROJECT_ROOT / "evaluations" / "eval_template.md").read_text(encoding="utf-8")
@@ -69,7 +69,7 @@ class TestProjectDocs:
 
     def test_requirements_has_all_deps(self):
         content = (PROJECT_ROOT / "requirements.txt").read_text(encoding="utf-8").lower()
-        assert "openai" in content, "requirements.txt missing openai"
+        assert "anthropic" in content, "requirements.txt missing anthropic"
         assert "python-dotenv" in content or "dotenv" in content, "requirements.txt missing python-dotenv"
         assert "pytest" in content, "requirements.txt missing pytest"
 

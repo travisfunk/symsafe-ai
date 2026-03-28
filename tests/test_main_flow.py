@@ -61,11 +61,11 @@ class TestLoggerHandlesNone:
 
 
 class TestEvaluatorModel:
-    def test_evaluator_uses_mini(self):
-        """evaluator.py should reference gpt-4o-mini, not gpt-4o"""
+    def test_evaluator_uses_haiku(self):
+        """evaluator.py should reference claude-haiku, not the main model"""
         path = Path(__file__).resolve().parent.parent / "symsafe" / "evaluator.py"
         content = path.read_text(encoding="utf-8")
-        assert "gpt-4o-mini" in content, "evaluator.py should use gpt-4o-mini"
-        lines_with_model = [l for l in content.split('\n') if 'model=' in l and 'gpt-4o' in l]
+        assert "claude-haiku-4-5-20251001" in content, "evaluator.py should use claude-haiku-4-5-20251001"
+        lines_with_model = [l for l in content.split('\n') if 'model=' in l and 'claude' in l]
         for line in lines_with_model:
-            assert "gpt-4o-mini" in line, f"Found non-mini model reference: {line.strip()}"
+            assert "haiku" in line, f"Found non-haiku model reference: {line.strip()}"

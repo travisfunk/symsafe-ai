@@ -1,7 +1,7 @@
 """
-agent.py — Primary GPT-4o interaction with structured JSON output.
+agent.py — Primary Claude interaction with structured JSON output.
 
-Handles the main assistant API call, instructing GPT-4o to return a
+Handles the main assistant API call, instructing Claude to return a
 structured JSON response containing the conversational reply, risk
 assessment, follow-up questions, and care level recommendation. Includes
 fallback parsing for malformed responses and code-fenced output.
@@ -9,8 +9,8 @@ fallback parsing for malformed responses and code-fenced output.
 
 import json
 
-# System instruction appended to every GPT call, requiring structured JSON output.
-# Defines the exact schema and care level definitions so GPT returns actionable data.
+# System instruction appended to every API call, requiring structured JSON output.
+# Defines the exact schema and care level definitions so Claude returns actionable data.
 JSON_INSTRUCTION = (
     'IMPORTANT: You must respond ONLY with valid JSON in this exact format, no other text: '
     '{"response": "your conversational reply", "risk_level": "HIGH or MODERATE or LOW", '
@@ -27,9 +27,9 @@ JSON_INSTRUCTION = (
 
 
 def _parse_response(raw_text):
-    """Parse structured JSON from GPT output, with code fence stripping and fallback."""
+    """Parse structured JSON from model output, with code fence stripping and fallback."""
     text = raw_text.strip()
-    # GPT sometimes wraps JSON in markdown code fences
+    # Model sometimes wraps JSON in markdown code fences
     if text.startswith("```"):
         lines = text.split("\n")
         lines = [l for l in lines if not l.strip().startswith("```")]
@@ -48,30 +48,41 @@ def _parse_response(raw_text):
 
 
 def get_assistant_response(client, messages):
-    """Send messages to GPT-4o and return a structured response dict.
+    """Send messages to Claude and return a structured response dict.
 
-    Appends a temporary JSON instruction to the message list (without
-    modifying the caller's list) to enforce structured output. Parses
-    the response and falls back to safe defaults if JSON parsing fails.
+    Extracts system messages into the system parameter and user/assistant
+    messages into the messages list. Appends a JSON instruction to enforce
+    structured output. Parses the response and falls back to safe defaults
+    if JSON parsing fails.
 
     Args:
-        client: An initialized OpenAI client instance.
+        client: An initialized Anthropic client instance.
         messages: The conversation message history (list of role/content dicts).
 
     Returns:
         A dict with keys: response, risk_level, risk_flags,
         follow_up_questions, care_level. Returns None on API failure.
     """
-    json_hint = {"role": "system", "content": JSON_INSTRUCTION}
-    messages_with_hint = messages + [json_hint]
+    messages_with_hint = messages + [{"role": "system", "content": JSON_INSTRUCTION}]
+
+    # Separate system messages from user/assistant messages for the Anthropic API
+    system_parts = [m["content"] for m in messages_with_hint if m["role"] == "system"]
+    system_prompt = "\n\n".join(system_parts)
+    conversation = [m for m in messages_with_hint if m["role"] in ("user", "assistant")]
+
+    # Ensure conversation is non-empty and starts with a user message
+    if not conversation:
+        conversation = [{"role": "user", "content": "Hello"}]
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=messages_with_hint,
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1024,
+            system=system_prompt,
+            messages=conversation,
             temperature=0.7
         )
-        raw_text = response.choices[0].message.content.strip()
+        raw_text = response.content[0].text.strip()
         return _parse_response(raw_text)
     except Exception:
         return None

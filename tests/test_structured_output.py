@@ -7,9 +7,9 @@ from symsafe.agent import get_assistant_response
 class TestStructuredOutput:
     def _mock_client(self, content):
         mock = MagicMock()
-        mock.chat.completions.create.return_value.choices = [
-            MagicMock(message=MagicMock(content=content))
-        ]
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text=content)]
+        mock.messages.create.return_value = mock_response
         return mock
 
     def test_returns_dict_on_valid_json(self):
@@ -50,7 +50,7 @@ class TestStructuredOutput:
 
     def test_returns_none_on_api_failure(self):
         mock = MagicMock()
-        mock.chat.completions.create.side_effect = Exception("API Error")
+        mock.messages.create.side_effect = Exception("API Error")
         result = get_assistant_response(mock, [{"role": "user", "content": "test"}])
         assert result is None
 
@@ -65,16 +65,16 @@ class TestStructuredOutput:
         result = get_assistant_response(client, [{"role": "user", "content": "I have a fever"}])
         assert len(result["follow_up_questions"]) == 2
 
-    def test_still_uses_gpt4o(self):
+    def test_still_uses_claude(self):
         response_json = json.dumps({
             "response": "Hi there.", "risk_level": "LOW",
             "risk_flags": [], "follow_up_questions": []
         })
         client = self._mock_client(response_json)
         get_assistant_response(client, [{"role": "user", "content": "hello"}])
-        call_args = client.chat.completions.create.call_args
+        call_args = client.messages.create.call_args
         model = call_args.kwargs.get("model") or call_args[1].get("model")
-        assert model == "gpt-4o", f"Agent should use gpt-4o, got: {model}"
+        assert model == "claude-sonnet-4-20250514", f"Agent should use claude-sonnet-4-20250514, got: {model}"
 
     def test_care_level_in_response(self):
         response_json = json.dumps({
