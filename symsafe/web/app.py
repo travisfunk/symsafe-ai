@@ -31,7 +31,9 @@ from symsafe.store import (
     get_session, get_exchanges, update_session_status, update_exchange_review,
     get_session_stats, get_synonym_proposals_for_session,
     get_all_synonym_proposals, get_all_rule_proposals, count_similar_exchanges,
+    save_analysis, get_analysis,
 )
+from symsafe.ai_analyzer import analyze_session, generate_bulk_synonyms
 from symsafe.feedback import (
     detect_classifier_gap, find_nearest_flag, save_synonym_proposal,
     generate_proposals, get_pending_proposals, approve_synonym,
@@ -981,6 +983,62 @@ def create_app(test_config=None):
             return jsonify(result)
         except Exception:
             logger.exception("Error in /api/review/impact")
+            return jsonify({"error": "An unexpected error occurred."}), 500
+
+    @app.route("/api/review/analyze/<session_id>")
+    @require_review_auth
+    def api_analyze_session(session_id):
+        """Return AI analysis for a session, with caching."""
+        try:
+            if not _validate_session_id(session_id):
+                return jsonify({"error": "Invalid session ID"}), 404
+
+            refresh = request.args.get("refresh") == "true"
+
+            if not refresh:
+                cached = get_analysis(session_id)
+                if cached:
+                    return jsonify(cached)
+
+            sess = get_session(session_id)
+            if sess is None:
+                return jsonify({"error": "Session not found"}), 404
+
+            if not has_api_key or client is None:
+                return jsonify({"clinical_summary": "Analysis unavailable — API key not configured."}), 503
+
+            exchanges = get_exchanges(session_id)
+            flags = {"high": list(HIGH_RISK_FLAGS), "moderate": list(MODERATE_RISK_FLAGS)}
+            result = analyze_session(client, sess, exchanges, flags)
+
+            save_analysis(session_id, result)
+            return jsonify(result)
+        except Exception:
+            logger.exception("Error in /api/review/analyze")
+            return jsonify({"error": "An unexpected error occurred."}), 500
+
+    @app.route("/api/review/bulk-synonyms", methods=["POST"])
+    @require_review_auth
+    def api_bulk_synonyms():
+        """Generate bulk synonym suggestions for a phrase."""
+        try:
+            data = request.get_json(silent=True)
+            if data is None:
+                return jsonify({"error": "JSON body required"}), 400
+
+            phrase = data.get("phrase")
+            mapped_to = data.get("mapped_to")
+            category = data.get("category")
+            if not phrase or not mapped_to or not category:
+                return jsonify({"error": "phrase, mapped_to, and category are required"}), 400
+
+            if not has_api_key or client is None:
+                return jsonify({"error": "API key not configured"}), 503
+
+            suggestions = generate_bulk_synonyms(client, phrase, mapped_to, category)
+            return jsonify({"suggestions": suggestions})
+        except Exception:
+            logger.exception("Error in /api/review/bulk-synonyms")
             return jsonify({"error": "An unexpected error occurred."}), 500
 
     @app.route("/api/review/save-correction", methods=["POST"])

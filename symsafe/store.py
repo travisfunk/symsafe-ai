@@ -106,6 +106,13 @@ def init_db(db_path=None):
                 reviewed_by TEXT,
                 created_at TEXT
             );
+
+            CREATE TABLE IF NOT EXISTS session_analyses (
+                session_id TEXT PRIMARY KEY,
+                analysis TEXT,
+                created_at TEXT,
+                model TEXT
+            );
         """)
         conn.commit()
     finally:
@@ -405,6 +412,52 @@ def get_synonym_proposals_for_session(session_id, db_path=None):
             (session_id,),
         ).fetchall()
         return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def save_analysis(session_id, analysis_dict, model="claude-haiku", db_path=None):
+    """Save a session analysis result to the database.
+
+    Args:
+        session_id: The session identifier.
+        analysis_dict: Dict containing the analysis results.
+        model: Name of the model used for analysis.
+        db_path: Path to the database file. Defaults to the configured DB_PATH.
+    """
+    conn = _get_connection(db_path)
+    try:
+        conn.execute(
+            "INSERT OR REPLACE INTO session_analyses (session_id, analysis, created_at, model) VALUES (?, ?, datetime('now'), ?)",
+            (session_id, json.dumps(analysis_dict), model),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_analysis(session_id, db_path=None):
+    """Retrieve a cached session analysis.
+
+    Args:
+        session_id: The session identifier.
+        db_path: Path to the database file. Defaults to the configured DB_PATH.
+
+    Returns:
+        A parsed analysis dict, or None if not found.
+    """
+    conn = _get_connection(db_path)
+    try:
+        row = conn.execute(
+            "SELECT analysis FROM session_analyses WHERE session_id = ?",
+            (session_id,),
+        ).fetchone()
+        if row and row["analysis"]:
+            try:
+                return json.loads(row["analysis"])
+            except (json.JSONDecodeError, TypeError):
+                return None
+        return None
     finally:
         conn.close()
 

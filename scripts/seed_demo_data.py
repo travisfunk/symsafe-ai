@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from symsafe.config import DB_PATH
 from symsafe.store import (
     init_db, save_session, save_exchange, update_session,
-    update_session_status, get_session,
+    update_session_status, get_session, save_analysis,
 )
 from symsafe.feedback import save_synonym_proposal, save_rule_proposal
 
@@ -318,6 +318,96 @@ def main():
     seed_all()
 
 
+def _seed_analyses(session_ids):
+    """Insert pre-computed AI analyses for demo sessions."""
+    s1, s2, s3, s4, s5 = session_ids
+
+    save_analysis(s1, {
+        "clinical_summary": "Patient presented with acute-onset chest pain (severity 8/10) with progressive radiating left arm pain. History of heart disease and aspirin use. AI appropriately escalated to emergency and recommended 911. This presentation is consistent with acute coronary syndrome and warrants immediate evaluation.",
+        "risk_assessment": {"ai_risk_was_appropriate": True, "explanation": "Both exchanges correctly identified as HIGH risk with emergency care level. The escalation from chest pain to radiating arm pain was handled well.", "suggested_risk": "HIGH", "reasoning": "Chest pain radiating to left arm in a patient with cardiac history is a classic ACS presentation."},
+        "response_quality": [
+            {"exchange_index": 0, "score": "good", "feedback": "Appropriate urgency without being alarmist. Good follow-up questions about pain character and aggravating factors.", "suggested_improvement": "", "missed_questions": []},
+            {"exchange_index": 1, "score": "good", "feedback": "Correct 911 recommendation for radiating chest pain. Mentioned aspirin appropriately given patient's medication history.", "suggested_improvement": "", "missed_questions": []}
+        ],
+        "differential_considerations": ["Acute coronary syndrome (STEMI/NSTEMI) — most consistent with presentation", "Aortic dissection — less likely but should be ruled out", "Pulmonary embolism — consider if ECG is normal"],
+        "synonym_suggestions": [],
+        "response_templates": [],
+        "intake_observations": "Patient reported severity 8/10 with worsening trajectory and cardiac history. Intake correctly captured high-acuity presentation.",
+        "review_priority": "urgent",
+        "priority_reason": "Potential acute cardiac event requiring verification of emergency follow-through",
+        "pattern_notes": "Cardiac presentations with radiating pain should always trigger emergency protocol. This session is a good example of appropriate escalation."
+    })
+
+    save_analysis(s2, {
+        "clinical_summary": "Patient presented with persistent headache (3 days, severity 6/10) unresponsive to ibuprofen, which subsequently developed visual symptoms (spots in vision). AI appropriately escalated from primary_care to urgent_care when vision changes were reported. The headache + vision combination warrants same-day evaluation.",
+        "risk_assessment": {"ai_risk_was_appropriate": True, "explanation": "Initial MODERATE for persistent headache was appropriate. Escalation to HIGH when vision changes appeared was correct per combination rules.", "suggested_risk": "HIGH", "reasoning": "Headache with visual symptoms could indicate increased intracranial pressure, migraine with aura, or more serious pathology."},
+        "response_quality": [
+            {"exchange_index": 0, "score": "good", "feedback": "Good reassurance while taking the symptom seriously. Relevant follow-up questions about pain type and location.", "suggested_improvement": "", "missed_questions": ["Any nausea or vomiting?"]},
+            {"exchange_index": 1, "score": "needs_improvement", "feedback": "Correctly escalated to urgent care, but could have been more specific about what type of evaluation to seek.", "suggested_improvement": "A persistent headache combined with vision changes like seeing spots should be evaluated promptly. I'd recommend going to an urgent care clinic today, or calling your doctor's office for a same-day appointment. They may want to check your blood pressure and do a neurological exam.", "missed_questions": ["Are the spots in both eyes or just one?", "Any numbness or tingling?"]}
+        ],
+        "differential_considerations": ["Migraine with aura — most likely given age and presentation", "Hypertensive crisis — check BP", "Intracranial mass — less likely but should be evaluated", "Temporal arteritis — if patient is over 50"],
+        "synonym_suggestions": [
+            {"phrase": "bad headache", "should_map_to": "headache", "category": "MODERATE", "reason": "Patients frequently describe severe headaches as 'bad headache' — the classifier should catch this common phrasing.", "similar_phrases": ["terrible headache", "awful headache", "really bad headache", "pounding headache"]},
+            {"phrase": "spots in vision", "should_map_to": "vision changes", "category": "HIGH", "reason": "Visual disturbances like 'spots' should map to the existing 'vision changes' flag for combination rule triggering.", "similar_phrases": ["seeing spots", "floaters", "flashing lights", "blurry spots"]}
+        ],
+        "response_templates": [],
+        "intake_observations": "Patient selected '2-3 days' for onset but the AI could have asked for more precision. Pain severity 6/10 with 'same' trajectory may understate the situation given the subsequent vision changes.",
+        "review_priority": "needs_attention",
+        "priority_reason": "Vision changes with headache — verify patient sought evaluation",
+        "pattern_notes": "Headache + vision symptom combinations are a known escalation pattern. The classifier correctly has a combination rule for this."
+    })
+
+    save_analysis(s3, {
+        "clinical_summary": "Patient presented with mild gastric discomfort (severity 3/10, 1 day duration) likely related to dietary cause. AI provided appropriate self-care guidance. Low-risk presentation requiring no medical intervention.",
+        "risk_assessment": {"ai_risk_was_appropriate": True, "explanation": "LOW risk and self_care recommendation were appropriate for this mild, acute-onset GI complaint.", "suggested_risk": "LOW", "reasoning": "Mild stomach upset of short duration with no red flags is appropriately managed with self-care."},
+        "response_quality": [
+            {"exchange_index": 0, "score": "good", "feedback": "Excellent proportionate response. Provided practical self-care advice without over-medicalizing. Clear escalation criteria given.", "suggested_improvement": "", "missed_questions": []}
+        ],
+        "differential_considerations": ["Viral gastroenteritis — most likely", "Food-related GI upset — patient suspects this", "Food intolerance — if recurrent"],
+        "synonym_suggestions": [],
+        "response_templates": [],
+        "intake_observations": "Straightforward low-acuity intake. No concerns.",
+        "review_priority": "routine",
+        "priority_reason": "Low-risk self-limiting presentation handled appropriately",
+        "pattern_notes": ""
+    })
+
+    save_analysis(s4, {
+        "clinical_summary": "Patient with asthma history presented with chest burning on coughing, sore throat, congestion, and low fever over 2-3 days with worsening trajectory. AI correctly identified this as likely upper respiratory infection and recommended primary care given the asthma comorbidity. MODERATE risk is appropriate.",
+        "risk_assessment": {"ai_risk_was_appropriate": True, "explanation": "MODERATE risk with primary_care recommendation was appropriate. The asthma comorbidity correctly influenced the care level.", "suggested_risk": "MODERATE", "reasoning": "URI symptoms in an asthma patient warrant closer monitoring but are not urgent unless respiratory distress develops."},
+        "response_quality": [
+            {"exchange_index": 0, "score": "good", "feedback": "Good contextualization of chest burning as cough-related rather than cardiac. Appropriate concern about asthma history. Relevant follow-up questions.", "suggested_improvement": "", "missed_questions": []},
+            {"exchange_index": 1, "score": "needs_improvement", "feedback": "Solid advice overall but could be more specific about when to seek urgent care for an asthma patient.", "suggested_improvement": "With the congestion, sore throat, and low fever on top of your asthma, this sounds like a cold or upper respiratory infection. Schedule an appointment with your doctor in the next day or two since respiratory infections can aggravate asthma.\n\nIn the meantime, stay hydrated and rest. If your breathing gets noticeably tighter, you're using your rescue inhaler more than every 4 hours, or your fever goes above 101, head to urgent care rather than waiting for your appointment.", "missed_questions": ["What is your current temperature?", "Do you have a peak flow meter?"]}
+        ],
+        "differential_considerations": ["Upper respiratory infection — most consistent", "Acute bronchitis — possible given chest symptoms", "Asthma exacerbation triggered by URI — monitor closely"],
+        "synonym_suggestions": [
+            {"phrase": "chest burns", "should_map_to": "chest pain", "category": "MODERATE", "reason": "Chest burning from coughing is common in URI but currently matches HIGH risk 'chest pain'. Consider creating a MODERATE-level synonym to avoid over-triaging.", "similar_phrases": ["burning in chest", "chest feels like burning", "my chest is on fire"]}
+        ],
+        "response_templates": [],
+        "intake_observations": "Asthma noted in conditions — this correctly influenced the AI's recommendation to see a doctor rather than pure self-care.",
+        "review_priority": "needs_attention",
+        "priority_reason": "Asthma patient with respiratory symptoms — verify appropriate follow-up",
+        "pattern_notes": "URI symptoms + asthma history is a common pattern that should default to primary_care. The 'chest burns' synonym issue highlights a classifier gap where cough-related chest burning triggers cardiac-level flags."
+    })
+
+    save_analysis(s5, {
+        "clinical_summary": "Patient expressed hopelessness and suicidal ideation (severity 9/10, worsening over 1-2 weeks). AI correctly identified this as a mental health emergency and provided 988 crisis line and ER resources. Appropriate crisis response.",
+        "risk_assessment": {"ai_risk_was_appropriate": True, "explanation": "HIGH risk with emergency care level was the only appropriate response for expressed suicidal ideation.", "suggested_risk": "HIGH", "reasoning": "Any expression of suicidal ideation requires immediate crisis intervention."},
+        "response_quality": [
+            {"exchange_index": 0, "score": "good", "feedback": "Excellent crisis response. Warm, non-judgmental tone. 988 hotline provided. ER option given. Open-ended follow-up offered.", "suggested_improvement": "", "missed_questions": []}
+        ],
+        "differential_considerations": ["Acute suicidal crisis — primary concern", "Major depressive episode — likely underlying", "Situational crisis — assess contributing factors"],
+        "synonym_suggestions": [],
+        "response_templates": [],
+        "intake_observations": "Severity 9/10 with worsening trajectory for mental health concern should potentially auto-flag for immediate review.",
+        "review_priority": "urgent",
+        "priority_reason": "Suicidal ideation — verify crisis resources were provided and patient safety",
+        "pattern_notes": "Mental health emergencies with severity 8+ and worsening trajectory should be auto-flagged for clinician review regardless of AI response quality."
+    })
+
+    return 5
+
+
 def seed_all():
     """Insert all demo data. Can be called programmatically (e.g. on app startup)."""
     s1 = _seed_session_1()
@@ -329,9 +419,10 @@ def seed_all():
 
     synonym_count = _seed_synonym_proposals(session_ids)
     rule_count = _seed_rule_proposals(session_ids)
+    analysis_count = _seed_analyses(session_ids)
 
     exchange_count = 2 + 2 + 1 + 2 + 1  # per session
-    print(f"Seeded: 5 sessions, {exchange_count} exchanges, {synonym_count} synonym proposals, {rule_count} rule proposals")
+    print(f"Seeded: 5 sessions, {exchange_count} exchanges, {synonym_count} synonym proposals, {rule_count} rule proposals, {analysis_count} analyses")
 
 
 if __name__ == "__main__":

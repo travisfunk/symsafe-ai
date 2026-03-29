@@ -21,23 +21,17 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 .tab .badge{vertical-align:middle}
 .tab-content{display:none;flex:1;overflow:hidden}
 .tab-content.active{display:flex;flex-direction:column;flex:1}
-
-/* TAB 1: Review queue — 3-panel layout */
 .panels{display:grid;grid-template-columns:260px 1fr 240px;flex:1;overflow:hidden;height:calc(100vh - 95px)}
 .panel{overflow-y:auto;padding:12px}
 .panel-left{background:#f5f6fa;border-right:1px solid #e0e0e0}
 .panel-center{background:#fff}
 .panel-right{background:#f5f6fa;border-left:1px solid #e0e0e0}
-
-/* Session queue cards */
 .queue-card{background:#fff;border:0.5px solid #ddd;border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s}
 .queue-card:hover{border-color:#2c3e50}
 .queue-card.active{border-left:3px solid #2c3e50;background:#f0f4f8}
 .queue-top{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 .risk-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.dot-high{background:#c0392b}
-.dot-moderate{background:#e67e22}
-.dot-low{background:#27ae60}
+.dot-high{background:#c0392b}.dot-moderate{background:#e67e22}.dot-low{background:#27ae60}
 .queue-symptoms{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
 .queue-meta{font-size:11px;color:#999;display:flex;gap:8px;flex-wrap:wrap}
 .status-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:.3px}
@@ -45,30 +39,33 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 .badge-reviewed{background:#eafaf1;color:#27ae60;border:1px solid #a9dfbf}
 .badge-flagged{background:#fde8e8;color:#c0392b;border:1px solid #e6b0aa}
 .risk-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px}
-.rbadge-high{background:#fde8e8;color:#c0392b}
-.rbadge-moderate{background:#fef5e7;color:#e67e22}
-.rbadge-low{background:#eafaf1;color:#27ae60}
-
-/* Center panel */
+.rbadge-high{background:#fde8e8;color:#c0392b}.rbadge-moderate{background:#fef5e7;color:#e67e22}.rbadge-low{background:#eafaf1;color:#27ae60}
 .placeholder{text-align:center;color:#aaa;padding:60px 20px;font-size:14px}
-.intake-bar{position:sticky;top:0;background:#f8f9fb;border-bottom:1px solid #e0e0e0;padding:10px 16px;font-size:12px;color:#555;z-index:10;line-height:1.6}
+.intake-bar{position:sticky;top:0;background:#f8f9fb;border-bottom:1px solid #e0e0e0;padding:10px 16px;font-size:12px;color:#555;z-index:10;line-height:1.6;cursor:pointer}
 .intake-bar strong{color:#333}
+.intake-detail{display:none;margin-top:6px;padding-top:6px;border-top:1px dashed #ccc}
+.ai-summary-block{margin:12px 16px;padding:14px;background:#f0f7fb;border:1px solid #b8d4e8;border-radius:8px}
+.priority-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;margin-bottom:8px}
+.priority-routine{background:#eafaf1;color:#27ae60}.priority-needs_attention{background:#fef5e7;color:#e67e22}.priority-urgent{background:#fde8e8;color:#c0392b}
+.summary-text{font-size:14px;line-height:1.5;margin-bottom:10px}
+.risk-box{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:10px;margin-bottom:8px;font-size:13px}
+.diff-list{font-size:13px;color:#555;margin-bottom:8px;padding-left:18px}
+.diff-list li{margin-bottom:3px}
 .exchange-card{border:1px solid #e8e8e8;border-radius:8px;padding:14px;margin:10px 16px}
 .patient-msg{border-left:3px solid #1a6b52;padding:8px 12px;margin-bottom:8px;font-size:14px;background:#f8fdfb;border-radius:0 6px 6px 0}
 .ai-msg{border-left:3px solid #bdc3c7;padding:8px 12px;margin-bottom:8px;font-size:14px;background:#fafafa;border-radius:0 6px 6px 0;white-space:pre-line}
 .pills-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
 .pill{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;border:1px solid #e0e0e0;background:#fff}
-.pill-high{background:#fde8e8;color:#c0392b;border-color:#e6b0aa}
-.pill-moderate{background:#fef5e7;color:#e67e22;border-color:#f5cba7}
-.pill-low{background:#eafaf1;color:#27ae60;border-color:#a9dfbf}
+.pill-high{background:#fde8e8;color:#c0392b;border-color:#e6b0aa}.pill-moderate{background:#fef5e7;color:#e67e22;border-color:#f5cba7}.pill-low{background:#eafaf1;color:#27ae60;border-color:#a9dfbf}
+.ai-feedback{padding:8px 12px;margin-bottom:8px;border-radius:6px;font-size:12px;line-height:1.5}
+.fb-good{border-left:3px solid #27ae60;background:#f6fcf8}.fb-needs{border-left:3px solid #e67e22;background:#fef9f0}.fb-poor{border-left:3px solid #c0392b;background:#fef0f0}
+.improve-box{background:#eef6ff;border:1px solid #b8d4e8;border-radius:6px;padding:8px;margin-top:6px;font-size:12px}
+.improve-box button{margin-top:4px;padding:3px 10px;font-size:11px;background:#3498db;color:#fff;border:none;border-radius:4px;cursor:pointer}
 .exchange-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .btn{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid;background:#fff;transition:all .15s}
-.btn-accept{color:#27ae60;border-color:#27ae60}
-.btn-accept:hover{background:#27ae60;color:#fff}
-.btn-correct{color:#e67e22;border-color:#e67e22}
-.btn-correct:hover{background:#e67e22;color:#fff}
-.btn-reject{color:#c0392b;border-color:#c0392b}
-.btn-reject:hover{background:#c0392b;color:#fff}
+.btn-accept{color:#27ae60;border-color:#27ae60}.btn-accept:hover{background:#27ae60;color:#fff}
+.btn-correct{color:#e67e22;border-color:#e67e22}.btn-correct:hover{background:#e67e22;color:#fff}
+.btn-reject{color:#c0392b;border-color:#c0392b}.btn-reject:hover{background:#c0392b;color:#fff}
 .btn:disabled{opacity:.4;cursor:default}
 .done-label{font-size:11px;color:#27ae60;font-weight:600}
 .correction-form{display:none;margin-top:10px;padding:12px;background:#fef9f0;border:1px solid #f5cba7;border-radius:8px}
@@ -84,41 +81,43 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 .btn-primary:hover{background:#1a252f}
 .btn-secondary{padding:8px 16px;background:#fff;color:#c0392b;border:1.5px solid #c0392b;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
 .btn-secondary:hover{background:#fde8e8}
-
-/* Right panel */
 .right-section{margin-bottom:16px}
 .right-section h3{font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
 .proposal-card{background:#fff;border:0.5px solid #ddd;border-radius:6px;padding:10px;margin-bottom:6px;font-size:12px}
 .proposal-card strong{color:#2c3e50}
 .proposal-actions{display:flex;gap:6px;margin-top:6px}
 .impact-text{font-size:11px;color:#888;font-style:italic;margin-top:4px}
+.syn-reason{font-size:11px;color:#555;margin-top:4px;line-height:1.4}
+.similar-pills{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.similar-pill{font-size:10px;background:#eef6ff;color:#3498db;padding:2px 6px;border-radius:8px}
 .inline-form{background:#fff;border:0.5px solid #ddd;border-radius:6px;padding:10px;margin-bottom:6px;display:none}
 .inline-form label{display:block;font-size:11px;font-weight:600;color:#555;margin-bottom:2px;margin-top:6px}
 .inline-form input,.inline-form select{width:100%;padding:4px 8px;border:1px solid #ccc;border-radius:4px;font-size:12px;font-family:inherit}
 .inline-form button{margin-top:8px;padding:5px 12px;font-size:11px}
-
-/* TAB 2: Learning queue */
+.obs-block{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:10px;font-size:12px;line-height:1.5;color:#555}
 .learning-panel{padding:20px;max-width:900px;margin:0 auto;overflow-y:auto;height:calc(100vh - 95px)}
 .learning-section{margin-bottom:28px}
 .learning-section h2{font-size:15px;color:#2c3e50;margin-bottom:12px;border-bottom:2px solid #e0e0e0;padding-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
 .learning-card{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:14px;margin-bottom:8px}
 .learning-card p{font-size:14px;margin-bottom:6px}
 .learning-card .meta{font-size:12px;color:#888}
-
-/* TAB 3: Manage classifier */
 .manage-panel{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:20px;overflow-y:auto;height:calc(100vh - 95px)}
 .manage-section{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:16px}
 .manage-section h2{font-size:15px;color:#2c3e50;margin-bottom:12px;border-bottom:2px solid #e0e0e0;padding-bottom:6px}
-.flag-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;max-height:300px;overflow-y:auto}
+.flag-group{margin-bottom:16px}
+.flag-group-header{font-size:13px;font-weight:600;color:#2c3e50;cursor:pointer;padding:6px 0;display:flex;align-items:center;gap:6px}
+.flag-group-header .count{font-size:11px;color:#888;font-weight:400}
+.flag-group-body{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0}
 .flag-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:500}
-.flag-pill-high{background:#fde8e8;color:#c0392b}
-.flag-pill-moderate{background:#fef5e7;color:#e67e22}
+.flag-pill-high{background:#fde8e8;color:#c0392b}.flag-pill-moderate{background:#fef5e7;color:#e67e22}
 .flag-pill .remove-flag{cursor:pointer;font-size:14px;font-weight:700;opacity:.6}
 .flag-pill .remove-flag:hover{opacity:1}
-.add-flag-form{display:flex;gap:6px;align-items:center}
+.add-flag-form{display:flex;gap:6px;align-items:center;margin-top:8px}
 .add-flag-form input{flex:1;padding:6px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px}
 .add-flag-form button{padding:6px 14px;font-size:12px}
-.rule-card{background:#f5f6fa;border:1px solid #e0e0e0;border-radius:6px;padding:10px;margin-bottom:6px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.rule-card{background:#f5f6fa;border:1px solid #e0e0e0;border-radius:6px;padding:10px;margin-bottom:6px;font-size:13px}
+.rule-desc{margin-bottom:4px;line-height:1.4}
+.rule-meta{display:flex;gap:8px;align-items:center}
 .rule-flags{display:flex;gap:4px;flex-wrap:wrap;flex:1}
 .rule-level{font-weight:600;font-size:12px}
 .rule-remove{cursor:pointer;color:#c0392b;font-size:12px;font-weight:600}
@@ -127,573 +126,408 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 .add-rule-form select{padding:6px;border:1px solid #ccc;border-radius:6px;font-size:13px}
 .add-rule-form button{padding:6px 14px;font-size:12px}
 .search-input{width:100%;padding:6px 10px;border:1px solid #ccc;border-radius:6px;font-size:12px;margin-bottom:8px}
-
-@media(max-width:900px){
-  .panels{grid-template-columns:1fr;height:auto}
-  .panel-left,.panel-right{max-height:300px}
-  .manage-panel{grid-template-columns:1fr}
-}
+@media(max-width:900px){.panels{grid-template-columns:1fr;height:auto}.panel-left,.panel-right{max-height:300px}.manage-panel{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
 <div class="header">
   <div style="display:flex;align-items:center;gap:12px">
     <h1>SymSafe clinical review</h1>
     <span class="badge">{{ stats.pending_count }} pending</span>
   </div>
-  <div class="header-right">
-    <a href="/">Patient UI</a>
-    <a href="/review/logout">Logout</a>
-  </div>
+  <div class="header-right"><a href="/">Patient UI</a><a href="/review/logout">Logout</a></div>
 </div>
-
 <div class="tabs">
   <div class="tab active" onclick="switchTab('queue',this)">Review queue <span class="badge">{{ stats.pending_count }}</span></div>
   <div class="tab" onclick="switchTab('learning',this)">Learning queue <span class="badge {% if not pending_synonyms and not pending_rules %}badge-muted{% endif %}">{{ (pending_synonyms|length) + (pending_rules|length) }}</span></div>
   <div class="tab" onclick="switchTab('manage',this)">Manage classifier</div>
 </div>
 
-<!-- TAB 1: Review Queue -->
+<!-- TAB 1 -->
 <div id="tab-queue" class="tab-content active">
-  <div class="panels">
-    <!-- LEFT: Session queue -->
-    <div class="panel panel-left">
-      {% for s in sessions %}
-      <div class="queue-card" data-sid="{{ s.id }}" onclick="loadSession('{{ s.id }}',this)">
-        <div class="queue-top">
-          <div class="risk-dot {% if s.highest_risk == 'HIGH' %}dot-high{% elif s.highest_risk == 'MODERATE' %}dot-moderate{% else %}dot-low{% endif %}"></div>
-          <div class="queue-symptoms">{{ (s.session_symptoms or [])[:3]|join(', ') or 'No symptoms' }}</div>
-        </div>
-        <div class="queue-meta">
-          <span class="risk-badge {% if s.highest_risk == 'HIGH' %}rbadge-high{% elif s.highest_risk == 'MODERATE' %}rbadge-moderate{% else %}rbadge-low{% endif %}">{{ s.highest_risk }}</span>
-          <span>{{ s.message_count }} msgs</span>
-          <span>{{ (s.highest_care_level or 'self_care')|replace('_',' ') }}</span>
-          <span class="status-badge {% if s.status == 'reviewed' %}badge-reviewed{% elif s.status == 'flagged' %}badge-flagged{% else %}badge-pending{% endif %}">{{ s.status|default('pending_review') }}</span>
-        </div>
-      </div>
-      {% endfor %}
-      {% if not sessions %}<div style="color:#aaa;font-size:13px;padding:20px;text-align:center">No sessions yet</div>{% endif %}
-    </div>
-
-    <!-- CENTER: Session detail -->
-    <div class="panel panel-center" id="center-panel">
-      <div class="placeholder">Select a session from the queue to review</div>
-    </div>
-
-    <!-- RIGHT: Context panel -->
-    <div class="panel panel-right" id="right-panel">
-      <div class="right-section">
-        <h3>Quick actions</h3>
-        <button class="btn btn-accept" onclick="showInlineForm('syn-form')" style="margin-bottom:6px;display:block;width:100%">+ Add synonym</button>
-        <div class="inline-form" id="syn-form">
-          <label>Phrase</label>
-          <input type="text" id="syn-phrase" placeholder="e.g. chest is burning">
-          <label>Category</label>
-          <select id="syn-category"><option value="HIGH">HIGH</option><option value="MODERATE">MODERATE</option></select>
-          <label>Synonym for</label>
-          <input type="text" id="syn-for" placeholder="e.g. chest pain">
-          <button class="btn btn-accept" onclick="addSynonym()">Add</button>
-        </div>
-        <button class="btn btn-accept" onclick="showInlineForm('rule-form')" style="display:block;width:100%">+ Add combination rule</button>
-        <div class="inline-form" id="rule-form">
-          <label>Flags (comma-separated)</label>
-          <input type="text" id="rule-flags" placeholder="e.g. headache, vision changes">
-          <label>Level</label>
-          <select id="rule-level"><option value="HIGH">HIGH</option><option value="MODERATE">MODERATE</option></select>
-          <button class="btn btn-accept" onclick="addRule()">Add</button>
-        </div>
-      </div>
-      <div id="right-proposals"></div>
-    </div>
+<div class="panels">
+<div class="panel panel-left">
+{% for s in sessions %}
+<div class="queue-card" data-sid="{{ s.id }}" onclick="loadSession('{{ s.id }}',this)">
+  <div class="queue-top">
+    <div class="risk-dot {% if s.highest_risk == 'HIGH' %}dot-high{% elif s.highest_risk == 'MODERATE' %}dot-moderate{% else %}dot-low{% endif %}"></div>
+    <div class="queue-symptoms">{{ (s.session_symptoms or [])[:3]|join(', ') or 'No symptoms' }}</div>
+  </div>
+  <div class="queue-meta">
+    <span class="risk-badge {% if s.highest_risk == 'HIGH' %}rbadge-high{% elif s.highest_risk == 'MODERATE' %}rbadge-moderate{% else %}rbadge-low{% endif %}">{{ s.highest_risk }}</span>
+    <span>{{ s.message_count }} msgs</span>
+    <span>{{ (s.highest_care_level or 'self_care')|replace('_',' ') }}</span>
+    <span class="status-badge {% if s.status == 'reviewed' %}badge-reviewed{% elif s.status == 'flagged' %}badge-flagged{% else %}badge-pending{% endif %}">{{ s.status|default('pending_review') }}</span>
   </div>
 </div>
+{% endfor %}
+{% if not sessions %}<div style="color:#aaa;font-size:13px;padding:20px;text-align:center">No sessions yet</div>{% endif %}
+</div>
+<div class="panel panel-center" id="center-panel"><div class="placeholder">Select a session from the queue to review</div></div>
+<div class="panel panel-right" id="right-panel">
+  <div class="right-section">
+    <h3>Quick actions</h3>
+    <button class="btn btn-accept" onclick="showInlineForm('syn-form')" style="margin-bottom:6px;display:block;width:100%">+ Add synonym</button>
+    <div class="inline-form" id="syn-form">
+      <label>Phrase</label><input type="text" id="syn-phrase" placeholder="e.g. chest is burning">
+      <label>Category</label><select id="syn-category"><option value="HIGH">HIGH</option><option value="MODERATE">MODERATE</option></select>
+      <label>Synonym for</label><input type="text" id="syn-for" placeholder="e.g. chest pain">
+      <button class="btn btn-accept" onclick="addSynonym()">Add</button>
+    </div>
+    <button class="btn btn-accept" onclick="showInlineForm('rule-form')" style="display:block;width:100%">+ Add combination rule</button>
+    <div class="inline-form" id="rule-form">
+      <label>Flags (comma-separated)</label><input type="text" id="rule-flags" placeholder="e.g. headache, vision changes">
+      <label>Level</label><select id="rule-level"><option value="HIGH">HIGH</option><option value="MODERATE">MODERATE</option></select>
+      <button class="btn btn-accept" onclick="addRule()">Add</button>
+    </div>
+  </div>
+  <div id="right-proposals"></div>
+</div>
+</div>
+</div>
 
-<!-- TAB 2: Learning Queue -->
+<!-- TAB 2 -->
 <div id="tab-learning" class="tab-content">
-  <div class="learning-panel">
-    <div class="learning-section">
-      <h2>Synonym proposals ({{ pending_synonyms|length }} pending)</h2>
-      {% for sp in pending_synonyms %}
-      <div class="learning-card" id="lsyn-{{ sp.id }}">
-        <p>Patient said "<strong>{{ sp.patient_phrase }}</strong>"</p>
-        <p>AI flagged as <strong>{{ sp.gpt_risk_level }}</strong> — Local classifier missed it</p>
-        <div class="meta">Suggested synonym for: {{ sp.proposed_synonym_for or 'unknown' }} | Category: {{ sp.proposed_category }}</div>
-        <div class="impact-text" data-phrase="{{ sp.patient_phrase }}">Checking impact...</div>
-        <div class="proposal-actions">
-          <button class="btn btn-accept" onclick="reviewSynonym({{ sp.id }},'approve',this)">Approve</button>
-          <button class="btn btn-reject" onclick="reviewSynonym({{ sp.id }},'reject',this)">Reject</button>
-        </div>
+<div class="learning-panel">
+  <div class="learning-section">
+    <h2>Synonym recommendations ({{ pending_synonyms|length }} pending)</h2>
+    {% for sp in pending_synonyms %}
+    <div class="learning-card" id="lsyn-{{ sp.id }}">
+      <p>Patient said "<strong>{{ sp.patient_phrase }}</strong>"</p>
+      <p>AI flagged as <strong>{{ sp.gpt_risk_level }}</strong> — Local classifier missed it</p>
+      <div class="meta">Suggested synonym for: {{ sp.proposed_synonym_for or 'unknown' }} | Category: {{ sp.proposed_category }}</div>
+      <div class="impact-text" data-phrase="{{ sp.patient_phrase }}">Checking impact...</div>
+      <div class="proposal-actions">
+        <button class="btn btn-accept" onclick="reviewSynonym({{ sp.id }},'approve',this)">Approve</button>
+        <button class="btn btn-reject" onclick="reviewSynonym({{ sp.id }},'reject',this)">Reject</button>
       </div>
-      {% endfor %}
-      {% if not pending_synonyms %}<div style="color:#aaa;font-size:13px;padding:12px 0">No pending synonym proposals</div>{% endif %}
     </div>
-
-    <div class="learning-section">
-      <h2>Combination rule proposals ({{ pending_rules|length }} pending)</h2>
-      {% for rp in pending_rules %}
-      <div class="learning-card" id="lrule-{{ rp.id }}">
-        <p><strong>{{ rp.description }}</strong></p>
-        <div class="meta">Type: {{ rp.proposal_type }} | Status: {{ rp.status }}</div>
-        <div class="proposal-actions">
-          <button class="btn btn-accept" onclick="reviewRule({{ rp.id }},'approve',this)">Approve</button>
-          <button class="btn btn-reject" onclick="reviewRule({{ rp.id }},'reject',this)">Reject</button>
-        </div>
+    {% endfor %}
+    {% if not pending_synonyms %}<div style="color:#aaa;font-size:13px;padding:12px 0">No pending synonym proposals</div>{% endif %}
+  </div>
+  <div class="learning-section">
+    <h2>Classification corrections</h2>
+    <div id="classification-corrections"><div style="color:#aaa;font-size:13px;padding:12px 0">Load a session to see AI risk suggestions</div></div>
+  </div>
+  <div class="learning-section">
+    <h2>Combination rule proposals ({{ pending_rules|length }} pending)</h2>
+    {% for rp in pending_rules %}
+    <div class="learning-card" id="lrule-{{ rp.id }}">
+      <p><strong>{{ rp.description }}</strong></p>
+      <div class="meta">Type: {{ rp.proposal_type }} | Status: {{ rp.status }}</div>
+      <div class="proposal-actions">
+        <button class="btn btn-accept" onclick="reviewRule({{ rp.id }},'approve',this)">Approve</button>
+        <button class="btn btn-reject" onclick="reviewRule({{ rp.id }},'reject',this)">Reject</button>
       </div>
-      {% endfor %}
-      {% if not pending_rules %}<div style="color:#aaa;font-size:13px;padding:12px 0">No pending rule proposals</div>{% endif %}
     </div>
-
-    <div class="learning-section">
-      <h2>Recently approved</h2>
-      {% for sp in approved_synonyms[:10] %}
-      <div class="learning-card">
-        <p>"<strong>{{ sp.patient_phrase }}</strong>" added as synonym for {{ sp.proposed_synonym_for or 'unknown' }} ({{ sp.proposed_category }})</p>
-        <div class="meta">Reviewed by: {{ sp.reviewed_by or 'system' }}</div>
-      </div>
-      {% endfor %}
-      {% if not approved_synonyms %}<div style="color:#aaa;font-size:13px;padding:12px 0">No recently approved items</div>{% endif %}
+    {% endfor %}
+    {% if not pending_rules %}<div style="color:#aaa;font-size:13px;padding:12px 0">No pending rule proposals</div>{% endif %}
+  </div>
+  <div class="learning-section">
+    <h2>Recently approved</h2>
+    {% for sp in approved_synonyms[:10] %}
+    <div class="learning-card">
+      <p>"<strong>{{ sp.patient_phrase }}</strong>" added as synonym for {{ sp.proposed_synonym_for or 'unknown' }} ({{ sp.proposed_category }})</p>
+      <div class="meta">Reviewed by: {{ sp.reviewed_by or 'system' }}</div>
     </div>
+    {% endfor %}
+    {% if not approved_synonyms %}<div style="color:#aaa;font-size:13px;padding:12px 0">No recently approved items</div>{% endif %}
   </div>
 </div>
+</div>
 
-<!-- TAB 3: Manage Classifier -->
+<!-- TAB 3 -->
 <div id="tab-manage" class="tab-content">
-  <div class="manage-panel">
-    <div>
-      <div class="manage-section">
-        <h2>HIGH risk flags ({{ high_flags|length }})</h2>
-        <input type="text" class="search-input" placeholder="Search flags..." oninput="filterFlags(this,'high-flags')">
-        <div class="flag-list" id="high-flags">
-          {% for f in high_flags %}
-          <span class="flag-pill flag-pill-high">{{ f }} <span class="remove-flag" onclick="removeFlag('{{ f }}','HIGH',this)">&times;</span></span>
-          {% endfor %}
+<div class="manage-panel">
+<div>
+  <div class="manage-section">
+    <h2>HIGH risk flags ({{ high_flags|length }})</h2>
+    <input type="text" class="search-input" placeholder="Search flags..." oninput="filterFlags(this,'high-flags')">
+    <div id="high-flags">
+    {% set high_groups = {
+      'Cardiac': ['chest pain','chest tightness','chest pressure','heart attack','heart racing','heart is racing'],
+      'Neurological': ['stroke','seizure','confusion','can\'t speak','difficulty speaking','facial drooping','worst headache','sudden headache'],
+      'Respiratory': ['shortness of breath','difficulty breathing','can\'t breathe','choking','stopped breathing'],
+      'Vision': ['vision loss','sudden blindness','can\'t see'],
+      'Mental health': ['suicidal','want to die','kill myself','self-harm','overdose'],
+      'Severe': ['uncontrolled bleeding','coughing blood','vomiting blood','loss of consciousness','passed out','unresponsive'],
+      'Allergic': ['throat swelling','anaphylaxis','can\'t swallow']
+    } %}
+    {% set grouped_flags = [] %}
+    {% for gname, gflags in high_groups.items() %}
+      {% set matched = [] %}
+      {% for f in high_flags %}{% if f in gflags %}{% if matched.append(f) %}{% endif %}{% endif %}{% endfor %}
+      {% if matched %}
+      <div class="flag-group">
+        <div class="flag-group-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none'">
+          {{ gname }} <span class="count">({{ matched|length }})</span>
         </div>
-        <div class="add-flag-form">
-          <input type="text" id="add-high-flag" placeholder="New HIGH flag...">
-          <button class="btn btn-accept" onclick="addFlag('HIGH')">Add</button>
+        <div class="flag-group-body">
+          {% for f in matched %}<span class="flag-pill flag-pill-high">{{ f }} <span class="remove-flag" onclick="removeFlag('{{ f }}','HIGH',this)">&times;</span></span>{% if grouped_flags.append(f) %}{% endif %}{% endfor %}
         </div>
       </div>
-
-      <div class="manage-section" style="margin-top:16px">
-        <h2>MODERATE risk flags ({{ moderate_flags|length }})</h2>
-        <input type="text" class="search-input" placeholder="Search flags..." oninput="filterFlags(this,'mod-flags')">
-        <div class="flag-list" id="mod-flags">
-          {% for f in moderate_flags %}
-          <span class="flag-pill flag-pill-moderate">{{ f }} <span class="remove-flag" onclick="removeFlag('{{ f }}','MODERATE',this)">&times;</span></span>
-          {% endfor %}
-        </div>
-        <div class="add-flag-form">
-          <input type="text" id="add-mod-flag" placeholder="New MODERATE flag...">
-          <button class="btn btn-accept" onclick="addFlag('MODERATE')">Add</button>
-        </div>
+      {% endif %}
+    {% endfor %}
+    {% set other_high = [] %}
+    {% for f in high_flags %}{% if f not in grouped_flags %}{% if other_high.append(f) %}{% endif %}{% endif %}{% endfor %}
+    {% if other_high %}
+    <div class="flag-group">
+      <div class="flag-group-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none'">
+        Other <span class="count">({{ other_high|length }})</span>
+      </div>
+      <div class="flag-group-body">
+        {% for f in other_high %}<span class="flag-pill flag-pill-high">{{ f }} <span class="remove-flag" onclick="removeFlag('{{ f }}','HIGH',this)">&times;</span></span>{% endfor %}
       </div>
     </div>
-
-    <div class="manage-section">
-      <h2>Combination rules ({{ combination_rules|length }})</h2>
-      <div id="rules-list">
-        {% for r in combination_rules %}
-        <div class="rule-card">
-          <div class="rule-flags">
-            {% for f in r.flags %}<span class="pill">{{ f }}</span>{% endfor %}
-          </div>
-          <span class="rule-level {% if r.level == 'HIGH' %}pill-high{% else %}pill-moderate{% endif %}" style="padding:3px 10px;border-radius:12px">{{ r.level }}</span>
-          <span style="font-size:11px;color:#888">{{ r.get('source','') if r.get is defined else '' }}</span>
-        </div>
-        {% endfor %}
-      </div>
-      <div class="add-rule-form">
-        <input type="text" id="manage-rule-flags" placeholder="Flags (comma-separated)">
-        <select id="manage-rule-level"><option value="HIGH">HIGH</option><option value="MODERATE">MODERATE</option></select>
-        <button class="btn btn-accept" onclick="addRuleFromManage()">Add rule</button>
-      </div>
+    {% endif %}
+    </div>
+    <div class="add-flag-form"><input type="text" id="add-high-flag" placeholder="New HIGH flag..."><button class="btn btn-accept" onclick="addFlag('HIGH')">Add</button></div>
+  </div>
+  <div class="manage-section" style="margin-top:16px">
+    <h2>MODERATE risk flags ({{ moderate_flags|length }})</h2>
+    <input type="text" class="search-input" placeholder="Search flags..." oninput="filterFlags(this,'mod-flags')">
+    <div class="flag-list" id="mod-flags">
+      {% for f in moderate_flags %}<span class="flag-pill flag-pill-moderate">{{ f }} <span class="remove-flag" onclick="removeFlag('{{ f }}','MODERATE',this)">&times;</span></span>{% endfor %}
+    </div>
+    <div class="add-flag-form"><input type="text" id="add-mod-flag" placeholder="New MODERATE flag..."><button class="btn btn-accept" onclick="addFlag('MODERATE')">Add</button></div>
+  </div>
+</div>
+<div class="manage-section">
+  <h2>Combination rules ({{ combination_rules|length }})</h2>
+  <div id="rules-list">
+  {% for r in combination_rules %}
+  <div class="rule-card">
+    <div class="rule-desc">When patient reports <strong>{{ r.flags|join('</strong> AND <strong>') }}</strong> together, escalate to <strong>{{ r.level }}</strong> risk</div>
+    <div class="rule-meta">
+      <div class="rule-flags">{% for f in r.flags %}<span class="pill">{{ f }}</span>{% endfor %}</div>
+      <span style="font-size:11px;color:#888">{{ r.get('source','') if r.get is defined else '' }}</span>
     </div>
   </div>
+  {% endfor %}
+  </div>
+  <div class="add-rule-form">
+    <input type="text" id="manage-rule-flags" placeholder="Flags (comma-separated)">
+    <select id="manage-rule-level"><option value="HIGH">HIGH</option><option value="MODERATE">MODERATE</option></select>
+    <button class="btn btn-accept" onclick="addRuleFromManage()">Add rule</button>
+  </div>
+</div>
+</div>
 </div>
 
 <script>
-var currentSessionId = null;
-var currentSessionData = null;
+var currentSessionId=null,currentSessionData=null,currentAnalysis=null;
 
-function switchTab(name, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
+function switchTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');document.getElementById('tab-'+name).classList.add('active');
 }
 
-function esc(s) {
-  if (!s) return '';
-  var d = document.createElement('div');
-  d.textContent = String(s);
-  return d.innerHTML;
+function esc(s){if(!s)return '';var d=document.createElement('div');d.textContent=String(s);return d.innerHTML}
+
+function loadSession(sid,card){
+  document.querySelectorAll('.queue-card').forEach(c=>c.classList.remove('active'));
+  if(card)card.classList.add('active');
+  currentSessionId=sid;currentAnalysis=null;
+  document.getElementById('center-panel').innerHTML='<div class="placeholder">Loading session and running analysis...</div>';
+
+  Promise.all([
+    fetch('/api/review/session-data/'+sid).then(r=>r.json()),
+    fetch('/api/review/analyze/'+sid).then(r=>r.json()).catch(()=>null)
+  ]).then(function(results){
+    var data=results[0],analysis=results[1];
+    if(data.error){document.getElementById('center-panel').innerHTML='<div class="placeholder">'+esc(data.error)+'</div>';return}
+    currentSessionData=data;currentAnalysis=analysis;
+    renderSession(data,analysis);
+    renderRightPanel(data,analysis);
+  }).catch(function(){document.getElementById('center-panel').innerHTML='<div class="placeholder">Failed to load session</div>'});
 }
 
-function loadSession(sid, card) {
-  document.querySelectorAll('.queue-card').forEach(c => c.classList.remove('active'));
-  if (card) card.classList.add('active');
-  currentSessionId = sid;
+function renderSession(data,analysis){
+  var s=data.session,exchanges=data.exchanges,html='';
 
-  document.getElementById('center-panel').innerHTML = '<div class="placeholder">Loading...</div>';
-
-  fetch('/api/review/session-data/' + sid)
-    .then(r => r.json())
-    .then(data => {
-      if (data.error) {
-        document.getElementById('center-panel').innerHTML = '<div class="placeholder">' + esc(data.error) + '</div>';
-        return;
-      }
-      currentSessionData = data;
-      renderSession(data);
-      renderRightPanel(data);
-    })
-    .catch(() => {
-      document.getElementById('center-panel').innerHTML = '<div class="placeholder">Failed to load session</div>';
-    });
-}
-
-function renderSession(data) {
-  var s = data.session;
-  var exchanges = data.exchanges;
-  var html = '';
-
-  // Intake bar
-  if (s.intake_answers) {
-    var ia = s.intake_answers;
-    var parts = [];
-    if (ia.concern) parts.push('<strong>Concern:</strong> ' + esc(ia.concern));
-    if (ia.location) parts.push('<strong>Location:</strong> ' + esc(ia.location));
-    if (ia.onset) parts.push('<strong>Onset:</strong> ' + esc(ia.onset));
-    if (ia.severity) parts.push('<strong>Severity:</strong> ' + esc(ia.severity) + '/10');
-    if (ia.trajectory) parts.push('<strong>Trajectory:</strong> ' + esc(ia.trajectory));
-    if (ia.medications && ia.medications !== 'none') parts.push('<strong>Meds:</strong> ' + esc(ia.medications));
-    if (ia.conditions && ia.conditions !== 'none') parts.push('<strong>Conditions:</strong> ' + esc(ia.conditions));
-    html += '<div class="intake-bar">' + parts.join(' &middot; ') + '</div>';
+  // Intake bar (collapsible)
+  if(s.intake_answers){
+    var ia=s.intake_answers,summary=[];
+    if(ia.concern)summary.push(esc(ia.concern));
+    if(ia.location)summary.push(esc(ia.location));
+    if(ia.severity)summary.push(esc(ia.severity)+'/10');
+    if(ia.onset)summary.push(esc(ia.onset));
+    html+='<div class="intake-bar" onclick="var d=this.querySelector(\'.intake-detail\');d.style.display=d.style.display===\'none\'?\'block\':\'none\'">';
+    html+='<strong>Intake:</strong> '+summary.join(' &middot; ')+' <span style="font-size:11px;color:#999">(click to expand)</span>';
+    html+='<div class="intake-detail">';
+    var fields=['concern','location','onset','severity','trajectory','medications','conditions'];
+    for(var fi=0;fi<fields.length;fi++){var fk=fields[fi];if(ia[fk])html+='<strong>'+fk+':</strong> '+esc(ia[fk])+'<br>'}
+    html+='</div></div>';
   }
 
-  // Exchanges
-  for (var i = 0; i < exchanges.length; i++) {
-    var ex = exchanges[i];
-    var riskClass = 'pill-low';
-    if (ex.merged_risk_level && ex.merged_risk_level.toUpperCase().indexOf('HIGH') >= 0) riskClass = 'pill-high';
-    else if (ex.merged_risk_level && ex.merged_risk_level.toUpperCase().indexOf('MODERATE') >= 0) riskClass = 'pill-moderate';
+  // AI Summary block
+  if(analysis && analysis.clinical_summary){
+    var pr=analysis.review_priority||'routine';
+    html+='<div class="ai-summary-block">';
+    html+='<span class="priority-badge priority-'+pr+'">'+esc(pr).replace('_',' ').toUpperCase()+'</span>';
+    if(analysis.priority_reason)html+=' <span style="font-size:11px;color:#888">'+esc(analysis.priority_reason)+'</span>';
+    html+='<div class="summary-text">'+esc(analysis.clinical_summary)+'</div>';
 
-    html += '<div class="exchange-card" id="ex-' + ex.id + '">';
-    html += '<div class="patient-msg"><strong>Patient:</strong> ' + esc(ex.user_input) + '</div>';
-    html += '<div class="ai-msg"><strong>AI:</strong> ' + esc(ex.assistant_response) + '</div>';
-    html += '<div class="pills-row">';
-    html += '<span class="pill ' + riskClass + '">' + esc(ex.merged_risk_level) + '</span>';
-    html += '<span class="pill">' + esc(ex.care_level) + '</span>';
-    html += '</div>';
+    if(analysis.risk_assessment){
+      var ra=analysis.risk_assessment;
+      html+='<div class="risk-box">';
+      html+='<strong>Risk assessment:</strong> ';
+      if(ra.ai_risk_was_appropriate)html+='<span style="color:#27ae60">AI risk level was appropriate.</span> ';
+      else html+='<span style="color:#e67e22">AI suggested: <strong>'+esc(ra.suggested_risk)+'</strong></span> ';
+      html+=esc(ra.explanation||'');
+      html+='</div>';
+    }
+
+    if(analysis.differential_considerations && analysis.differential_considerations.length){
+      html+='<ul class="diff-list">';
+      for(var di=0;di<analysis.differential_considerations.length;di++)html+='<li>'+esc(analysis.differential_considerations[di])+'</li>';
+      html+='</ul>';
+    }
+    html+='</div>';
+  }
+
+  // Exchanges with AI feedback
+  var rq=analysis&&analysis.response_quality?analysis.response_quality:[];
+  for(var i=0;i<exchanges.length;i++){
+    var ex=exchanges[i];
+    var riskClass='pill-low';
+    if(ex.merged_risk_level&&ex.merged_risk_level.toUpperCase().indexOf('HIGH')>=0)riskClass='pill-high';
+    else if(ex.merged_risk_level&&ex.merged_risk_level.toUpperCase().indexOf('MODERATE')>=0)riskClass='pill-moderate';
+
+    html+='<div class="exchange-card" id="ex-'+ex.id+'">';
+    html+='<div class="patient-msg"><strong>Patient:</strong> '+esc(ex.user_input)+'</div>';
+    html+='<div class="ai-msg"><strong>AI:</strong> '+esc(ex.assistant_response)+'</div>';
+    html+='<div class="pills-row"><span class="pill '+riskClass+'">'+esc(ex.merged_risk_level)+'</span><span class="pill">'+esc(ex.care_level)+'</span></div>';
+
+    // AI feedback for this exchange
+    var fb=null;
+    for(var qi=0;qi<rq.length;qi++){if(rq[qi].exchange_index===i||rq[qi].exchange_index===ex.exchange_index){fb=rq[qi];break}}
+    if(fb){
+      var fbClass=fb.score==='good'?'fb-good':fb.score==='poor'?'fb-poor':'fb-needs';
+      html+='<div class="ai-feedback '+fbClass+'">';
+      html+='<strong>'+esc(fb.score).replace('_',' ')+'</strong>: '+esc(fb.feedback);
+      if(fb.score!=='good'&&fb.suggested_improvement){
+        html+='<div class="improve-box">'+esc(fb.suggested_improvement);
+        html+='<br><button onclick="applySuggestion('+ex.id+',this)">Apply this improvement</button></div>';
+      }
+      if(fb.missed_questions&&fb.missed_questions.length){
+        html+='<div style="margin-top:4px;font-size:11px;color:#888">Missed questions: '+fb.missed_questions.map(esc).join(', ')+'</div>';
+      }
+      html+='</div>';
+    }
 
     // Actions
-    html += '<div class="exchange-actions" id="actions-' + ex.id + '">';
-    if (ex.review_status && ex.review_status !== 'pending') {
-      html += '<span class="done-label">' + esc(ex.review_status).toUpperCase() + '</span>';
-      if (ex.corrected_risk_level) html += ' <span class="pill pill-high">Corrected: ' + esc(ex.corrected_risk_level) + '</span>';
-      if (ex.review_reason) html += ' <span style="font-size:11px;color:#555">' + esc(ex.review_reason) + '</span>';
-    } else {
-      html += '<button class="btn btn-accept" onclick="reviewExchange(' + ex.id + ',\'accepted\',this)">Accept</button>';
-      html += '<button class="btn btn-correct" onclick="showCorrection(' + ex.id + ')">Correct</button>';
-      html += '<button class="btn btn-reject" onclick="rejectExchange(' + ex.id + ',this)">Reject</button>';
+    html+='<div class="exchange-actions" id="actions-'+ex.id+'">';
+    if(ex.review_status&&ex.review_status!=='pending'){
+      html+='<span class="done-label">'+esc(ex.review_status).toUpperCase()+'</span>';
+    }else{
+      html+='<button class="btn btn-accept" onclick="reviewExchange('+ex.id+',\'accepted\',this)">Accept</button>';
+      html+='<button class="btn btn-correct" onclick="showCorrection('+ex.id+')">Correct</button>';
+      html+='<button class="btn btn-reject" onclick="rejectExchange('+ex.id+',this)">Reject</button>';
     }
-    html += '</div>';
+    html+='</div>';
 
-    // Correction form
-    html += '<div class="correction-form" id="correction-' + ex.id + '">';
-    html += '<label>What should the AI have said?</label>';
-    html += '<textarea id="corr-text-' + ex.id + '">' + esc(ex.assistant_response) + '</textarea>';
-    html += '<button class="suggest-btn" onclick="getSuggestion(' + ex.id + ',\'' + esc(ex.user_input).replace(/'/g, "\\'") + '\')">Get AI suggestion</button>';
-    html += '<label>Risk level</label>';
-    html += '<select id="corr-risk-' + ex.id + '"><option value="HIGH">HIGH</option><option value="MODERATE">MODERATE</option><option value="LOW">LOW</option></select>';
-    html += '<label>Care level</label>';
-    html += '<select id="corr-care-' + ex.id + '"><option value="emergency">emergency</option><option value="urgent_care">urgent_care</option><option value="primary_care">primary_care</option><option value="telehealth">telehealth</option><option value="self_care">self_care</option></select>';
-    html += '<label>Reason</label>';
-    html += '<input type="text" id="corr-reason-' + ex.id + '" placeholder="Why is this correction needed?">';
-    html += '<button class="submit-btn" onclick="submitCorrection(' + ex.id + ')">Save correction</button>';
-    html += '</div>';
-    html += '</div>';
+    html+='<div class="correction-form" id="correction-'+ex.id+'">';
+    html+='<label>What should the AI have said?</label>';
+    html+='<textarea id="corr-text-'+ex.id+'">'+esc(ex.assistant_response)+'</textarea>';
+    html+='<button class="suggest-btn" onclick="getSuggestion('+ex.id+',\''+esc(ex.user_input).replace(/'/g,"\\'")+'\')">Get AI suggestion</button>';
+    html+='<label>Risk level</label><select id="corr-risk-'+ex.id+'"><option value="HIGH">HIGH</option><option value="MODERATE">MODERATE</option><option value="LOW">LOW</option></select>';
+    html+='<label>Care level</label><select id="corr-care-'+ex.id+'"><option value="emergency">emergency</option><option value="urgent_care">urgent_care</option><option value="primary_care">primary_care</option><option value="telehealth">telehealth</option><option value="self_care">self_care</option></select>';
+    html+='<label>Reason</label><input type="text" id="corr-reason-'+ex.id+'" placeholder="Why is this correction needed?">';
+    html+='<button class="submit-btn" onclick="submitCorrection('+ex.id+')">Save correction</button>';
+    html+='</div></div>';
   }
+  if(!exchanges.length)html+='<div class="placeholder">No exchanges in this session</div>';
 
-  if (!exchanges.length) html += '<div class="placeholder">No exchanges in this session</div>';
-
-  // Bottom actions
-  html += '<div class="session-bottom">';
-  html += '<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">Clinical notes</label>';
-  html += '<textarea class="notes-area" id="clinicalNotes">' + esc(s.reviewer_notes || '') + '</textarea>';
-  html += '<div class="bottom-actions">';
-  html += '<button class="btn-primary" onclick="markSession(\'reviewed\')">Mark as reviewed</button>';
-  html += '<button class="btn-secondary" onclick="markSession(\'flagged\')">Flag for follow-up</button>';
-  html += '</div></div>';
-
-  document.getElementById('center-panel').innerHTML = html;
+  html+='<div class="session-bottom">';
+  html+='<label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px">Clinical notes</label>';
+  html+='<textarea class="notes-area" id="clinicalNotes">'+esc(s.reviewer_notes||'')+'</textarea>';
+  html+='<div class="bottom-actions"><button class="btn-primary" onclick="markSession(\'reviewed\')">Mark as reviewed</button>';
+  html+='<button class="btn-secondary" onclick="markSession(\'flagged\')">Flag for follow-up</button></div></div>';
+  document.getElementById('center-panel').innerHTML=html;
 }
 
-function renderRightPanel(data) {
-  var html = '';
-  var proposals = data.synonym_proposals || [];
-  if (proposals.length) {
-    html += '<div class="right-section"><h3>Session proposals</h3>';
-    for (var i = 0; i < proposals.length; i++) {
-      var sp = proposals[i];
-      html += '<div class="proposal-card" id="rsyn-' + sp.id + '">';
-      html += '<strong>"' + esc(sp.patient_phrase) + '"</strong>';
-      html += '<br>AI: ' + esc(sp.gpt_risk_level) + ' | Local: missed';
-      html += '<br>Synonym for: ' + esc(sp.proposed_synonym_for || 'unknown');
-      html += '<div class="impact-text" data-phrase="' + esc(sp.patient_phrase) + '">Checking impact...</div>';
-      if (sp.status === 'pending') {
-        html += '<div class="proposal-actions">';
-        html += '<button class="btn btn-accept" onclick="reviewSynonym(' + sp.id + ',\'approve\',this)">Approve</button>';
-        html += '<button class="btn btn-reject" onclick="reviewSynonym(' + sp.id + ',\'reject\',this)">Reject</button>';
-        html += '</div>';
-      } else {
-        html += '<div style="font-size:11px;color:#27ae60;font-weight:600;margin-top:4px">' + esc(sp.status).toUpperCase() + '</div>';
+function renderRightPanel(data,analysis){
+  var html='';
+
+  // Synonym suggestions from AI analysis
+  if(analysis&&analysis.synonym_suggestions&&analysis.synonym_suggestions.length){
+    html+='<div class="right-section"><h3>AI synonym suggestions</h3>';
+    for(var i=0;i<analysis.synonym_suggestions.length;i++){
+      var sg=analysis.synonym_suggestions[i];
+      html+='<div class="proposal-card">';
+      html+='<strong>"'+esc(sg.phrase)+'"</strong> &rarr; '+esc(sg.should_map_to)+' ('+esc(sg.category)+')';
+      if(sg.reason)html+='<div class="syn-reason">'+esc(sg.reason)+'</div>';
+      if(sg.similar_phrases&&sg.similar_phrases.length){
+        html+='<div class="similar-pills">';
+        for(var si=0;si<sg.similar_phrases.length;si++)html+='<span class="similar-pill">'+esc(sg.similar_phrases[si])+'</span>';
+        html+='</div>';
       }
-      html += '</div>';
+      html+='<div class="proposal-actions">';
+      html+='<button class="btn btn-accept" onclick="addSynonymDirect(\''+esc(sg.phrase).replace(/'/g,"\\'")+'\',\''+esc(sg.category)+'\',\''+esc(sg.should_map_to).replace(/'/g,"\\'")+'\',this)">Approve</button>';
+      html+='<button class="btn btn-reject" onclick="this.parentElement.parentElement.style.display=\'none\'">Dismiss</button>';
+      html+='</div></div>';
     }
-    html += '</div>';
+    html+='</div>';
   }
 
-  // Check for gaps
-  var exchanges = data.exchanges || [];
-  var gapHtml = '';
-  for (var i = 0; i < exchanges.length; i++) {
-    var ex = exchanges[i];
-    var gptFlags = ex.gpt_risk_flags || [];
-    var localFlags = ex.local_risk_flags || [];
-    for (var j = 0; j < gptFlags.length; j++) {
-      if (localFlags.indexOf(gptFlags[j]) < 0) {
-        gapHtml += '<div class="proposal-card">';
-        gapHtml += 'AI detected <strong>"' + esc(gptFlags[j]) + '"</strong> but local classifier missed it.';
-        gapHtml += '</div>';
-      }
+  // Session proposals
+  var proposals=data.synonym_proposals||[];
+  if(proposals.length){
+    html+='<div class="right-section"><h3>Session proposals</h3>';
+    for(var i=0;i<proposals.length;i++){
+      var sp=proposals[i];
+      html+='<div class="proposal-card" id="rsyn-'+sp.id+'">';
+      html+='<strong>"'+esc(sp.patient_phrase)+'"</strong>';
+      html+='<br>AI: '+esc(sp.gpt_risk_level)+' | Local: missed';
+      html+='<br>Synonym for: '+esc(sp.proposed_synonym_for||'unknown');
+      html+='<div class="impact-text" data-phrase="'+esc(sp.patient_phrase)+'">Checking impact...</div>';
+      if(sp.status==='pending'){
+        html+='<div class="proposal-actions">';
+        html+='<button class="btn btn-accept" onclick="reviewSynonym('+sp.id+',\'approve\',this)">Approve</button>';
+        html+='<button class="btn btn-reject" onclick="reviewSynonym('+sp.id+',\'reject\',this)">Reject</button>';
+        html+='</div>';
+      }else html+='<div style="font-size:11px;color:#27ae60;font-weight:600;margin-top:4px">'+esc(sp.status).toUpperCase()+'</div>';
+      html+='</div>';
     }
+    html+='</div>';
   }
-  if (gapHtml) {
-    html += '<div class="right-section"><h3>Classifier gaps</h3>' + gapHtml + '</div>';
+
+  // Intake observations
+  if(analysis&&analysis.intake_observations){
+    html+='<div class="right-section"><h3>Intake observations</h3><div class="obs-block">'+esc(analysis.intake_observations)+'</div></div>';
   }
 
-  var rightPanel = document.getElementById('right-panel');
-  var existingQuickActions = rightPanel.querySelector('.right-section');
-  var proposalsDiv = document.getElementById('right-proposals');
-  proposalsDiv.innerHTML = html;
-
-  // Fetch impact for proposals
-  document.querySelectorAll('#right-proposals .impact-text[data-phrase]').forEach(function(el) {
-    fetchImpact(el, el.dataset.phrase);
-  });
-}
-
-function fetchImpact(el, phrase) {
-  fetch('/api/review/impact/' + encodeURIComponent(phrase))
-    .then(r => r.json())
-    .then(d => { el.textContent = 'Impact: ' + d.count + ' past exchanges contain this phrase'; })
-    .catch(() => { el.textContent = ''; });
-}
-
-function reviewExchange(id, action, btn) {
-  fetch('/api/review/exchange/' + id, {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({action: action})
-  }).then(r => r.json()).then(d => {
-    if (d.status === 'ok') {
-      document.getElementById('actions-' + id).innerHTML = '<span class="done-label">' + action.toUpperCase() + '</span>';
-    }
-  });
-}
-
-function rejectExchange(id, btn) {
-  var reason = prompt('Reason for rejection (optional):');
-  var body = {action: 'rejected'};
-  if (reason) body.reason = reason;
-  fetch('/api/review/exchange/' + id, {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(body)
-  }).then(r => r.json()).then(d => {
-    if (d.status === 'ok') {
-      document.getElementById('actions-' + id).innerHTML = '<span class="done-label">REJECTED</span>';
-    }
-  });
-}
-
-function showCorrection(id) {
-  document.getElementById('correction-' + id).style.display = 'block';
-}
-
-function getSuggestion(id, userInput) {
-  var textarea = document.getElementById('corr-text-' + id);
-  var currentResponse = textarea.value;
-  var intakeContext = '';
-  if (currentSessionData && currentSessionData.session && currentSessionData.session.intake_answers) {
-    intakeContext = JSON.stringify(currentSessionData.session.intake_answers);
+  // Pattern notes
+  if(analysis&&analysis.pattern_notes){
+    html+='<div class="right-section"><h3>Pattern notes</h3><div class="obs-block">'+esc(analysis.pattern_notes)+'</div></div>';
   }
-  fetch('/api/review/rewrite', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({user_input: userInput, current_response: currentResponse, intake_context: intakeContext})
-  }).then(r => r.json()).then(d => {
-    if (d.rewrite) textarea.value = d.rewrite;
-    else if (d.error) alert(d.error);
-  }).catch(() => alert('Failed to get suggestion'));
+
+  document.getElementById('right-proposals').innerHTML=html;
+  document.querySelectorAll('#right-proposals .impact-text[data-phrase]').forEach(function(el){fetchImpact(el,el.dataset.phrase)});
 }
 
-function submitCorrection(id) {
-  var risk = document.getElementById('corr-risk-' + id).value;
-  var care = document.getElementById('corr-care-' + id).value;
-  var reason = document.getElementById('corr-reason-' + id).value;
-  var correctedResponse = document.getElementById('corr-text-' + id).value;
-  fetch('/api/review/save-correction', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({exchange_id: id, corrected_response: correctedResponse, corrected_risk_level: risk, corrected_care_level: care, reason: reason})
-  }).then(r => r.json()).then(d => {
-    if (d.status === 'ok') {
-      document.getElementById('correction-' + id).style.display = 'none';
-      document.getElementById('actions-' + id).innerHTML = '<span class="done-label">CORRECTED</span> <span class="pill pill-high">Corrected: ' + risk + '</span>';
-    }
-  });
-}
+function fetchImpact(el,phrase){fetch('/api/review/impact/'+encodeURIComponent(phrase)).then(r=>r.json()).then(d=>{el.textContent='Impact: '+d.count+' past exchanges contain this phrase'}).catch(()=>{el.textContent=''})}
+function reviewExchange(id,action,btn){fetch('/api/review/exchange/'+id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:action})}).then(r=>r.json()).then(d=>{if(d.status==='ok')document.getElementById('actions-'+id).innerHTML='<span class="done-label">'+action.toUpperCase()+'</span>'})}
+function rejectExchange(id,btn){var reason=prompt('Reason for rejection (optional):');var body={action:'rejected'};if(reason)body.reason=reason;fetch('/api/review/exchange/'+id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json()).then(d=>{if(d.status==='ok')document.getElementById('actions-'+id).innerHTML='<span class="done-label">REJECTED</span>'})}
+function showCorrection(id){document.getElementById('correction-'+id).style.display='block'}
+function getSuggestion(id,userInput){var ta=document.getElementById('corr-text-'+id),ic='';if(currentSessionData&&currentSessionData.session&&currentSessionData.session.intake_answers)ic=JSON.stringify(currentSessionData.session.intake_answers);fetch('/api/review/rewrite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_input:userInput,current_response:ta.value,intake_context:ic})}).then(r=>r.json()).then(d=>{if(d.rewrite)ta.value=d.rewrite;else if(d.error)alert(d.error)}).catch(()=>alert('Failed'))}
+function applySuggestion(exId,btn){var improveBox=btn.parentElement;var text=improveBox.textContent.replace('Apply this improvement','').trim();showCorrection(exId);var ta=document.getElementById('corr-text-'+exId);if(ta)ta.value=text}
+function submitCorrection(id){fetch('/api/review/save-correction',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({exchange_id:id,corrected_response:document.getElementById('corr-text-'+id).value,corrected_risk_level:document.getElementById('corr-risk-'+id).value,corrected_care_level:document.getElementById('corr-care-'+id).value,reason:document.getElementById('corr-reason-'+id).value})}).then(r=>r.json()).then(d=>{if(d.status==='ok'){document.getElementById('correction-'+id).style.display='none';document.getElementById('actions-'+id).innerHTML='<span class="done-label">CORRECTED</span>'}})}
+function markSession(status){if(!currentSessionId)return;fetch('/api/review/session/'+currentSessionId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:status,notes:document.getElementById('clinicalNotes').value})}).then(r=>r.json()).then(d=>{if(d.status==='ok'){var card=document.querySelector('.queue-card[data-sid="'+currentSessionId+'"]');if(card){var b=card.querySelector('.status-badge');if(b){b.className='status-badge badge-'+status;b.textContent=status}}alert('Session marked as '+status)}})}
+function reviewSynonym(id,action,btn){fetch('/api/review/synonym/'+id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:action})}).then(r=>r.json()).then(d=>{if(d.status==='ok')btn.parentElement.innerHTML='<span class="done-label">'+action.toUpperCase()+'D</span>'})}
+function reviewRule(id,action,btn){fetch('/api/review/rule/'+id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:action})}).then(r=>r.json()).then(d=>{if(d.status==='ok')btn.parentElement.innerHTML='<span class="done-label">'+action.toUpperCase()+'D</span>'})}
+function showInlineForm(id){var el=document.getElementById(id);el.style.display=el.style.display==='block'?'none':'block'}
+function addSynonym(){var p=document.getElementById('syn-phrase').value.trim(),c=document.getElementById('syn-category').value,f=document.getElementById('syn-for').value.trim();if(!p||!f){alert('Fill all fields');return}fetch('/api/review/add-synonym',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phrase:p,category:c,synonym_for:f})}).then(r=>r.json()).then(d=>{if(d.status==='ok'){alert('Added "'+p+'" to '+c);document.getElementById('syn-phrase').value='';document.getElementById('syn-for').value='';document.getElementById('syn-form').style.display='none'}else alert(d.error||'Failed')})}
+function addSynonymDirect(phrase,category,synonymFor,btn){fetch('/api/review/add-synonym',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phrase:phrase,category:category,synonym_for:synonymFor})}).then(r=>r.json()).then(d=>{if(d.status==='ok')btn.parentElement.innerHTML='<span class="done-label">APPROVED</span>';else alert(d.error||'Failed')})}
+function addRule(){var f=document.getElementById('rule-flags').value.trim(),l=document.getElementById('rule-level').value;if(!f){alert('Enter flags');return}var flags=f.split(',').map(s=>s.trim()).filter(s=>s);fetch('/api/review/add-rule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flags:flags,level:l})}).then(r=>r.json()).then(d=>{if(d.status==='ok'){alert('Rule added');document.getElementById('rule-flags').value='';document.getElementById('rule-form').style.display='none'}else alert(d.error||'Failed')})}
+function addFlag(cat){var iid=cat==='HIGH'?'add-high-flag':'add-mod-flag',p=document.getElementById(iid).value.trim().toLowerCase();if(!p)return;fetch('/api/review/add-synonym',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phrase:p,category:cat,synonym_for:p})}).then(r=>r.json()).then(d=>{if(d.status==='ok'){var cid=cat==='HIGH'?'high-flags':'mod-flags',cls=cat==='HIGH'?'flag-pill-high':'flag-pill-moderate',c=document.getElementById(cid);var s=document.createElement('span');s.className='flag-pill '+cls;s.innerHTML=esc(p)+' <span class="remove-flag" onclick="removeFlag(\''+esc(p)+'\',\''+cat+'\',this)">&times;</span>';c.appendChild(s);document.getElementById(iid).value=''}})}
+function removeFlag(phrase,cat,el){if(!confirm('Remove "'+phrase+'" from '+cat+'?'))return;fetch('/api/review/remove-flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phrase:phrase,category:cat})}).then(r=>r.json()).then(d=>{if(d.status==='ok')el.parentElement.remove()})}
+function filterFlags(input,cid){var q=input.value.toLowerCase();document.getElementById(cid).querySelectorAll('.flag-pill').forEach(function(p){p.style.display=p.textContent.toLowerCase().indexOf(q)>=0?'':'none'})}
+function addRuleFromManage(){var f=document.getElementById('manage-rule-flags').value.trim(),l=document.getElementById('manage-rule-level').value;if(!f){alert('Enter flags');return}var flags=f.split(',').map(s=>s.trim()).filter(s=>s);fetch('/api/review/add-rule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flags:flags,level:l})}).then(r=>r.json()).then(d=>{if(d.status==='ok'){alert('Rule added');document.getElementById('manage-rule-flags').value='';location.reload()}})}
 
-function markSession(status) {
-  if (!currentSessionId) return;
-  var notes = document.getElementById('clinicalNotes').value;
-  fetch('/api/review/session/' + currentSessionId, {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({status: status, notes: notes})
-  }).then(r => r.json()).then(d => {
-    if (d.status === 'ok') {
-      var card = document.querySelector('.queue-card[data-sid="' + currentSessionId + '"]');
-      if (card) {
-        var badge = card.querySelector('.status-badge');
-        if (badge) {
-          badge.className = 'status-badge badge-' + status;
-          badge.textContent = status;
-        }
-      }
-      alert('Session marked as ' + status);
-    }
-  });
-}
-
-function reviewSynonym(id, action, btn) {
-  fetch('/api/review/synonym/' + id, {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({action: action})
-  }).then(r => r.json()).then(d => {
-    if (d.status === 'ok') btn.parentElement.innerHTML = '<span class="done-label">' + action.toUpperCase() + 'D</span>';
-  });
-}
-
-function reviewRule(id, action, btn) {
-  fetch('/api/review/rule/' + id, {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({action: action})
-  }).then(r => r.json()).then(d => {
-    if (d.status === 'ok') btn.parentElement.innerHTML = '<span class="done-label">' + action.toUpperCase() + 'D</span>';
-  });
-}
-
-function showInlineForm(id) {
-  var el = document.getElementById(id);
-  el.style.display = el.style.display === 'block' ? 'none' : 'block';
-}
-
-function addSynonym() {
-  var phrase = document.getElementById('syn-phrase').value.trim();
-  var category = document.getElementById('syn-category').value;
-  var synonymFor = document.getElementById('syn-for').value.trim();
-  if (!phrase || !synonymFor) { alert('Please fill in all fields'); return; }
-  fetch('/api/review/add-synonym', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({phrase: phrase, category: category, synonym_for: synonymFor})
-  }).then(r => r.json()).then(d => {
-    if (d.status === 'ok') {
-      alert('Added "' + phrase + '" to ' + category + ' flags');
-      document.getElementById('syn-phrase').value = '';
-      document.getElementById('syn-for').value = '';
-      document.getElementById('syn-form').style.display = 'none';
-    } else alert(d.error || 'Failed');
-  });
-}
-
-function addRule() {
-  var flagsStr = document.getElementById('rule-flags').value.trim();
-  var level = document.getElementById('rule-level').value;
-  if (!flagsStr) { alert('Please enter flags'); return; }
-  var flags = flagsStr.split(',').map(f => f.trim()).filter(f => f);
-  fetch('/api/review/add-rule', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({flags: flags, level: level})
-  }).then(r => r.json()).then(d => {
-    if (d.status === 'ok') {
-      alert('Combination rule added');
-      document.getElementById('rule-flags').value = '';
-      document.getElementById('rule-form').style.display = 'none';
-    } else alert(d.error || 'Failed');
-  });
-}
-
-function addFlag(category) {
-  var inputId = category === 'HIGH' ? 'add-high-flag' : 'add-mod-flag';
-  var phrase = document.getElementById(inputId).value.trim().toLowerCase();
-  if (!phrase) return;
-  fetch('/api/review/add-synonym', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({phrase: phrase, category: category, synonym_for: phrase})
-  }).then(r => r.json()).then(d => {
-    if (d.status === 'ok') {
-      var containerId = category === 'HIGH' ? 'high-flags' : 'mod-flags';
-      var cls = category === 'HIGH' ? 'flag-pill-high' : 'flag-pill-moderate';
-      var container = document.getElementById(containerId);
-      var span = document.createElement('span');
-      span.className = 'flag-pill ' + cls;
-      span.innerHTML = esc(phrase) + ' <span class="remove-flag" onclick="removeFlag(\'' + esc(phrase) + '\',\'' + category + '\',this)">&times;</span>';
-      container.appendChild(span);
-      document.getElementById(inputId).value = '';
-    }
-  });
-}
-
-function removeFlag(phrase, category, el) {
-  if (!confirm('Remove "' + phrase + '" from ' + category + ' flags?')) return;
-  fetch('/api/review/remove-flag', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({phrase: phrase, category: category})
-  }).then(r => r.json()).then(d => {
-    if (d.status === 'ok') el.parentElement.remove();
-  });
-}
-
-function filterFlags(input, containerId) {
-  var query = input.value.toLowerCase();
-  var pills = document.getElementById(containerId).querySelectorAll('.flag-pill');
-  pills.forEach(function(p) {
-    p.style.display = p.textContent.toLowerCase().indexOf(query) >= 0 ? '' : 'none';
-  });
-}
-
-function addRuleFromManage() {
-  var flagsStr = document.getElementById('manage-rule-flags').value.trim();
-  var level = document.getElementById('manage-rule-level').value;
-  if (!flagsStr) { alert('Please enter flags'); return; }
-  var flags = flagsStr.split(',').map(f => f.trim()).filter(f => f);
-  fetch('/api/review/add-rule', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({flags: flags, level: level})
-  }).then(r => r.json()).then(d => {
-    if (d.status === 'ok') {
-      alert('Combination rule added');
-      document.getElementById('manage-rule-flags').value = '';
-      location.reload();
-    }
-  });
-}
-
-// On load, fetch impact for learning queue
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.learning-card .impact-text[data-phrase]').forEach(function(el) {
-    fetchImpact(el, el.dataset.phrase);
-  });
-});
+document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.learning-card .impact-text[data-phrase]').forEach(function(el){fetchImpact(el,el.dataset.phrase)})});
 </script>
 </body>
 </html>

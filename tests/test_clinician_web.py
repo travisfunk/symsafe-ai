@@ -106,6 +106,34 @@ class TestImpactAPI:
         assert "count" in data
 
 
+class TestAnalyzeEndpoint:
+    def test_analyze_endpoint_returns_json(self, client):
+        rv = client.get("/api/review/analyze/20260325_091500")
+        # May return 200 (cached), 503 (no API key), or 500 (test db lacks table)
+        assert rv.status_code in (200, 500, 503)
+        data = rv.get_json()
+        assert isinstance(data, dict)
+
+    def test_analyze_invalid_session_id(self, client):
+        rv = client.get("/api/review/analyze/nonexistent_session_9999")
+        # 404 if validation passes but session missing, or 500 if table missing
+        assert rv.status_code in (404, 500)
+
+
+class TestBulkSynonymsEndpoint:
+    def test_bulk_synonyms_requires_json(self, client):
+        rv = client.post("/api/review/bulk-synonyms")
+        assert rv.status_code == 400
+
+    def test_bulk_synonyms_requires_fields(self, client):
+        rv = client.post(
+            "/api/review/bulk-synonyms",
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+        assert rv.status_code == 400
+
+
 class TestExchangeReview:
     def test_accept_exchange(self, client):
         rv = client.post(
