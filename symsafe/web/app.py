@@ -30,12 +30,15 @@ from symsafe.store import (
     init_db, save_session, update_session, save_exchange, get_all_sessions,
     get_session, get_exchanges, update_session_status, update_exchange_review,
     get_session_stats, get_synonym_proposals_for_session,
+    get_all_synonym_proposals, get_all_rule_proposals, count_similar_exchanges,
 )
 from symsafe.feedback import (
     detect_classifier_gap, find_nearest_flag, save_synonym_proposal,
     generate_proposals, get_pending_proposals, approve_synonym,
     reject_proposal, approve_rule_proposal, get_pending_rule_proposals,
+    apply_approved_synonyms, save_rule_proposal,
 )
+from symsafe.risk_classifier import apply_combination_rule, COMBINATION_RULES
 
 logger = logging.getLogger(__name__)
 
@@ -659,7 +662,7 @@ def create_app(test_config=None):
     @app.route("/review")
     @require_review_auth
     def review_dashboard():
-        """Clinician dashboard showing all sessions sorted by risk."""
+        """Clinician 3-panel workstation with tabs."""
         try:
             sessions_list = get_all_sessions()
             stats = get_session_stats()
@@ -671,54 +674,66 @@ def create_app(test_config=None):
                 risk_order.get(s.get("highest_risk", "LOW"), 9),
             ))
 
-            high_sessions = [s for s in sessions_list if s.get("highest_risk") == "HIGH"]
-            moderate_sessions = [s for s in sessions_list if s.get("highest_risk") == "MODERATE"]
-            low_sessions = [s for s in sessions_list if s.get("highest_risk") == "LOW"]
+            pending_synonyms = get_all_synonym_proposals(status="pending")
+            pending_rules = get_all_rule_proposals(status="pending")
+            approved_synonyms = get_all_synonym_proposals(status="approved")
 
             return render_template(
                 "review.html",
                 sessions=sessions_list,
-                high_sessions=high_sessions,
-                moderate_sessions=moderate_sessions,
-                low_sessions=low_sessions,
                 stats=stats,
+                pending_synonyms=pending_synonyms,
+                pending_rules=pending_rules,
+                approved_synonyms=approved_synonyms,
+                high_flags=list(HIGH_RISK_FLAGS),
+                moderate_flags=list(MODERATE_RISK_FLAGS),
+                combination_rules=list(COMBINATION_RULES),
             )
         except Exception:
             logger.exception("Error in /review")
             return jsonify({"error": "An unexpected error occurred."}), 500
 
-    @app.route("/review/session/<session_id>")
+    @app.route("/api/review/session-data/<session_id>")
     @require_review_auth
-    def review_session(session_id):
-        """Session detail page with exchange-by-exchange review controls."""
+    def api_session_data(session_id):
+        """Return full session JSON for the center panel."""
         try:
             if not _validate_session_id(session_id):
-                return render_template(
-                    "review_session.html",
-                    session=None, session_id=session_id,
-                    exchanges=[], synonym_proposals=[], rule_proposals=[],
-                ), 404
+                return jsonify({"error": "Invalid session ID"}), 404
 
             sess = get_session(session_id)
             if sess is None:
-                return render_template(
-                    "review_session.html",
-                    session=None, session_id=session_id,
-                    exchanges=[], synonym_proposals=[], rule_proposals=[],
-                ), 404
+                return jsonify({"error": "Session not found"}), 404
 
             exchanges = get_exchanges(session_id)
             synonym_proposals = get_synonym_proposals_for_session(session_id)
             rule_proposals = get_pending_rule_proposals(DB_PATH)
 
-            return render_template(
-                "review_session.html",
-                session=sess, session_id=session_id,
-                exchanges=exchanges, synonym_proposals=synonym_proposals,
-                rule_proposals=rule_proposals,
-            )
+            return jsonify({
+                "session": sess,
+                "exchanges": exchanges,
+                "synonym_proposals": synonym_proposals,
+                "rule_proposals": rule_proposals,
+            })
         except Exception:
-            logger.exception("Error in /review/session")
+            logger.exception("Error in /api/review/session-data")
+            return jsonify({"error": "An unexpected error occurred."}), 500
+
+    @app.route("/api/review/classifier-data")
+    @require_review_auth
+    def api_classifier_data():
+        """Return current classifier flag lists and combination rules."""
+        try:
+            return jsonify({
+                "high_flags": list(HIGH_RISK_FLAGS),
+                "moderate_flags": list(MODERATE_RISK_FLAGS),
+                "combination_rules": [
+                    {"flags": r["flags"], "level": r["level"], "source": r.get("source", "unknown")}
+                    for r in COMBINATION_RULES
+                ],
+            })
+        except Exception:
+            logger.exception("Error in /api/review/classifier-data")
             return jsonify({"error": "An unexpected error occurred."}), 500
 
     @app.route("/api/review/exchange/<int:exchange_id>", methods=["POST"])
@@ -841,6 +856,194 @@ def create_app(test_config=None):
             return jsonify({"synonyms": synonyms, "rules": rules})
         except Exception:
             logger.exception("Error in /api/review/proposals")
+            return jsonify({"error": "An unexpected error occurred."}), 500
+
+    @app.route("/api/review/rewrite", methods=["POST"])
+    @require_review_auth
+    def api_review_rewrite():
+        """Generate an AI-suggested rewrite of an assistant response."""
+        try:
+            data = request.get_json(silent=True)
+            if data is None:
+                return jsonify({"error": "JSON body required"}), 400
+
+            user_input = data.get("user_input")
+            current_response = data.get("current_response")
+            if not user_input or not current_response:
+                return jsonify({"error": "user_input and current_response are required"}), 400
+
+            if not has_api_key or client is None:
+                return jsonify({"error": "API key not configured"}), 503
+
+            intake_context = data.get("intake_context", "")
+            rewrite_response = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=512,
+                system="You are a clinical triage assistant. Rewrite this response to be more helpful, proportionate, and actionable. Keep it concise. Do not diagnose. Match urgency to the actual symptoms described.",
+                messages=[{"role": "user", "content": f"Patient said: {user_input}\n\nIntake context: {intake_context}\n\nCurrent AI response:\n{current_response}\n\nProvide a better rewrite:"}],
+                temperature=0.5,
+            )
+            rewrite = rewrite_response.content[0].text.strip()
+            return jsonify({"rewrite": rewrite})
+        except Exception:
+            logger.exception("Error in /api/review/rewrite")
+            return jsonify({"error": "An unexpected error occurred."}), 500
+
+    @app.route("/api/review/add-synonym", methods=["POST"])
+    @require_review_auth
+    def api_add_synonym():
+        """Directly add a synonym to the classifier."""
+        try:
+            data = request.get_json(silent=True)
+            if data is None:
+                return jsonify({"error": "JSON body required"}), 400
+
+            phrase = data.get("phrase")
+            category = data.get("category")
+            synonym_for = data.get("synonym_for")
+            if not phrase or not category or not synonym_for:
+                return jsonify({"error": "phrase, category, and synonym_for are required"}), 400
+
+            if category not in ("HIGH", "MODERATE"):
+                return jsonify({"error": "category must be HIGH or MODERATE"}), 400
+
+            save_synonym_proposal(
+                db_path=DB_PATH, patient_phrase=phrase,
+                gpt_risk_level=category, local_risk_level="LOW",
+                proposed_category=category, proposed_synonym_for=synonym_for,
+                session_id="clinician_manual",
+            )
+            import sqlite3
+            conn = sqlite3.connect(str(DB_PATH))
+            try:
+                row = conn.execute(
+                    "SELECT id FROM synonym_proposals WHERE patient_phrase = ? ORDER BY id DESC LIMIT 1",
+                    (phrase,),
+                ).fetchone()
+                if row:
+                    approve_synonym(DB_PATH, row[0])
+                    apply_approved_synonyms(DB_PATH, classifier_path)
+            finally:
+                conn.close()
+
+            return jsonify({"status": "ok", "phrase": phrase, "added_to": category})
+        except Exception:
+            logger.exception("Error in /api/review/add-synonym")
+            return jsonify({"error": "An unexpected error occurred."}), 500
+
+    @app.route("/api/review/add-rule", methods=["POST"])
+    @require_review_auth
+    def api_add_rule():
+        """Directly add a combination rule."""
+        try:
+            data = request.get_json(silent=True)
+            if data is None:
+                return jsonify({"error": "JSON body required"}), 400
+
+            flags = data.get("flags")
+            level = data.get("level")
+            if not flags or not level:
+                return jsonify({"error": "flags and level are required"}), 400
+
+            if level not in ("HIGH", "MODERATE"):
+                return jsonify({"error": "level must be HIGH or MODERATE"}), 400
+
+            rule_dict = {"flags": flags, "level": level, "source": "clinician_approved"}
+            apply_combination_rule(rule_dict)
+
+            save_rule_proposal(
+                db_path=DB_PATH, proposal_type="combination_rule",
+                description=" + ".join(flags) + " should be " + level,
+                supporting_evidence=[], proposed_rule={"flags": flags, "level": level},
+            )
+            import sqlite3
+            conn = sqlite3.connect(str(DB_PATH))
+            try:
+                row = conn.execute(
+                    "SELECT id FROM rule_proposals ORDER BY id DESC LIMIT 1"
+                ).fetchone()
+                if row:
+                    approve_rule_proposal(DB_PATH, row[0])
+            finally:
+                conn.close()
+
+            return jsonify({"status": "ok"})
+        except Exception:
+            logger.exception("Error in /api/review/add-rule")
+            return jsonify({"error": "An unexpected error occurred."}), 500
+
+    @app.route("/api/review/impact/<path:phrase>")
+    @require_review_auth
+    def api_impact(phrase):
+        """Return impact count for a phrase."""
+        try:
+            result = count_similar_exchanges(phrase)
+            return jsonify(result)
+        except Exception:
+            logger.exception("Error in /api/review/impact")
+            return jsonify({"error": "An unexpected error occurred."}), 500
+
+    @app.route("/api/review/save-correction", methods=["POST"])
+    @require_review_auth
+    def api_save_correction():
+        """Save a clinician's corrected response for an exchange."""
+        try:
+            data = request.get_json(silent=True)
+            if data is None:
+                return jsonify({"error": "JSON body required"}), 400
+
+            exchange_id = data.get("exchange_id")
+            if exchange_id is None:
+                return jsonify({"error": "exchange_id is required"}), 400
+
+            corrected_risk = data.get("corrected_risk_level")
+            if corrected_risk and corrected_risk not in VALID_RISK_LEVELS:
+                return jsonify({"error": "Invalid corrected_risk_level"}), 400
+
+            corrected_care = data.get("corrected_care_level")
+            if corrected_care and corrected_care not in VALID_CARE_LEVELS:
+                return jsonify({"error": "Invalid corrected_care_level"}), 400
+
+            reason = data.get("reason", "")
+            if reason:
+                reason = sanitize_input(str(reason), max_length=500)
+
+            update_exchange_review(
+                exchange_id=exchange_id,
+                review_status="corrected",
+                corrected_risk_level=corrected_risk,
+                corrected_care_level=corrected_care,
+                review_reason=reason,
+            )
+            return jsonify({"status": "ok"})
+        except Exception:
+            logger.exception("Error in /api/review/save-correction")
+            return jsonify({"error": "An unexpected error occurred."}), 500
+
+    @app.route("/api/review/remove-flag", methods=["POST"])
+    @require_review_auth
+    def api_remove_flag():
+        """Remove a flag from the in-memory classifier lists."""
+        try:
+            data = request.get_json(silent=True)
+            if data is None:
+                return jsonify({"error": "JSON body required"}), 400
+
+            phrase = data.get("phrase")
+            category = data.get("category")
+            if not phrase or not category:
+                return jsonify({"error": "phrase and category are required"}), 400
+
+            if category == "HIGH" and phrase in HIGH_RISK_FLAGS:
+                HIGH_RISK_FLAGS.remove(phrase)
+            elif category == "MODERATE" and phrase in MODERATE_RISK_FLAGS:
+                MODERATE_RISK_FLAGS.remove(phrase)
+            else:
+                return jsonify({"error": "Flag not found"}), 404
+
+            return jsonify({"status": "ok"})
+        except Exception:
+            logger.exception("Error in /api/review/remove-flag")
             return jsonify({"error": "An unexpected error occurred."}), 500
 
     return app

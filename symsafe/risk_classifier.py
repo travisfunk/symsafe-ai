@@ -34,6 +34,7 @@ HIGH_RISK_FLAGS = [
     "loss of consciousness", "passed out", "unresponsive",
     # Allergic
     "throat swelling", "anaphylaxis", "can't swallow",
+    "heart is racing",
 ]
 
 # Phrases indicating conditions that need medical attention but are

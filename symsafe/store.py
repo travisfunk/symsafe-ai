@@ -409,6 +409,96 @@ def get_synonym_proposals_for_session(session_id, db_path=None):
         conn.close()
 
 
+def get_all_synonym_proposals(status=None, db_path=None):
+    """Return all synonym proposals, optionally filtered by status.
+
+    Args:
+        status: If provided, only return proposals with this status.
+        db_path: Path to the database file. Defaults to the configured DB_PATH.
+
+    Returns:
+        A list of dicts representing synonym proposals.
+    """
+    conn = _get_connection(db_path)
+    try:
+        if status:
+            rows = conn.execute(
+                "SELECT * FROM synonym_proposals WHERE status = ? ORDER BY created_at DESC",
+                (status,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM synonym_proposals ORDER BY created_at DESC"
+            ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def get_all_rule_proposals(status=None, db_path=None):
+    """Return all rule proposals, optionally filtered by status.
+
+    Args:
+        status: If provided, only return proposals with this status.
+        db_path: Path to the database file. Defaults to the configured DB_PATH.
+
+    Returns:
+        A list of dicts representing rule proposals.
+    """
+    conn = _get_connection(db_path)
+    try:
+        if status:
+            rows = conn.execute(
+                "SELECT * FROM rule_proposals WHERE status = ? ORDER BY created_at DESC",
+                (status,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM rule_proposals ORDER BY created_at DESC"
+            ).fetchall()
+        results = []
+        for r in rows:
+            d = dict(r)
+            for field in ("supporting_evidence", "proposed_rule"):
+                if d.get(field):
+                    try:
+                        d[field] = json.loads(d[field])
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+            results.append(d)
+        return results
+    finally:
+        conn.close()
+
+
+def count_similar_exchanges(phrase, db_path=None):
+    """Search all exchanges for user_input containing the given phrase.
+
+    Args:
+        phrase: The search phrase (case-insensitive).
+        db_path: Path to the database file. Defaults to the configured DB_PATH.
+
+    Returns:
+        A dict with "count" and "sample_inputs" (up to 3 examples).
+    """
+    conn = _get_connection(db_path)
+    try:
+        count = conn.execute(
+            "SELECT COUNT(*) FROM exchanges WHERE LOWER(user_input) LIKE ?",
+            (f"%{phrase.lower()}%",),
+        ).fetchone()[0]
+        samples = conn.execute(
+            "SELECT user_input FROM exchanges WHERE LOWER(user_input) LIKE ? LIMIT 3",
+            (f"%{phrase.lower()}%",),
+        ).fetchall()
+        return {
+            "count": count,
+            "sample_inputs": [r["user_input"] for r in samples],
+        }
+    finally:
+        conn.close()
+
+
 def _row_to_session_dict(row):
     """Convert a sqlite3.Row from sessions into a plain dict with parsed JSON.
 
