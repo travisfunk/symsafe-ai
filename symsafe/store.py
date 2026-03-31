@@ -462,6 +462,34 @@ def get_analysis(session_id, db_path=None):
         conn.close()
 
 
+def get_all_analyses(db_path=None):
+    """Return all cached session analyses.
+
+    Args:
+        db_path: Path to the database file. Defaults to the configured DB_PATH.
+
+    Returns:
+        A list of dicts, each with session_id and the parsed analysis dict.
+    """
+    conn = _get_connection(db_path)
+    try:
+        rows = conn.execute(
+            "SELECT session_id, analysis FROM session_analyses ORDER BY created_at DESC"
+        ).fetchall()
+        results = []
+        for r in rows:
+            try:
+                results.append({
+                    "session_id": r["session_id"],
+                    "analysis": json.loads(r["analysis"]),
+                })
+            except (json.JSONDecodeError, TypeError):
+                continue
+        return results
+    finally:
+        conn.close()
+
+
 def get_all_synonym_proposals(status=None, db_path=None):
     """Return all synonym proposals, optionally filtered by status.
 

@@ -31,7 +31,7 @@ from symsafe.store import (
     get_session, get_exchanges, update_session_status, update_exchange_review,
     get_session_stats, get_synonym_proposals_for_session,
     get_all_synonym_proposals, get_all_rule_proposals, count_similar_exchanges,
-    save_analysis, get_analysis,
+    save_analysis, get_analysis, get_all_analyses,
 )
 from symsafe.ai_analyzer import analyze_session, generate_bulk_synonyms
 from symsafe.feedback import (
@@ -680,6 +680,9 @@ def create_app(test_config=None):
             pending_rules = get_all_rule_proposals(status="pending")
             approved_synonyms = get_all_synonym_proposals(status="approved")
 
+            all_analyses_list = get_all_analyses()
+            all_analyses = {a["session_id"]: a["analysis"] for a in all_analyses_list}
+
             return render_template(
                 "review.html",
                 sessions=sessions_list,
@@ -690,6 +693,7 @@ def create_app(test_config=None):
                 high_flags=list(HIGH_RISK_FLAGS),
                 moderate_flags=list(MODERATE_RISK_FLAGS),
                 combination_rules=list(COMBINATION_RULES),
+                all_analyses=all_analyses,
             )
         except Exception:
             logger.exception("Error in /review")
@@ -1102,6 +1106,31 @@ def create_app(test_config=None):
             return jsonify({"status": "ok"})
         except Exception:
             logger.exception("Error in /api/review/remove-flag")
+            return jsonify({"error": "An unexpected error occurred."}), 500
+
+    @app.route("/api/review/remove-rule", methods=["POST"])
+    @require_review_auth
+    def api_remove_rule():
+        """Remove a combination rule by index from the in-memory list."""
+        try:
+            data = request.get_json(silent=True)
+            if data is None:
+                return jsonify({"error": "JSON body required"}), 400
+
+            rule_index = data.get("rule_index")
+            if rule_index is None:
+                return jsonify({"error": "rule_index is required"}), 400
+
+            rule_index = int(rule_index)
+            if rule_index < 0 or rule_index >= len(COMBINATION_RULES):
+                return jsonify({"error": "Invalid rule index"}), 404
+
+            COMBINATION_RULES.pop(rule_index)
+            return jsonify({"status": "ok"})
+        except (ValueError, TypeError):
+            return jsonify({"error": "rule_index must be an integer"}), 400
+        except Exception:
+            logger.exception("Error in /api/review/remove-rule")
             return jsonify({"error": "An unexpected error occurred."}), 500
 
     return app

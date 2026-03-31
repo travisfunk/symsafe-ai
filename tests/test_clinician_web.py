@@ -10,6 +10,7 @@ from symsafe.store import (
     init_db, save_session, save_exchange, get_session_stats,
     get_synonym_proposals_for_session, count_similar_exchanges,
     get_all_synonym_proposals, get_all_rule_proposals,
+    save_analysis, get_all_analyses,
 )
 from symsafe.feedback import save_synonym_proposal, save_rule_proposal
 
@@ -55,6 +56,13 @@ class TestClinicianDashboard:
         assert "Review queue" in html
         assert "Learning queue" in html
         assert "Manage classifier" in html
+
+    def test_review_contains_learning_sections(self, client):
+        rv = client.get("/review")
+        html = rv.data.decode()
+        assert "Synonym recommendations" in html
+        assert "Classification corrections" in html
+        assert "Response improvements" in html
 
 
 class TestSessionDataAPI:
@@ -131,6 +139,12 @@ class TestBulkSynonymsEndpoint:
             data=json.dumps({}),
             content_type="application/json",
         )
+        assert rv.status_code == 400
+
+
+class TestRemoveRuleAPI:
+    def test_remove_rule_requires_json(self, client):
+        rv = client.post("/api/review/remove-rule")
         assert rv.status_code == 400
 
 
@@ -297,3 +311,12 @@ class TestStoreHelpers:
     def test_get_all_rule_proposals(self, db_path):
         results = get_all_rule_proposals(db_path=db_path)
         assert isinstance(results, list)
+
+    def test_get_all_analyses(self, db_path):
+        save_analysis("session_a", {"clinical_summary": "Analysis A"}, db_path=db_path)
+        save_analysis("session_b", {"clinical_summary": "Analysis B"}, db_path=db_path)
+        results = get_all_analyses(db_path=db_path)
+        assert len(results) >= 2
+        session_ids = [r["session_id"] for r in results]
+        assert "session_a" in session_ids
+        assert "session_b" in session_ids

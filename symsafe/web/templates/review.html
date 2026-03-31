@@ -192,23 +192,98 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
   <div class="learning-section">
     <h2>Synonym recommendations ({{ pending_synonyms|length }} pending)</h2>
     {% for sp in pending_synonyms %}
+    {% set ai_reason = '' %}
+    {% set similar = [] %}
+    {% if sp.session_id and sp.session_id in all_analyses %}
+      {% set analysis = all_analyses[sp.session_id] %}
+      {% if analysis.synonym_suggestions is defined %}
+        {% for sg in analysis.synonym_suggestions %}
+          {% if sg.phrase == sp.patient_phrase %}
+            {% if ai_reason == '' %}{% set ai_reason = sg.reason %}{% endif %}
+            {% if sg.similar_phrases is defined %}{% set similar = sg.similar_phrases %}{% endif %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endif %}
     <div class="learning-card" id="lsyn-{{ sp.id }}">
       <p>Patient said "<strong>{{ sp.patient_phrase }}</strong>"</p>
+      {% if ai_reason %}
+      <p style="font-size:13px;color:#555;line-height:1.5">{{ ai_reason }}</p>
+      {% else %}
       <p>AI flagged as <strong>{{ sp.gpt_risk_level }}</strong> — Local classifier missed it</p>
-      <div class="meta">Suggested synonym for: {{ sp.proposed_synonym_for or 'unknown' }} | Category: {{ sp.proposed_category }}</div>
+      {% endif %}
+      <div class="meta">Synonym for: {{ sp.proposed_synonym_for or 'unknown' }} | Category: {{ sp.proposed_category }}</div>
+      {% if similar %}
+      <div class="similar-pills" style="margin-top:6px">
+        {% for ph in similar %}<span class="similar-pill">{{ ph }}</span>{% endfor %}
+      </div>
+      {% endif %}
       <div class="impact-text" data-phrase="{{ sp.patient_phrase }}">Checking impact...</div>
       <div class="proposal-actions">
         <button class="btn btn-accept" onclick="reviewSynonym({{ sp.id }},'approve',this)">Approve</button>
+        {% if similar %}<button class="btn btn-accept" onclick="approveWithRelated({{ sp.id }},'{{ sp.proposed_synonym_for }}','{{ sp.proposed_category }}',this)" style="border-style:dashed">Approve + related</button>{% endif %}
         <button class="btn btn-reject" onclick="reviewSynonym({{ sp.id }},'reject',this)">Reject</button>
       </div>
     </div>
     {% endfor %}
     {% if not pending_synonyms %}<div style="color:#aaa;font-size:13px;padding:12px 0">No pending synonym proposals</div>{% endif %}
   </div>
+
   <div class="learning-section">
     <h2>Classification corrections</h2>
-    <div id="classification-corrections"><div style="color:#aaa;font-size:13px;padding:12px 0">Load a session to see AI risk suggestions</div></div>
+    {% set has_corrections = [] %}
+    {% for sid, analysis in all_analyses.items() %}
+      {% if analysis.risk_assessment is defined and analysis.risk_assessment.ai_risk_was_appropriate is defined and not analysis.risk_assessment.ai_risk_was_appropriate %}
+        {% if has_corrections.append(1) %}{% endif %}
+        {% set sess_info = None %}
+        {% for s in sessions %}{% if s.id == sid %}{% set sess_info = s %}{% endif %}{% endfor %}
+        <div class="learning-card">
+          <p><strong>Session {{ sid }}</strong>
+          {% if sess_info %} — {{ (sess_info.session_symptoms or [])[:3]|join(', ') or 'No symptoms' }}{% endif %}</p>
+          <div style="display:flex;gap:12px;margin:8px 0;align-items:center">
+            <span class="pill pill-moderate">Current: {{ sess_info.highest_risk if sess_info else 'MODERATE' }}</span>
+            <span style="font-size:14px">&#8594;</span>
+            <span class="pill pill-low">AI suggests: {{ analysis.risk_assessment.suggested_risk }}</span>
+          </div>
+          <p style="font-size:13px;color:#555;line-height:1.5">{{ analysis.risk_assessment.explanation }}</p>
+          {% if analysis.risk_assessment.reasoning %}
+          <p style="font-size:12px;color:#888;margin-top:4px">{{ analysis.risk_assessment.reasoning }}</p>
+          {% endif %}
+          <div class="proposal-actions">
+            <button class="btn btn-accept" onclick="this.innerHTML='ACCEPTED';this.disabled=true">Accept AI suggestion</button>
+            <button class="btn btn-reject" onclick="this.parentElement.parentElement.style.display='none'">Dismiss</button>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+    {% if not has_corrections %}<div style="color:#aaa;font-size:13px;padding:12px 0">All reviewed sessions have appropriate risk levels.</div>{% endif %}
   </div>
+
+  <div class="learning-section">
+    <h2>Response improvements</h2>
+    {% set has_improvements = [] %}
+    {% for sid, analysis in all_analyses.items() %}
+      {% if analysis.response_quality is defined %}
+        {% for rq in analysis.response_quality %}
+          {% if rq.score in ('needs_improvement', 'poor') %}
+            {% if has_improvements.append(1) %}{% endif %}
+            <div class="learning-card">
+              <div class="meta" style="margin-bottom:4px">Session {{ sid }} — Exchange {{ rq.exchange_index + 1 }}</div>
+              <p style="font-size:13px"><strong>{{ 'Needs improvement' if rq.score == 'needs_improvement' else 'Poor' }}:</strong> {{ rq.feedback }}</p>
+              {% if rq.suggested_improvement %}
+              <div class="improve-box" style="margin-top:8px">{{ rq.suggested_improvement[:300] }}{% if rq.suggested_improvement|length > 300 %}...{% endif %}</div>
+              {% endif %}
+              <div class="proposal-actions">
+                <button class="btn btn-accept" onclick="alert('Template saved for future use')">Apply as template</button>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+    {% if not has_improvements %}<div style="color:#aaa;font-size:13px;padding:12px 0">No response improvements needed.</div>{% endif %}
+  </div>
+
   <div class="learning-section">
     <h2>Combination rule proposals ({{ pending_rules|length }} pending)</h2>
     {% for rp in pending_rules %}
@@ -223,6 +298,7 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
     {% endfor %}
     {% if not pending_rules %}<div style="color:#aaa;font-size:13px;padding:12px 0">No pending rule proposals</div>{% endif %}
   </div>
+
   <div class="learning-section">
     <h2>Recently approved</h2>
     {% for sp in approved_synonyms[:10] %}
@@ -297,10 +373,11 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
   <div id="rules-list">
   {% for r in combination_rules %}
   <div class="rule-card">
-    <div class="rule-desc">When patient reports <strong>{{ r.flags|join('</strong> AND <strong>') }}</strong> together, escalate to <strong>{{ r.level }}</strong> risk</div>
+    <div class="rule-desc">{{ r.flags|join(' + ') }} &#8594; {{ r.level }}</div>
     <div class="rule-meta">
       <div class="rule-flags">{% for f in r.flags %}<span class="pill">{{ f }}</span>{% endfor %}</div>
-      <span style="font-size:11px;color:#888">{{ r.get('source','') if r.get is defined else '' }}</span>
+      <span class="rule-level">{{ r.level }}</span>
+      <span class="rule-remove" onclick="removeRule({{ loop.index0 }})">Remove</span>
     </div>
   </div>
   {% endfor %}
@@ -451,11 +528,18 @@ function renderSession(data,analysis){
 function renderRightPanel(data,analysis){
   var html='';
 
-  // Synonym suggestions from AI analysis
+  // Collect session proposal phrases for deduplication
+  var proposalPhrases={};
+  var proposals=data.synonym_proposals||[];
+  for(var pi=0;pi<proposals.length;pi++){proposalPhrases[proposals[pi].patient_phrase]=true}
+
+  // Synonym suggestions from AI analysis (deduplicated)
   if(analysis&&analysis.synonym_suggestions&&analysis.synonym_suggestions.length){
+    var filteredSuggestions=analysis.synonym_suggestions.filter(function(sg){return !proposalPhrases[sg.phrase]});
+    if(filteredSuggestions.length){
     html+='<div class="right-section"><h3>AI synonym suggestions</h3>';
-    for(var i=0;i<analysis.synonym_suggestions.length;i++){
-      var sg=analysis.synonym_suggestions[i];
+    for(var i=0;i<filteredSuggestions.length;i++){
+      var sg=filteredSuggestions[i];
       html+='<div class="proposal-card">';
       html+='<strong>"'+esc(sg.phrase)+'"</strong> &rarr; '+esc(sg.should_map_to)+' ('+esc(sg.category)+')';
       if(sg.reason)html+='<div class="syn-reason">'+esc(sg.reason)+'</div>';
@@ -470,6 +554,7 @@ function renderRightPanel(data,analysis){
       html+='</div></div>';
     }
     html+='</div>';
+    }
   }
 
   // Session proposals
@@ -526,6 +611,16 @@ function addFlag(cat){var iid=cat==='HIGH'?'add-high-flag':'add-mod-flag',p=docu
 function removeFlag(phrase,cat,el){if(!confirm('Remove "'+phrase+'" from '+cat+'?'))return;fetch('/api/review/remove-flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phrase:phrase,category:cat})}).then(r=>r.json()).then(d=>{if(d.status==='ok')el.parentElement.remove()})}
 function filterFlags(input,cid){var q=input.value.toLowerCase();document.getElementById(cid).querySelectorAll('.flag-pill').forEach(function(p){p.style.display=p.textContent.toLowerCase().indexOf(q)>=0?'':'none'})}
 function addRuleFromManage(){var f=document.getElementById('manage-rule-flags').value.trim(),l=document.getElementById('manage-rule-level').value;if(!f){alert('Enter flags');return}var flags=f.split(',').map(s=>s.trim()).filter(s=>s);fetch('/api/review/add-rule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flags:flags,level:l})}).then(r=>r.json()).then(d=>{if(d.status==='ok'){alert('Rule added');document.getElementById('manage-rule-flags').value='';location.reload()}})}
+
+function approveWithRelated(id,synonymFor,category,btn){
+  reviewSynonym(id,'approve',btn);
+  var pills=btn.parentElement.parentElement.querySelectorAll('.similar-pill');
+  pills.forEach(function(p){
+    var phrase=p.textContent.trim();
+    fetch('/api/review/add-synonym',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phrase:phrase,category:category,synonym_for:synonymFor})});
+  });
+}
+function removeRule(idx){if(!confirm('Remove this combination rule?'))return;fetch('/api/review/remove-rule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rule_index:idx})}).then(r=>r.json()).then(d=>{if(d.status==='ok')location.reload();else alert(d.error||'Failed')})}
 
 document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.learning-card .impact-text[data-phrase]').forEach(function(el){fetchImpact(el,el.dataset.phrase)})});
 </script>
