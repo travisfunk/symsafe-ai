@@ -517,6 +517,17 @@ def create_app(test_config=None):
             )
             state["exchange_index"] += 1
 
+            # Update session record in DB after each exchange so the
+            # clinician dashboard shows current data even before session ends
+            update_session(
+                session_id=session_id,
+                highest_risk=state["session_highest_risk"],
+                highest_care_level=state["session_highest_care_level"],
+                message_count=state["session_message_count"],
+                session_symptoms=list(dict.fromkeys(state["session_symptoms"])),
+                zip_code=state.get("zip_code"),
+            )
+
             gap = detect_classifier_gap(user_input, local_risk_level, local_risk_flags, gpt_risk_level, gpt_risk_flags)
             if gap:
                 all_flags_list = HIGH_RISK_FLAGS + MODERATE_RISK_FLAGS
