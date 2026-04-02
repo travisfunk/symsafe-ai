@@ -26,6 +26,7 @@ from symsafe.logger import create_log_file, log_interaction, log_session_summary
 from symsafe.care_router import get_care_guidance, merge_care_level, CARE_LEVEL_HIERARCHY
 from symsafe.intake import format_intake_context
 from symsafe.report import generate_report, save_report
+from symsafe import store
 from symsafe.store import (
     init_db, save_session, update_session, save_exchange, get_all_sessions,
     get_session, get_exchanges, update_session_status, update_exchange_review,
@@ -793,25 +794,44 @@ def create_app(test_config=None):
     @app.route("/api/review/session/<session_id>", methods=["POST"])
     @require_review_auth
     def api_review_session(session_id):
-        """Update a session's review status and notes."""
+        """Update a session's review status, notes, and/or risk level."""
         try:
             data = request.get_json(silent=True)
             if data is None:
                 return jsonify({"error": "JSON body required"}), 400
 
             status = data.get("status")
-            if status not in VALID_SESSION_STATUSES:
+            highest_risk = data.get("highest_risk")
+
+            if status is None and highest_risk is None:
+                return jsonify({"error": "Provide status or highest_risk"}), 400
+
+            if status is not None and status not in VALID_SESSION_STATUSES:
                 return jsonify({"error": "Invalid status"}), 400
 
-            notes = data.get("notes")
-            if notes is not None:
-                notes = sanitize_input(str(notes), max_length=2000)
+            if highest_risk is not None:
+                if highest_risk not in ("HIGH", "MODERATE", "LOW"):
+                    return jsonify({"error": "Invalid risk level"}), 400
+                conn = store._get_connection()
+                try:
+                    conn.execute(
+                        "UPDATE sessions SET highest_risk = ? WHERE id = ?",
+                        (highest_risk, session_id),
+                    )
+                    conn.commit()
+                finally:
+                    conn.close()
 
-            update_session_status(
-                session_id=session_id,
-                status=status,
-                reviewer_notes=notes,
-            )
+            if status is not None:
+                notes = data.get("notes")
+                if notes is not None:
+                    notes = sanitize_input(str(notes), max_length=2000)
+                update_session_status(
+                    session_id=session_id,
+                    status=status,
+                    reviewer_notes=notes,
+                )
+
             return jsonify({"status": "ok"})
         except Exception:
             logger.exception("Error in /api/review/session")

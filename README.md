@@ -1,3 +1,5 @@
+**Live demo:** [symsafe-ai.onrender.com](https://symsafe-ai.onrender.com) (free tier — may take 30s to wake up)
+
 # SymSafe AI
 
 AI-powered healthcare triage assistant that helps scale nurse call systems. Built with Python, Flask, and Anthropic Claude.
@@ -9,6 +11,12 @@ SymSafe is a two-sided system. On the patient side, a guided intake form and con
 On the clinician side, an AI-powered review workstation analyzes every patient session. One API call per session generates a clinical summary, risk justification, per-exchange quality scores, differential considerations, synonym suggestions with reasoning, and a review priority rating. Clinicians don't wade through raw data — they see AI-generated insights and approve, correct, or override. Every clinician action feeds back into the system: approved synonyms are written into the classifier, combination rules are loaded at startup, and corrected responses become training signal. The system gets smarter with every review.
 
 This is a portfolio prototype built in collaboration with an RN and phlebotomist. It demonstrates AI-in-healthcare architecture — it is not intended for real clinical use.
+
+## Why I Built This
+
+I built SymSafe to demonstrate how AI can augment healthcare workflows without replacing clinical judgment. Most symptom checkers are black boxes — patients type symptoms, get a risk score, and have no idea why. SymSafe is transparent: patients see proportionate responses (not everything is an emergency), and clinicians see exactly why the AI made each decision.
+
+The core insight is the learning loop. Every time a clinician reviews a session, their corrections feed back into the classifier. Approved synonyms get written into the risk engine. Over time, the system gets more accurate without any code changes. This is the architecture pattern I believe AI-in-healthcare should follow — AI does the analytical work, humans stay in the loop.
 
 ## How It Works
 
@@ -79,6 +87,10 @@ pytest tests/ -v
 305 tests across 22 test files. All tests run without a valid API key — API calls are mocked. Coverage spans risk classification, combination rules, care routing, structured output parsing, intake questionnaire, HTML report generation, AI analyzer, SQLite persistence, gap detection, synonym proposals, Flask routes, input sanitization, authentication, rate limiting, security headers, and clinician review API endpoints.
 
 The original test suite started at 248 tests in v3.0.0 and has grown as features were added.
+
+## Screenshots
+
+Screenshots coming soon.
 
 ## Key Modules
 
