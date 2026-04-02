@@ -104,13 +104,17 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 .manage-panel{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:20px;overflow-y:auto;height:calc(100vh - 95px)}
 .manage-section{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:16px}
 .manage-section h2{font-size:15px;color:#2c3e50;margin-bottom:12px;border-bottom:2px solid #e0e0e0;padding-bottom:6px}
-.flag-group{margin-bottom:16px}
-.flag-group-header{font-size:13px;font-weight:600;color:#2c3e50;cursor:pointer;padding:6px 0;display:flex;align-items:center;gap:6px}
-.flag-group-header .count{font-size:11px;color:#888;font-weight:400}
-.flag-group-body{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0}
-.flag-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:500}
+.flag-group{margin-bottom:8px}
+.flag-group-header{font-size:12px;font-weight:600;color:#2c3e50;cursor:pointer;padding:6px 0;display:flex;align-items:center;gap:6px;user-select:none}
+.flag-group-header .toggle-arrow{display:inline-block;font-size:10px;transition:transform .15s;width:12px}
+.flag-group-header .toggle-arrow.open{transform:rotate(90deg)}
+.flag-group-header .count{font-size:10px;color:#888;font-weight:400;font-family:'Courier New',monospace;background:#f0f0f0;padding:1px 6px;border-radius:8px}
+.flag-group-body{display:none;flex-wrap:wrap;gap:4px;padding:6px 0}
+.flag-group-body.open{display:flex}
+.flag-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:500}
 .flag-pill-high{background:#fde8e8;color:#c0392b}.flag-pill-moderate{background:#fef5e7;color:#e67e22}
-.flag-pill .remove-flag{cursor:pointer;font-size:14px;font-weight:700;opacity:.6}
+.flag-pill .remove-flag{cursor:pointer;font-size:14px;font-weight:700;opacity:0;transition:opacity .15s}
+.flag-pill:hover .remove-flag{opacity:.6}
 .flag-pill .remove-flag:hover{opacity:1}
 .add-flag-form{display:flex;gap:6px;align-items:center;margin-top:8px}
 .add-flag-form input{flex:1;padding:6px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px}
@@ -192,36 +196,34 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
   <div class="learning-section">
     <h2>Synonym recommendations ({{ pending_synonyms|length }} pending)</h2>
     {% for sp in pending_synonyms %}
-    {% set ai_reason = '' %}
-    {% set similar = [] %}
+    {% set ns = namespace(ai_reason='', similar=[]) %}
     {% if sp.session_id and sp.session_id in all_analyses %}
       {% set analysis = all_analyses[sp.session_id] %}
       {% if analysis.synonym_suggestions is defined %}
         {% for sg in analysis.synonym_suggestions %}
           {% if sg.phrase == sp.patient_phrase %}
-            {% if ai_reason == '' %}{% set ai_reason = sg.reason %}{% endif %}
-            {% if sg.similar_phrases is defined %}{% set similar = sg.similar_phrases %}{% endif %}
+            {% if ns.ai_reason == '' %}{% set ns.ai_reason = sg.reason %}{% endif %}
+            {% if sg.similar_phrases is defined %}{% set ns.similar = sg.similar_phrases %}{% endif %}
           {% endif %}
         {% endfor %}
       {% endif %}
     {% endif %}
     <div class="learning-card" id="lsyn-{{ sp.id }}">
       <p>Patient said "<strong>{{ sp.patient_phrase }}</strong>"</p>
-      {% if ai_reason %}
-      <p style="font-size:13px;color:#555;line-height:1.5">{{ ai_reason }}</p>
-      {% else %}
       <p>AI flagged as <strong>{{ sp.gpt_risk_level }}</strong> — Local classifier missed it</p>
+      {% if ns.ai_reason %}
+      <div class="syn-reason" style="font-size:12px;color:#666;font-style:italic;line-height:1.5;margin-top:4px">{{ ns.ai_reason }}</div>
       {% endif %}
       <div class="meta">Synonym for: {{ sp.proposed_synonym_for or 'unknown' }} | Category: {{ sp.proposed_category }}</div>
-      {% if similar %}
+      {% if ns.similar %}
       <div class="similar-pills" style="margin-top:6px">
-        {% for ph in similar %}<span class="similar-pill">{{ ph }}</span>{% endfor %}
+        {% for ph in ns.similar %}<span class="similar-pill">{{ ph }}</span>{% endfor %}
       </div>
       {% endif %}
       <div class="impact-text" data-phrase="{{ sp.patient_phrase }}">Checking impact...</div>
       <div class="proposal-actions">
         <button class="btn btn-accept" onclick="reviewSynonym({{ sp.id }},'approve',this)">Approve</button>
-        {% if similar %}<button class="btn btn-accept" onclick="approveWithRelated({{ sp.id }},'{{ sp.proposed_synonym_for }}','{{ sp.proposed_category }}',this)" style="border-style:dashed">Approve + related</button>{% endif %}
+        {% if ns.similar %}<button class="btn btn-accept" onclick="approveWithRelated({{ sp.id }},'{{ sp.proposed_synonym_for }}','{{ sp.proposed_category }}',this)" style="border-style:dashed">Approve + related</button>{% endif %}
         <button class="btn btn-reject" onclick="reviewSynonym({{ sp.id }},'reject',this)">Reject</button>
       </div>
     </div>
@@ -335,8 +337,8 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
       {% for f in high_flags %}{% if f in gflags %}{% if matched.append(f) %}{% endif %}{% endif %}{% endfor %}
       {% if matched %}
       <div class="flag-group">
-        <div class="flag-group-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none'">
-          {{ gname }} <span class="count">({{ matched|length }})</span>
+        <div class="flag-group-header" onclick="toggleFlagGroup(this)">
+          <span class="toggle-arrow">&#9658;</span> {{ gname }} <span class="count">{{ matched|length }}</span>
         </div>
         <div class="flag-group-body">
           {% for f in matched %}<span class="flag-pill flag-pill-high">{{ f }} <span class="remove-flag" onclick="removeFlag('{{ f }}','HIGH',this)">&times;</span></span>{% if grouped_flags.append(f) %}{% endif %}{% endfor %}
@@ -348,8 +350,8 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
     {% for f in high_flags %}{% if f not in grouped_flags %}{% if other_high.append(f) %}{% endif %}{% endif %}{% endfor %}
     {% if other_high %}
     <div class="flag-group">
-      <div class="flag-group-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none'">
-        Other <span class="count">({{ other_high|length }})</span>
+      <div class="flag-group-header" onclick="toggleFlagGroup(this)">
+        <span class="toggle-arrow">&#9658;</span> Other <span class="count">{{ other_high|length }}</span>
       </div>
       <div class="flag-group-body">
         {% for f in other_high %}<span class="flag-pill flag-pill-high">{{ f }} <span class="remove-flag" onclick="removeFlag('{{ f }}','HIGH',this)">&times;</span></span>{% endfor %}
@@ -362,8 +364,39 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
   <div class="manage-section" style="margin-top:16px">
     <h2>MODERATE risk flags ({{ moderate_flags|length }})</h2>
     <input type="text" class="search-input" placeholder="Search flags..." oninput="filterFlags(this,'mod-flags')">
-    <div class="flag-list" id="mod-flags">
-      {% for f in moderate_flags %}<span class="flag-pill flag-pill-moderate">{{ f }} <span class="remove-flag" onclick="removeFlag('{{ f }}','MODERATE',this)">&times;</span></span>{% endfor %}
+    <div id="mod-flags">
+    {% set mod_groups = {
+      'GI/Digestive': ['blood in stool','blood in urine','can\'t keep food down','dehydrated'],
+      'Musculoskeletal': ['sprain','burn','broken bone','fracture'],
+      'General/Systemic': ['fever','persistent pain','worsening symptoms','swollen','infected']
+    } %}
+    {% set mod_grouped = [] %}
+    {% for gname, gflags in mod_groups.items() %}
+      {% set matched = [] %}
+      {% for f in moderate_flags %}{% if f in gflags %}{% if matched.append(f) %}{% endif %}{% endif %}{% endfor %}
+      {% if matched %}
+      <div class="flag-group">
+        <div class="flag-group-header" onclick="toggleFlagGroup(this)">
+          <span class="toggle-arrow">&#9658;</span> {{ gname }} <span class="count">{{ matched|length }}</span>
+        </div>
+        <div class="flag-group-body">
+          {% for f in matched %}<span class="flag-pill flag-pill-moderate">{{ f }} <span class="remove-flag" onclick="removeFlag('{{ f }}','MODERATE',this)">&times;</span></span>{% if mod_grouped.append(f) %}{% endif %}{% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+    {% set other_mod = [] %}
+    {% for f in moderate_flags %}{% if f not in mod_grouped %}{% if other_mod.append(f) %}{% endif %}{% endif %}{% endfor %}
+    {% if other_mod %}
+    <div class="flag-group">
+      <div class="flag-group-header" onclick="toggleFlagGroup(this)">
+        <span class="toggle-arrow">&#9658;</span> Other <span class="count">{{ other_mod|length }}</span>
+      </div>
+      <div class="flag-group-body">
+        {% for f in other_mod %}<span class="flag-pill flag-pill-moderate">{{ f }} <span class="remove-flag" onclick="removeFlag('{{ f }}','MODERATE',this)">&times;</span></span>{% endfor %}
+      </div>
+    </div>
+    {% endif %}
     </div>
     <div class="add-flag-form"><input type="text" id="add-mod-flag" placeholder="New MODERATE flag..."><button class="btn btn-accept" onclick="addFlag('MODERATE')">Add</button></div>
   </div>
@@ -609,7 +642,8 @@ function addSynonymDirect(phrase,category,synonymFor,btn){fetch('/api/review/add
 function addRule(){var f=document.getElementById('rule-flags').value.trim(),l=document.getElementById('rule-level').value;if(!f){alert('Enter flags');return}var flags=f.split(',').map(s=>s.trim()).filter(s=>s);fetch('/api/review/add-rule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flags:flags,level:l})}).then(r=>r.json()).then(d=>{if(d.status==='ok'){alert('Rule added');document.getElementById('rule-flags').value='';document.getElementById('rule-form').style.display='none'}else alert(d.error||'Failed')})}
 function addFlag(cat){var iid=cat==='HIGH'?'add-high-flag':'add-mod-flag',p=document.getElementById(iid).value.trim().toLowerCase();if(!p)return;fetch('/api/review/add-synonym',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phrase:p,category:cat,synonym_for:p})}).then(r=>r.json()).then(d=>{if(d.status==='ok'){var cid=cat==='HIGH'?'high-flags':'mod-flags',cls=cat==='HIGH'?'flag-pill-high':'flag-pill-moderate',c=document.getElementById(cid);var s=document.createElement('span');s.className='flag-pill '+cls;s.innerHTML=esc(p)+' <span class="remove-flag" onclick="removeFlag(\''+esc(p)+'\',\''+cat+'\',this)">&times;</span>';c.appendChild(s);document.getElementById(iid).value=''}})}
 function removeFlag(phrase,cat,el){if(!confirm('Remove "'+phrase+'" from '+cat+'?'))return;fetch('/api/review/remove-flag',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phrase:phrase,category:cat})}).then(r=>r.json()).then(d=>{if(d.status==='ok')el.parentElement.remove()})}
-function filterFlags(input,cid){var q=input.value.toLowerCase();document.getElementById(cid).querySelectorAll('.flag-pill').forEach(function(p){p.style.display=p.textContent.toLowerCase().indexOf(q)>=0?'':'none'})}
+function toggleFlagGroup(header){var body=header.nextElementSibling;var arrow=header.querySelector('.toggle-arrow');if(body.classList.contains('open')){body.classList.remove('open');arrow.classList.remove('open')}else{body.classList.add('open');arrow.classList.add('open')}}
+function filterFlags(input,cid){var q=input.value.toLowerCase();var container=document.getElementById(cid);container.querySelectorAll('.flag-pill').forEach(function(p){p.style.display=p.textContent.toLowerCase().indexOf(q)>=0?'':'none'});container.querySelectorAll('.flag-group-body').forEach(function(b){if(q){b.classList.add('open');b.previousElementSibling.querySelector('.toggle-arrow').classList.add('open')}else{b.classList.remove('open');b.previousElementSibling.querySelector('.toggle-arrow').classList.remove('open')}})}
 function addRuleFromManage(){var f=document.getElementById('manage-rule-flags').value.trim(),l=document.getElementById('manage-rule-level').value;if(!f){alert('Enter flags');return}var flags=f.split(',').map(s=>s.trim()).filter(s=>s);fetch('/api/review/add-rule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({flags:flags,level:l})}).then(r=>r.json()).then(d=>{if(d.status==='ok'){alert('Rule added');document.getElementById('manage-rule-flags').value='';location.reload()}})}
 
 function approveWithRelated(id,synonymFor,category,btn){
