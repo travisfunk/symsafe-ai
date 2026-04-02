@@ -21,7 +21,7 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 .tab .badge{vertical-align:middle}
 .tab-content{display:none;flex:1;overflow:hidden}
 .tab-content.active{display:flex;flex-direction:column;flex:1}
-.panels{display:grid;grid-template-columns:260px 1fr 240px;flex:1;overflow:hidden;height:calc(100vh - 95px)}
+.panels{display:grid;grid-template-columns:260px 1fr 240px;flex:1;overflow:hidden;height:calc(100vh - 120px)}
 .panel{overflow-y:auto;padding:12px}
 .panel-left{background:#f5f6fa;border-right:1px solid #e0e0e0}
 .panel-center{background:#fff}
@@ -95,13 +95,13 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 .inline-form input,.inline-form select{width:100%;padding:4px 8px;border:1px solid #ccc;border-radius:4px;font-size:12px;font-family:inherit}
 .inline-form button{margin-top:8px;padding:5px 12px;font-size:11px}
 .obs-block{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:10px;font-size:12px;line-height:1.5;color:#555}
-.learning-panel{padding:20px;max-width:900px;margin:0 auto;overflow-y:auto;height:calc(100vh - 95px)}
+.learning-panel{padding:20px;max-width:900px;margin:0 auto;overflow-y:auto;height:calc(100vh - 120px)}
 .learning-section{margin-bottom:28px}
 .learning-section h2{font-size:15px;color:#2c3e50;margin-bottom:12px;border-bottom:2px solid #e0e0e0;padding-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
 .learning-card{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:14px;margin-bottom:8px}
 .learning-card p{font-size:14px;margin-bottom:6px}
 .learning-card .meta{font-size:12px;color:#888}
-.manage-panel{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:20px;overflow-y:auto;height:calc(100vh - 95px)}
+.manage-panel{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:20px;overflow-y:auto;height:calc(100vh - 120px)}
 .manage-section{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:16px}
 .manage-section h2{font-size:15px;color:#2c3e50;margin-bottom:12px;border-bottom:2px solid #e0e0e0;padding-bottom:6px}
 .flag-group{margin-bottom:8px}
@@ -130,6 +130,15 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 .add-rule-form select{padding:6px;border:1px solid #ccc;border-radius:6px;font-size:13px}
 .add-rule-form button{padding:6px 14px;font-size:12px}
 .search-input{width:100%;padding:6px 10px;border:1px solid #ccc;border-radius:6px;font-size:12px;margin-bottom:8px}
+.tab-subtitle{font-size:12px;color:#999;padding:4px 24px;border-bottom:1px solid #eee;background:#fff}
+.section-desc{font-size:12px;color:#999;font-weight:400;margin-top:-8px;margin-bottom:12px}
+.guide-box{text-align:center;color:#aaa;padding:40px 20px;max-width:500px;margin:0 auto}
+.guide-box h3{font-size:15px;color:#888;margin-bottom:16px;font-weight:600}
+.guide-box ol{text-align:left;list-style:none;counter-reset:steps;padding:0}
+.guide-box ol li{counter-increment:steps;margin-bottom:14px;font-size:13px;line-height:1.5;padding-left:28px;position:relative}
+.guide-box ol li::before{content:counter(steps);position:absolute;left:0;top:0;width:20px;height:20px;background:#e8ecf0;color:#666;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.manage-intro{grid-column:1/-1;font-size:13px;color:#666;line-height:1.5;margin-bottom:0}
+.panel-hint{font-size:11px;color:#aaa;padding:0 0 8px 0}
 @media(max-width:900px){.panels{grid-template-columns:1fr;height:auto}.panel-left,.panel-right{max-height:300px}.manage-panel{grid-template-columns:1fr}}
 </style>
 </head>
@@ -146,11 +155,13 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
   <div class="tab" onclick="switchTab('learning',this)">Learning queue <span class="badge {% if not pending_synonyms and not pending_rules %}badge-muted{% endif %}">{{ (pending_synonyms|length) + (pending_rules|length) }}</span></div>
   <div class="tab" onclick="switchTab('manage',this)">Manage classifier</div>
 </div>
+<div class="tab-subtitle" id="tab-subtitle">Review patient sessions and AI responses</div>
 
 <!-- TAB 1 -->
 <div id="tab-queue" class="tab-content active">
 <div class="panels">
 <div class="panel panel-left">
+<div class="panel-hint">Sessions sorted by risk &middot; Click to review</div>
 {% for s in sessions %}
 <div class="queue-card" data-sid="{{ s.id }}" onclick="loadSession('{{ s.id }}',this)">
   <div class="queue-top">
@@ -167,7 +178,15 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 {% endfor %}
 {% if not sessions %}<div style="color:#aaa;font-size:13px;padding:20px;text-align:center">No sessions yet</div>{% endif %}
 </div>
-<div class="panel panel-center" id="center-panel"><div class="placeholder">Select a session from the queue to review</div></div>
+<div class="panel panel-center" id="center-panel"><div class="guide-box">
+  <h3>How to review sessions</h3>
+  <ol>
+    <li><strong>Click a session</strong> from the queue on the left. Sessions are sorted by risk — HIGH risk sessions that need review appear first.</li>
+    <li><strong>Read the AI analysis</strong> at the top. It summarizes what happened, whether the risk level was appropriate, and what the differentials are.</li>
+    <li><strong>Review each exchange.</strong> The AI scores each response and suggests improvements where needed. Accept good responses, correct problems, or reject unsafe ones.</li>
+    <li><strong>When done,</strong> add any clinical notes and click Mark as reviewed.</li>
+  </ol>
+</div></div>
 <div class="panel panel-right" id="right-panel">
   <div class="right-section">
     <h3>Quick actions</h3>
@@ -185,7 +204,7 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
       <button class="btn btn-accept" onclick="addRule()">Add</button>
     </div>
   </div>
-  <div id="right-proposals"></div>
+  <div id="right-proposals"><div class="panel-hint">AI suggestions appear here when you select a session</div></div>
 </div>
 </div>
 </div>
@@ -195,6 +214,7 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 <div class="learning-panel">
   <div class="learning-section">
     <h2>Synonym recommendations ({{ pending_synonyms|length }} pending)</h2>
+    <div class="section-desc">Phrases patients used that the classifier didn't recognize. Approving adds them so future patients get better responses.</div>
     {% for sp in pending_synonyms %}
     {% set ns = namespace(ai_reason='', similar=[]) %}
     {% if sp.session_id and sp.session_id in all_analyses %}
@@ -233,6 +253,7 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 
   <div class="learning-section">
     <h2>Classification corrections</h2>
+    <div class="section-desc">Sessions where the AI thinks the risk level was wrong. Review the reasoning and accept or dismiss.</div>
     {% set has_corrections = [] %}
     {% for sid, analysis in all_analyses.items() %}
       {% if analysis.risk_assessment is defined and analysis.risk_assessment.ai_risk_was_appropriate is defined and not analysis.risk_assessment.ai_risk_was_appropriate %}
@@ -263,6 +284,7 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 
   <div class="learning-section">
     <h2>Response improvements</h2>
+    <div class="section-desc">Exchanges where the AI response could be better. Review the suggestion and apply it as a template for future responses.</div>
     {% set has_improvements = [] %}
     {% for sid, analysis in all_analyses.items() %}
       {% if analysis.response_quality is defined %}
@@ -288,6 +310,7 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 
   <div class="learning-section">
     <h2>Combination rule proposals ({{ pending_rules|length }} pending)</h2>
+    <div class="section-desc">When multiple symptoms appear together, these rules automatically escalate the risk level. Approve if clinically appropriate.</div>
     {% for rp in pending_rules %}
     <div class="learning-card" id="lrule-{{ rp.id }}">
       <p><strong>{{ rp.description }}</strong></p>
@@ -303,6 +326,7 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 
   <div class="learning-section">
     <h2>Recently approved</h2>
+    <div class="section-desc">Your recent approvals. Confirms the system is learning from your feedback.</div>
     {% for sp in approved_synonyms[:10] %}
     <div class="learning-card">
       <p>"<strong>{{ sp.patient_phrase }}</strong>" added as synonym for {{ sp.proposed_synonym_for or 'unknown' }} ({{ sp.proposed_category }})</p>
@@ -317,6 +341,7 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 <!-- TAB 3 -->
 <div id="tab-manage" class="tab-content">
 <div class="manage-panel">
+<div class="manage-intro">The classifier uses these keyword lists to flag patient symptoms. HIGH risk flags trigger emergency protocols. MODERATE flags trigger doctor visit recommendations. You can add, remove, or search flags. Changes take effect immediately.</div>
 <div>
   <div class="manage-section">
     <h2>HIGH risk flags ({{ high_flags|length }})</h2>
@@ -403,6 +428,7 @@ body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:#f5f6fa;c
 </div>
 <div class="manage-section">
   <h2>Combination rules ({{ combination_rules|length }})</h2>
+  <div class="section-desc">Rules that escalate risk when multiple symptoms appear together. For example, headache + vision changes triggers HIGH risk even though neither alone would.</div>
   <div id="rules-list">
   {% for r in combination_rules %}
   <div class="rule-card">
@@ -431,6 +457,8 @@ function switchTab(name,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');document.getElementById('tab-'+name).classList.add('active');
+  var subtitles={queue:'Review patient sessions and AI responses',learning:'Approve improvements to make the system smarter',manage:'Edit the keywords and rules that classify patient risk'};
+  document.getElementById('tab-subtitle').textContent=subtitles[name]||'';
 }
 
 function esc(s){if(!s)return '';var d=document.createElement('div');d.textContent=String(s);return d.innerHTML}
