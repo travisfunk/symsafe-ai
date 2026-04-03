@@ -90,7 +90,25 @@ The original test suite started at 248 tests in v3.0.0 and has grown as features
 
 ## Screenshots
 
-Screenshots coming soon.
+### Patient triage chat
+Patients describe symptoms in their own words and receive proportionate care guidance — a common cold gets home remedies, not an ER referral.
+
+![Patient chat](docs/screenshots/patient-chat.png)
+
+### Clinician review workstation
+AI analyzes each session with clinical summaries, risk justification, differential considerations, and per-exchange quality scoring. Clinicians accept, correct, or override.
+
+![Clinician review](docs/screenshots/clinician-review.png)
+
+### Learning queue
+Every classifier gap becomes a learning opportunity. AI explains why each synonym should be added and suggests related phrases for bulk approval.
+
+![Learning queue](docs/screenshots/learning-queue.png)
+
+### Patient triage report
+Patients get a printable report with provider questions and answer lines to bring to their appointment.
+
+![Triage report](docs/screenshots/triage-report.png)
 
 ## Key Modules
 
