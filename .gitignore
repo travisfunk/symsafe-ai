@@ -19,6 +19,9 @@ data/
 # Logs
 *.log
 
+# Archives
+*.zip
+
 # OS files
 .DS_Store
 
