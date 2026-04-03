@@ -1,5 +1,3 @@
-**Live demo:** [symsafe-ai.onrender.com](https://symsafe-ai.onrender.com) (free tier — may take 30s to wake up)
-
 # SymSafe AI
 
 AI-powered healthcare triage assistant that helps scale nurse call systems. Built with Python, Flask, and Anthropic Claude.
