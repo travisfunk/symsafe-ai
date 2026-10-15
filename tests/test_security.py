@@ -241,3 +241,12 @@ class TestReviewPasswordRequired:
                 stack.enter_context(p)
             stack.enter_context(patch.dict("os.environ", env, clear=True))
             assert create_app(test_config={"TESTING": True}) is not None
+
+    def test_startup_fails_with_placeholder_password(self):
+        import contextlib
+        with contextlib.ExitStack() as stack:
+            for p in self._patches():
+                stack.enter_context(p)
+            stack.enter_context(patch.dict("os.environ", {"REVIEW_PASSWORD": "change-me"}))
+            with pytest.raises(RuntimeError, match="change-me"):
+                create_app()

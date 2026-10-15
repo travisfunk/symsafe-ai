@@ -82,7 +82,7 @@ python -m scripts.seed_demo_data
 pytest tests/ -v
 ```
 
-305 tests across 22 test files. All tests run without a valid API key — API calls are mocked. Coverage spans risk classification, combination rules, care routing, structured output parsing, intake questionnaire, HTML report generation, AI analyzer, SQLite persistence, gap detection, synonym proposals, Flask routes, input sanitization, authentication, rate limiting, security headers, and clinician review API endpoints.
+309 tests across 24 test files. All tests run without a valid API key — API calls are mocked. Coverage spans risk classification, combination rules, care routing, structured output parsing, intake questionnaire, HTML report generation, AI analyzer, SQLite persistence, gap detection, synonym proposals, Flask routes, input sanitization, authentication, rate limiting, security headers, and clinician review API endpoints.
 
 The original test suite started at 248 tests in v3.0.0 and has grown as features were added.
 

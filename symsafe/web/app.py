@@ -283,6 +283,11 @@ def create_app(test_config=None):
             "REVIEW_PASSWORD is not set. Set it in your environment or .env file "
             "to protect the clinician review dashboard (see .env.example)."
         )
+    if review_password == "change-me" and not app.config.get("TESTING"):
+        raise RuntimeError(
+            "REVIEW_PASSWORD is still the placeholder 'change-me'. "
+            "Set your own strong password in your environment or .env file."
+        )
 
     def require_review_auth(f):
         """Decorator that requires clinician authentication for review routes."""
