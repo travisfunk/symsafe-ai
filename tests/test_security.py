@@ -210,3 +210,34 @@ class TestApiKeyProtection:
         data = rv.get_json()
         assert "error" in data
         assert "unavailable" in data["error"].lower()
+
+
+class TestReviewPasswordRequired:
+    """Startup must fail without REVIEW_PASSWORD (outside test mode)."""
+
+    def _patches(self):
+        return [
+            patch("symsafe.web.app.init_db"),
+            patch("symsafe.web.app.load_combination_rules_from_db"),
+            patch("symsafe.web.app.generate_proposals"),
+            patch("symsafe.web.app.load_base_prompt", return_value="Test prompt."),
+        ]
+
+    def test_startup_fails_without_password(self):
+        import contextlib
+        env = {k: v for k, v in os.environ.items() if k != "REVIEW_PASSWORD"}
+        with contextlib.ExitStack() as stack:
+            for p in self._patches():
+                stack.enter_context(p)
+            stack.enter_context(patch.dict("os.environ", env, clear=True))
+            with pytest.raises(RuntimeError, match="REVIEW_PASSWORD"):
+                create_app()
+
+    def test_test_mode_does_not_require_password(self):
+        import contextlib
+        env = {k: v for k, v in os.environ.items() if k != "REVIEW_PASSWORD"}
+        with contextlib.ExitStack() as stack:
+            for p in self._patches():
+                stack.enter_context(p)
+            stack.enter_context(patch.dict("os.environ", env, clear=True))
+            assert create_app(test_config={"TESTING": True}) is not None

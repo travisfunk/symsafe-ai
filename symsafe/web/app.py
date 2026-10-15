@@ -277,7 +277,12 @@ def create_app(test_config=None):
 
     client = get_client() if has_api_key else None
 
-    review_password = os.environ.get("REVIEW_PASSWORD", "symsafe-review")
+    review_password = os.environ.get("REVIEW_PASSWORD", "")
+    if not review_password and not app.config.get("TESTING"):
+        raise RuntimeError(
+            "REVIEW_PASSWORD is not set. Set it in your environment or .env file "
+            "to protect the clinician review dashboard (see .env.example)."
+        )
 
     def require_review_auth(f):
         """Decorator that requires clinician authentication for review routes."""

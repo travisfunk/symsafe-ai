@@ -49,11 +49,11 @@ git clone https://github.com/travisfunk/symsafe-ai.git
 cd symsafe-ai
 pip install -r requirements.txt
 cp .env.example .env
-# Edit .env and add your Anthropic API key
+# Edit .env: add your Anthropic API key and set your own REVIEW_PASSWORD (required)
 python run_web.py
 ```
 
-Patient UI at http://localhost:5000. Clinician review at http://localhost:5000/review (default password: `symsafe-review`).
+Patient UI at http://localhost:5000. Clinician review at http://localhost:5000/review. Log in with the `REVIEW_PASSWORD` you set in `.env`; the app will not start without it.
 
 The CLI is also available:
 
@@ -74,7 +74,7 @@ python -m scripts.seed_demo_data
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Yes | Anthropic API key for Claude chat and analysis |
 | `FLASK_SECRET_KEY` | Production | Session cookie encryption key |
-| `REVIEW_PASSWORD` | No | Clinician dashboard password (default: `symsafe-review`) |
+| `REVIEW_PASSWORD` | Yes | Clinician dashboard password. No default; the app refuses to start if unset. Choose your own in `.env` |
 
 ## Testing
 
