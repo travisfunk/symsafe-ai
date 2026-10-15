@@ -40,7 +40,7 @@ A secondary function generates bulk synonym suggestions — given an approved ph
 
 ## Tech Stack
 
-Python 3.11, Flask, Anthropic Claude API (Sonnet for patient chat, Haiku for analysis and evaluation), SQLite for persistence, vanilla JavaScript for the frontend, deployed on Render. The v3.0.0 architecture was built on OpenAI GPT-4o; v4.0 migrated to Anthropic Claude.
+Python 3.11, Flask, Anthropic Claude API (Sonnet for patient chat, Haiku for analysis and evaluation), SQLite for persistence, vanilla JavaScript for the frontend. It was deployed on Render (`render.yaml` is kept for reference) and has since been taken offline to avoid ongoing public API costs. It runs locally with your own Anthropic API key; see [Running Locally](#running-locally). The v3.0.0 architecture was built on OpenAI GPT-4o; v4.0 migrated to Anthropic Claude.
 
 ## Running Locally
 
@@ -135,6 +135,8 @@ Input sanitization on all routes with HTML tag stripping, XSS protection headers
 ## Project Status
 
 **Current version: v4.0** (architecture evolved from v3.0.0)
+
+**Hosting: offline.** The app was deployed on Render and has since been taken offline to avoid ongoing public API costs. To try it, run it locally with your own Anthropic API key; see [Running Locally](#running-locally).
 
 Built by Travis in collaboration with clinical reviewers (RN and phlebotomist). This is a portfolio project demonstrating how AI can augment healthcare triage workflows while keeping clinicians in the loop. The self-improving classifier — where every clinician action makes the system smarter — is the core architectural insight.
 
