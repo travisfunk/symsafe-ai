@@ -30,3 +30,15 @@ node_modules/
 
 # Testing
 .pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Caches
+.mypy_cache/
+.ruff_cache/
+.cache/
+.env.*
+!.env.example
