@@ -262,3 +262,11 @@ class TestDatabase:
         assert a_exchanges[0]["user_input"] == "hello"
         assert len(b_exchanges) == 1
         assert b_exchanges[0]["user_input"] == "bye"
+
+
+def test_init_db_creates_missing_data_folder(tmp_path):
+    from symsafe.store import init_db
+    db = tmp_path / "nested" / "data" / "symsafe.db"
+    assert not db.parent.exists()
+    init_db(db)
+    assert db.exists()
