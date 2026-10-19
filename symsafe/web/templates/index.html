@@ -303,20 +303,20 @@ function showIntake() {
 }
 
 function skipToChat() {
-  sessionId = new Date().toISOString().replace(/[-:T]/g,'').slice(0,15).replace(/(\d{8})(\d{6}).*/, '$1_$2');
+  sessionId = null;
   document.getElementById('welcomeView').style.display = 'none';
   document.getElementById('intakeView').style.display = 'none';
   document.getElementById('chatView').style.display = 'flex';
   document.getElementById('endBtn').style.display = 'block';
   fetch('/api/intake', {
     method:'POST',headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({session_id: sessionId, answers: {}, zip_code: null})
-  });
+    body: JSON.stringify({answers: {}, zip_code: null})
+  }).then(r => r.json()).then(d => { sessionId = d.session_id || null; });
   showChatWelcome(false);
 }
 
 function submitIntake() {
-  sessionId = new Date().toISOString().replace(/[-:T]/g,'').slice(0,15).replace(/(\d{8})(\d{6}).*/, '$1_$2');
+  sessionId = null;
   const answers = {};
   document.querySelectorAll('.chips').forEach(group => {
     const field = group.dataset.field;
@@ -336,8 +336,9 @@ function submitIntake() {
 
   fetch('/api/intake', {
     method:'POST',headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({session_id: sessionId, answers: answers, zip_code: zip || null})
-  }).then(() => {
+    body: JSON.stringify({answers: answers, zip_code: zip || null})
+  }).then(r => r.json()).then(d => {
+    sessionId = d.session_id || null;
     document.getElementById('intakeView').style.display = 'none';
     document.getElementById('chatView').style.display = 'flex';
     document.getElementById('endBtn').style.display = 'block';

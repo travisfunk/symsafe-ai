@@ -10,9 +10,12 @@ authentication for clinician routes, and security headers.
 
 import datetime
 import functools
+import hmac
 import logging
 import os
 import re
+import secrets
+import time
 import urllib.parse
 
 from flask import Flask, render_template, request, jsonify, session, send_from_directory, redirect, url_for
@@ -61,6 +64,8 @@ VALID_PROPOSAL_ACTIONS = {"approve", "reject"}
 VALID_SESSION_STATUSES = {"reviewed", "flagged"}
 
 MAX_SESSION_MESSAGES = 30
+MAX_LOGIN_FAILURES = 5
+LOGIN_LOCKOUT_SECONDS = 15 * 60
 
 _sessions = {}
 
@@ -90,6 +95,28 @@ def _validate_session_id(session_id):
     if not session_id or not isinstance(session_id, str):
         return False
     return bool(_RE_SESSION_ID.match(session_id))
+
+
+def _new_session_id():
+    """Return an unguessable session ID (32 hex chars).
+
+    Session IDs are also used in report filenames, so they must not be
+    predictable (timestamps were guessable).
+    """
+    return secrets.token_hex(16)
+
+
+def _owned_session_id():
+    """Return the session ID bound to this browser's signed session cookie.
+
+    Client-supplied session IDs are never trusted for lookups: a browser can
+    only reach the session the server issued to it.
+    """
+    session_id = session.get("session_id")
+    if not session_id:
+        session_id = _new_session_id()
+        session["session_id"] = session_id
+    return session_id
 
 
 def build_maps_link(care_level, zip_code=None):
@@ -237,7 +264,9 @@ def create_app(test_config=None):
     # Secure session configuration
     secret = os.environ.get("FLASK_SECRET_KEY")
     if not secret:
-        secret = "symsafe-dev-key-change-in-production"
+        # Random per-process key. A hardcoded fallback would let anyone who
+        # reads the source forge a clinician session cookie.
+        secret = secrets.token_hex(32)
         if not (test_config and test_config.get("TESTING")):
             logger.warning("FLASK_SECRET_KEY not set. Using insecure default. Set FLASK_SECRET_KEY in production.")
     app.secret_key = secret
@@ -319,11 +348,13 @@ def create_app(test_config=None):
             if data is None:
                 return jsonify({"error": "JSON body required"}), 400
 
-            session_id = data.get("session_id")
-            if session_id and not _validate_session_id(session_id):
+            requested_id = data.get("session_id")
+            if requested_id and not _validate_session_id(requested_id):
                 return jsonify({"error": "Invalid session ID format"}), 400
-            if not session_id:
-                session_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            # Intake starts a new conversation. The server issues the ID and
+            # binds it to this browser; any client-chosen ID is ignored.
+            session_id = _new_session_id()
+            session["session_id"] = session_id
 
             state = _get_or_create_session(session_id, base_prompt, symptom_tree)
 
@@ -399,12 +430,12 @@ def create_app(test_config=None):
             if not user_input:
                 return jsonify({"error": "Message is required"}), 400
 
-            session_id = data.get("session_id") or session.get("session_id")
-            if session_id and not _validate_session_id(session_id):
+            requested_id = data.get("session_id")
+            if requested_id and not _validate_session_id(requested_id):
                 return jsonify({"error": "Invalid session ID format"}), 400
-            if not session_id:
-                session_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-                session["session_id"] = session_id
+            # Only the session issued to this browser can be used; a
+            # client-supplied ID cannot reach someone else's conversation.
+            session_id = _owned_session_id()
 
             state = _get_or_create_session(session_id, base_prompt, symptom_tree)
 
@@ -579,10 +610,11 @@ def create_app(test_config=None):
     def end_session():
         try:
             data = request.get_json(silent=True) or {}
-            session_id = data.get("session_id") or session.get("session_id")
-
-            if session_id and not _validate_session_id(session_id):
+            requested_id = data.get("session_id")
+            if requested_id and not _validate_session_id(requested_id):
                 return jsonify({"error": "Invalid session ID format"}), 400
+            # Only end the session this browser owns.
+            session_id = session.get("session_id")
 
             if not session_id or session_id not in _sessions:
                 return jsonify({
@@ -626,7 +658,7 @@ def create_app(test_config=None):
                         "What should I watch for that would mean I need to come back?",
                     ]
                 report_html = generate_report(
-                    timestamp=session_id,
+                    timestamp=datetime.datetime.now().strftime("%Y%m%d_%H%M%S"),
                     intake_answers=state["intake_answers"],
                     session_symptoms=state["session_symptoms"],
                     highest_risk=state["session_highest_risk"],
@@ -638,6 +670,8 @@ def create_app(test_config=None):
                 reports_dir = BASE_DIR / "reports"
                 save_report(report_html, reports_dir, session_id)
                 report_url = f"/reports/symsafe_report_{session_id}.html"
+                owned_reports = session.get("report_ids", [])[-9:]
+                session["report_ids"] = owned_reports + [session_id]
 
             summary = {
                 "session_symptoms": list(dict.fromkeys(state["session_symptoms"])),
@@ -656,18 +690,35 @@ def create_app(test_config=None):
 
     @app.route("/reports/<filename>")
     def serve_report(filename):
+        # Reports contain patient health information. Serve one only to the
+        # browser that created it, or to an authenticated clinician.
+        allowed = {f"symsafe_report_{rid}.html" for rid in session.get("report_ids", [])}
+        if filename not in allowed and not session.get("review_authenticated"):
+            return jsonify({"error": "Not found"}), 404
         reports_dir = str(BASE_DIR / "reports")
         return send_from_directory(reports_dir, filename)
 
     # --- Clinician authentication ---
 
+    login_failures = {}  # client IP -> list of failure timestamps
+
     @app.route("/review/login", methods=["GET", "POST"])
     def review_login():
         if request.method == "POST":
+            ip = request.remote_addr or "unknown"
+            now = time.time()
+            recent = [t for t in login_failures.get(ip, []) if now - t < LOGIN_LOCKOUT_SECONDS]
+            if len(recent) >= MAX_LOGIN_FAILURES:
+                return render_template(
+                    "review_login.html",
+                    error="Too many failed attempts. Try again in 15 minutes.",
+                ), 429
             password = request.form.get("password", "")
-            if password == review_password:
+            if hmac.compare_digest(password.encode(), review_password.encode()):
+                login_failures.pop(ip, None)
                 session["review_authenticated"] = True
                 return redirect(url_for("review_dashboard"))
+            login_failures[ip] = recent + [now]
             return render_template("review_login.html", error="Incorrect password"), 200
         return render_template("review_login.html", error=None)
 
